@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/pantonshire/goldcrest/rpc";
+
+package rpc;
+
+service Twitter {
+  rpc GetRaw(RawAPIRequest) returns (RawAPIResult);
+}
+
+message RawAPIRequest {
+  string version = 1;
+  string path = 2;
+}
+
+message RawAPIResult {
+  string response = 1;
+}
