@@ -13,7 +13,7 @@ type TwitterConfig struct {
   Client ClientConfig `json:"client"`
 }
 
-type twitter struct {
+type Twitter struct {
   c          client
   bearerLock sync.Mutex
   bearers    map[string]*twitterBearer
@@ -36,7 +36,7 @@ const (
   xRateLimitReset     = "X-Rate-Limit-Reset"
 )
 
-func (t *twitter) req(bearer *twitterBearer, method, reqPath, version string, body, response interface{}) (retry bool, err error) {
+func (t *Twitter) req(bearer *twitterBearer, method, reqPath, version string, body, response interface{}) (retry bool, err error) {
   b, err := json.Marshal(body)
   if err != nil {
     return false, err
