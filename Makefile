@@ -36,6 +36,6 @@ $(PROTO_BUILD)/%.go: $(PROTO_SRC)/%.proto
 	$(PROTOC) -I $(PROTO_SRC) --go_out=plugins=grpc,paths=source_relative:$(PROTO_BUILD) $<
 
 clean-proto:
-	rm $(PROTO_GO)
+	rm $(wildcard $(PROTO_BUILD)/*.pb.go)
 
 .PHONY: buildpath build dist build-% clean proto clean-proto
