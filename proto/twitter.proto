@@ -8,9 +8,14 @@ service Twitter {
   rpc GetRaw(RawAPIRequest) returns (RawAPIResult);
 }
 
+message Authentication {
+  string bearerToken = 1;
+}
+
 message RawAPIRequest {
-  string version = 1;
-  string path = 2;
+  Authentication auth = 1;
+  string version = 2;
+  string path = 3;
 }
 
 message RawAPIResult {
