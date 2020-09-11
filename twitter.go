@@ -36,6 +36,7 @@ const (
   xRateLimitReset     = "X-Rate-Limit-Reset"
 )
 
+//TODO: rate limiting
 func (t *Twitter) req(bearer *twitterBearer, method, reqPath, version string, body, response interface{}) (retry bool, err error) {
   b, err := json.Marshal(body)
   if err != nil {
