@@ -10,13 +10,15 @@ import (
 )
 
 type TwitterConfig struct {
-  Client ClientConfig `json:"client"`
+  Client       ClientConfig `json:"client"`
+  LimitPadding uint         `json:"limitPadding"`
 }
 
 type Twitter struct {
-  c          client
-  bearerLock sync.Mutex
-  bearers    map[string]*twitterBearer
+  c            client
+  limitPadding uint
+  bearerLock   sync.Mutex
+  bearers      map[string]*twitterBearer
 }
 
 type twitterBearer struct {
