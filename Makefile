@@ -13,7 +13,7 @@ PROTO_SRC := proto
 PROTO_BUILD := rpc
 
 PROTO_SOURCES := $(wildcard $(PROTO_SRC)/*.proto)
-PROTO_GO := $(addprefix $(PROTO_BUILD)/,$(notdir $(PROTO_SOURCES:.proto=.go)))
+PROTO_GO := $(addprefix $(PROTO_BUILD)/,$(notdir $(PROTO_SOURCES:.proto=.pb.go)))
 
 build: buildpath
 	$(GO_BUILD) -v -o $(BUILD)/$(EXEC) $(MAIN)
@@ -32,7 +32,7 @@ clean:
 
 proto: $(PROTO_GO)
 
-$(PROTO_BUILD)/%.go: $(PROTO_SRC)/%.proto
+$(PROTO_BUILD)/%.pb.go: $(PROTO_SRC)/%.proto
 	$(PROTOC) -I $(PROTO_SRC) --go_out=plugins=grpc,paths=source_relative:$(PROTO_BUILD) $<
 
 clean-proto:
