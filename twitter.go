@@ -28,7 +28,6 @@ type twitterBearer struct {
 
 const (
   twitterBaseURL = "https://api.twitter.com"
-  twitterAPIv1   = "1.1"
   twitterAPIv2   = "2"
 
   xRateLimit          = "X-Rate-Limit-Limit"
