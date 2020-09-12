@@ -1,4 +1,4 @@
-package twitter
+package model
 
 import "time"
 

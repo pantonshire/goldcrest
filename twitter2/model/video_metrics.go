@@ -1,4 +1,4 @@
-package twitter
+package model
 
 type VideoMetrics struct {
   Playback000Count int `json:"playback_0_count"`

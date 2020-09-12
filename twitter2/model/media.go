@@ -1,4 +1,4 @@
-package twitter
+package model
 
 type Media struct {
   MediaKey        string           `json:"media_key"`

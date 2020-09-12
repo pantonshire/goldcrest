@@ -1,4 +1,4 @@
-package twitter
+package model
 
 type Annotation struct {
   Entity

@@ -1,4 +1,4 @@
-package twitter
+package model
 
 type Entity struct {
   Start int `json:"start"`

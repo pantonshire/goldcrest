@@ -1,4 +1,4 @@
-package twitter
+package model
 
 type TweetIncludes struct {
   Tweets []Tweet `json:"tweets"`
