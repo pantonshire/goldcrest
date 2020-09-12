@@ -25,7 +25,7 @@ type Tweet struct {
   ReplyUserIDStr      *string `json:"in_reply_to_user_id_str"`
   ReplyUserScreenName *string `json:"in_reply_to_screen_name"`
 
-  //TODO: user
+  User User `json:"user"`
 
   Coordinates *struct {
     Coordinates []float64 `json:"coordinates"`
