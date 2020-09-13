@@ -23,5 +23,14 @@ type User struct {
   WithheldCountries   []string    `json:"withheld_in_countries"`
   WithheldScope       *string     `json:"withheld_scope"`
 
+  Entities struct {
+    URL struct {
+      URLs []URL `json:"urls"`
+    } `json:"url"`
+    Description struct {
+      URLs []URL `json:"urls"`
+    } `json:"description"`
+  } `json:"entities"`
+
   //TODO: derived
 }
