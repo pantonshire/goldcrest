@@ -17,19 +17,19 @@ type client struct {
 }
 
 type HttpError struct {
-  code   int
-  status string
+  Code   int
+  Status string
 }
 
 func (e *HttpError) Error() string {
-  return fmt.Sprintf("%d %s", e.code, e.status)
+  return fmt.Sprintf("%d %s", e.Code, e.Status)
 }
 
 func NewHttpError(code int, status string) *HttpError {
   if IsStatusOK(code) {
     return nil
   }
-  return &HttpError{code: code, status: status}
+  return &HttpError{Code: code, Status: status}
 }
 
 func HttpErrorFor(resp *http.Response) *HttpError {
