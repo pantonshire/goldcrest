@@ -57,8 +57,18 @@ type Tweet struct {
   RetweetCount  int  `json:"retweet_count"`
   FavoriteCount *int `json:"favorite_count"`
 
-  Entities         Entities         `json:"entities"`
-  ExtendedEntities ExtendedEntities `json:"extended_entities"`
+  Entities struct {
+    Hashtags []Hashtag `json:"hashtags"`
+    Media    []Media   `json:"media"`
+    URLs     []URL     `json:"urls"`
+    Mentions []Mention `json:"user_mentions"`
+    Symbols  []Symbol  `json:"symbols"`
+    Polls    []Poll    `json:"polls"`
+  } `json:"entities"`
+
+  ExtendedEntities struct {
+    Media []Media `json:"media"`
+  } `json:"extended_entities"`
 
   Favorited         *bool   `json:"favorited"`
   Retweeted         bool    `json:"retweeted"`

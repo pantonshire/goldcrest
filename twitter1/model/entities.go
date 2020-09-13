@@ -1,18 +1,5 @@
 package model
 
-type Entities struct {
-  Hashtags []Hashtag `json:"hashtags"`
-  Media    []Media   `json:"media"`
-  URLs     []URL     `json:"urls"`
-  Mentions []Mention `json:"user_mentions"`
-  Symbols  []Symbol  `json:"symbols"`
-  Polls    []Poll    `json:"polls"`
-}
-
-type ExtendedEntities struct {
-  Media []Media `json:"media"`
-}
-
 type InlineEntity struct {
   Indices []int `json:"indices"`
 }
