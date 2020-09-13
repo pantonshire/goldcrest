@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 type Entities struct {
   Hashtags []Hashtag `json:"hashtags"`
   Media    []Media   `json:"media"`
@@ -77,8 +75,8 @@ type MediaSize struct {
 }
 
 type Poll struct {
-  EndTime         time.Time `json:"end_datetime"`
-  DurationMinutes int       `json:"duration_minutes"`
+  EndTime         TwitterTime `json:"end_datetime"`
+  DurationMinutes int         `json:"duration_minutes"`
 
   Options []struct {
     Position int    `json:"position"`

@@ -1,12 +1,10 @@
 package model
 
-import "time"
-
 type Tweet struct {
   ID    int64  `json:"id"`
   IDStr string `json:"id_str"`
 
-  CreatedAt time.Time `json:"created_at"`
+  CreatedAt TwitterTime `json:"created_at"`
 
   //Compatibility mode text, 140 character limit
   Text string `json:"text"`
