@@ -1,6 +1,7 @@
 package model
 
 import (
+  "strings"
   "time"
 )
 
@@ -11,10 +12,12 @@ const (
 )
 
 func (tt *TwitterTime) UnmarshalJSON(data []byte) error {
-  if string(data) == "null" {
+  str := string(data)
+  if str == "null" {
     return nil
   }
-  t, err := time.Parse(timeFormat, string(data))
+  str = strings.Trim(string(data), `"`)
+  t, err := time.Parse(timeFormat, str)
   *tt = TwitterTime(t)
   return err
 }
