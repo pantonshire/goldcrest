@@ -58,7 +58,7 @@ func (t *Twitter) req(bearer *twitterBearer, method, reqPath, version string, bo
     }
   }()
   httpErr := HttpErrorFor(resp)
-  if err == nil {
+  if httpErr == nil {
     if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
       return false, err
     }
