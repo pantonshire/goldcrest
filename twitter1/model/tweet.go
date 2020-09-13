@@ -57,18 +57,8 @@ type Tweet struct {
   RetweetCount  int  `json:"retweet_count"`
   FavoriteCount *int `json:"favorite_count"`
 
-  Entities struct {
-    Hashtags []Hashtag `json:"hashtags"`
-    Media    []Media   `json:"media"`
-    URLs     []URL     `json:"urls"`
-    Mentions []Mention `json:"user_mentions"`
-    Symbols  []Symbol  `json:"symbols"`
-    Polls    []Poll    `json:"polls"`
-  } `json:"entities"`
-
-  ExtendedEntities struct {
-    Media []Media `json:"media"`
-  } `json:"extended_entities"`
+  Entities         TweetEntities         `json:"entities"`
+  ExtendedEntities TweetExtendedEntities `json:"extended_entities"`
 
   Favorited         *bool   `json:"favorited"`
   Retweeted         bool    `json:"retweeted"`
@@ -97,9 +87,9 @@ type Tweet struct {
 
   //Included in streamed tweets
   ExtendedTweet *struct {
-    FullText         string           `json:"full_text"`
-    DisplayTextRange []int            `json:"display_text_range"`
-    Entities         Entities         `json:"entities"`
-    ExtendedEntities ExtendedEntities `json:"extended_entities"`
+    FullText         string                `json:"full_text"`
+    DisplayTextRange []int                 `json:"display_text_range"`
+    Entities         TweetEntities         `json:"entities"`
+    ExtendedEntities TweetExtendedEntities `json:"extended_entities"`
   } `json:"extended_tweet"`
 }

@@ -1,5 +1,18 @@
 package model
 
+type TweetEntities struct {
+  Hashtags []Hashtag `json:"hashtags"`
+  Media    []Media   `json:"media"`
+  URLs     []URL     `json:"urls"`
+  Mentions []Mention `json:"user_mentions"`
+  Symbols  []Symbol  `json:"symbols"`
+  Polls    []Poll    `json:"polls"`
+}
+
+type TweetExtendedEntities struct {
+  Media []Media `json:"media"`
+}
+
 type InlineEntity struct {
   Indices []int `json:"indices"`
 }
