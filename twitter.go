@@ -57,7 +57,7 @@ func (t *Twitter) req(bearer *twitterBearer, method, reqPath, version string, bo
       err = closeErr
     }
   }()
-  httpErr := httpErrorFor(resp)
+  httpErr := HttpErrorFor(resp)
   if err == nil {
     if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
       return false, err
@@ -66,5 +66,5 @@ func (t *Twitter) req(bearer *twitterBearer, method, reqPath, version string, bo
   } else if httpErr.code == http.StatusTooManyRequests {
     return true, nil
   }
-  return false, httpErrorFor(resp)
+  return false, HttpErrorFor(resp)
 }

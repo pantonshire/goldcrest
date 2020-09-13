@@ -16,27 +16,27 @@ type client struct {
   pool chan int
 }
 
-type httpError struct {
+type HttpError struct {
   code   int
   status string
 }
 
-func (e *httpError) Error() string {
+func (e *HttpError) Error() string {
   return fmt.Sprintf("%d %s", e.code, e.status)
 }
 
-func newHttpError(code int, status string) *httpError {
-  if isStatusOK(code) {
+func NewHttpError(code int, status string) *HttpError {
+  if IsStatusOK(code) {
     return nil
   }
-  return &httpError{code: code, status: status}
+  return &HttpError{code: code, status: status}
 }
 
-func httpErrorFor(resp *http.Response) *httpError {
-  return newHttpError(resp.StatusCode, resp.Status)
+func HttpErrorFor(resp *http.Response) *HttpError {
+  return NewHttpError(resp.StatusCode, resp.Status)
 }
 
-func isStatusOK(code int) bool {
+func IsStatusOK(code int) bool {
   return 200 <= code && code < 300
 }
 
