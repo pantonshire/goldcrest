@@ -83,6 +83,33 @@ message User {
   //TODO: entities
 }
 
+message URL {
+  Indices indices = 1;
+  string twitterURL = 2;
+  string displayURL = 3;
+  string expandedURL = 4;
+}
+
+message Symbol {
+  Indices indices = 1;
+  string text = 2;
+}
+
+message Mention {
+  Indices indices = 1;
+  fixed64 userID = 2;
+  string handle = 3;
+  string displayName = 4;
+}
+
+message Media {
+  URL url = 1;
+  fixed64 id = 2;
+  string type = 3;
+  string mediaURL = 4;
+  string alt = 5;
+}
+
 message RawAPIRequest {
   Authentication auth = 1;
   string version = 2;
