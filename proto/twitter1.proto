@@ -108,6 +108,19 @@ message Media {
   string type = 3;
   string media_url = 4;
   string alt = 5;
+  oneof source {
+    bool no_source = 6;
+    fixed64 source_tweet_id = 7;
+  }
+  message MediaSize {
+    uint32 width = 1;
+    uint32 height = 2;
+    string resize = 3;
+  }
+  MediaSize thumb = 8;
+  MediaSize small = 9;
+  MediaSize medium = 10;
+  MediaSize large = 11;
 }
 
 message RawAPIRequest {
