@@ -56,6 +56,42 @@ message Tweet {
   bool truncated = 5;
   string source = 6;
   User user = 7;
+  message Reply {
+    fixed64 reply_to_tweet_id = 1;
+    fixed64 reply_to_user_id = 2;
+    string reply_to_user_handle = 3;
+  }
+  oneof reply {
+    bool no_reply = 8;
+    Reply replied_tweet = 9;
+  }
+  oneof quote {
+    bool no_quote = 10;
+    Tweet quoted_tweet = 11;
+  }
+  oneof retweet {
+    bool no_retweet = 12;
+    Tweet retweeted_tweet = 13;
+  }
+  uint32 quote_count = 14;
+  uint32 reply_count = 15;
+  uint32 retweet_count = 16;
+  uint32 favorite_count = 17;
+  bool favorited = 18;
+  bool retweeted = 19;
+  fixed64 current_user_retweet_id = 20;
+  repeated Symbol hashtags = 21;
+  repeated URL urls = 22;
+  repeated Mention mentions = 23;
+  repeated Symbol symbols = 24;
+  repeated Media media = 25;
+  repeated Poll polls = 26;
+  bool possibly_sensitive = 27;
+  string filter_level = 28;
+  string lang = 29;
+  bool withheld_copyright = 30;
+  repeated string withheld_countries = 31;
+  string withheld_scope = 32;
 }
 
 message User {
@@ -79,8 +115,8 @@ message User {
   bool default_profile_image = 18;
   repeated string withheld_countries = 19;
   string withheld_scope = 20;
-
-  //TODO: entities
+  repeated URL url_urls = 21;
+  repeated URL bio_urls = 22;
 }
 
 message URL {
