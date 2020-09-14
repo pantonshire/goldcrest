@@ -1,7 +1,7 @@
 package model
 
 type TweetEntities struct {
-  Hashtags []Hashtag `json:"hashtags"`
+  Hashtags []Symbol  `json:"hashtags"`
   Media    []Media   `json:"media"`
   URLs     []URL     `json:"urls"`
   Mentions []Mention `json:"user_mentions"`
@@ -17,7 +17,7 @@ type InlineEntity struct {
   Indices []int `json:"indices"`
 }
 
-type Hashtag struct {
+type Symbol struct {
   InlineEntity
   Text string `json:"text"`
 }
@@ -42,11 +42,6 @@ type Mention struct {
   IDStr      string `json:"id_str"`
   Name       string `json:"name"`
   ScreenName string `json:"screen_name"`
-}
-
-type Symbol struct {
-  InlineEntity
-  Text string `json:"text"`
 }
 
 type Media struct {
