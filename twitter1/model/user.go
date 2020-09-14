@@ -1,7 +1,7 @@
 package model
 
 type User struct {
-  ID                  int64       `json:"id"`
+  ID                  uint64      `json:"id"`
   IDStr               string      `json:"id_str"`
   Name                string      `json:"name"`
   ScreenName          string      `json:"screen_name"`
@@ -11,11 +11,11 @@ type User struct {
   Description         *string     `json:"description"`
   Protected           bool        `json:"protected"`
   Verified            bool        `json:"verified"`
-  FollowersCount      int         `json:"followers_count"`
-  FriendsCount        int         `json:"friends_count"`
-  ListedCount         int         `json:"listed_count"`
-  FavoritesCount      int         `json:"favourites_count"`
-  StatusesCount       int         `json:"statuses_count"`
+  FollowersCount      uint        `json:"followers_count"`
+  FriendsCount        uint        `json:"friends_count"`
+  ListedCount         uint        `json:"listed_count"`
+  FavoritesCount      uint        `json:"favourites_count"`
+  StatusesCount       uint        `json:"statuses_count"`
   ProfileBanner       string      `json:"profile_banner_url"`
   ProfileImage        string      `json:"profile_image_url_https"`
   DefaultProfile      bool        `json:"default_profile"`

@@ -1,7 +1,7 @@
 package model
 
 type Tweet struct {
-  ID    int64  `json:"id"`
+  ID    uint64 `json:"id"`
   IDStr string `json:"id_str"`
 
   CreatedAt TwitterTime `json:"created_at"`
@@ -12,14 +12,14 @@ type Tweet struct {
   //Extended mode text, 280 character limit
   FullText string `json:"full_text"`
 
-  DisplayTextRange []int `json:"display_text_range"`
+  DisplayTextRange []uint `json:"display_text_range"`
 
   Source    string `json:"source"`
   Truncated bool   `json:"truncated"`
 
-  ReplyStatusID       *int64  `json:"in_reply_to_status_id"`
+  ReplyStatusID       *uint64 `json:"in_reply_to_status_id"`
   ReplyStatusIDStr    *string `json:"in_reply_to_status_id_str"`
-  ReplyUserID         *int64  `json:"in_reply_to_user_id"`
+  ReplyUserID         *uint64 `json:"in_reply_to_user_id"`
   ReplyUserIDStr      *string `json:"in_reply_to_user_id_str"`
   ReplyUserScreenName *string `json:"in_reply_to_screen_name"`
 
@@ -45,17 +45,17 @@ type Tweet struct {
     } `json:"bounding_box"`
   } `json:"place"`
 
-  QuotedStatusID    *int64  `json:"quoted_status_id"`
+  QuotedStatusID    *uint64 `json:"quoted_status_id"`
   QuotedStatusIDStr *string `json:"quoted_status_id_str"`
   IsQuoteStatus     bool    `json:"is_quote_status"`
 
   QuotedStatus    *Tweet `json:"quoted_status"`
   RetweetedStatus *Tweet `json:"retweeted_status"`
 
-  QuoteCount    *int `json:"quote_count"`
-  ReplyCount    int  `json:"reply_count"`
-  RetweetCount  int  `json:"retweet_count"`
-  FavoriteCount *int `json:"favorite_count"`
+  QuoteCount    *uint `json:"quote_count"`
+  ReplyCount    uint  `json:"reply_count"`
+  RetweetCount  uint  `json:"retweet_count"`
+  FavoriteCount *uint `json:"favorite_count"`
 
   Entities         TweetEntities         `json:"entities"`
   ExtendedEntities TweetExtendedEntities `json:"extended_entities"`
@@ -72,7 +72,7 @@ type Tweet struct {
 
   MatchingRules []struct {
     Tag   string `json:"tag"`
-    ID    int64  `json:"id"`
+    ID    uint64 `json:"id"`
     IDStr string `json:"id_str"`
   } `json:"matching_rules"`
 
@@ -88,7 +88,7 @@ type Tweet struct {
   //Included in streamed tweets
   ExtendedTweet *struct {
     FullText         string                `json:"full_text"`
-    DisplayTextRange []int                 `json:"display_text_range"`
+    DisplayTextRange []uint                `json:"display_text_range"`
     Entities         TweetEntities         `json:"entities"`
     ExtendedEntities TweetExtendedEntities `json:"extended_entities"`
   } `json:"extended_tweet"`

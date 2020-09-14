@@ -14,7 +14,7 @@ type TweetExtendedEntities struct {
 }
 
 type InlineEntity struct {
-  Indices []int `json:"indices"`
+  Indices []uint `json:"indices"`
 }
 
 type Symbol struct {
@@ -38,7 +38,7 @@ type URL struct {
 
 type Mention struct {
   InlineEntity
-  ID         int64  `json:"id"`
+  ID         uint64 `json:"id"`
   IDStr      string `json:"id_str"`
   Name       string `json:"name"`
   ScreenName string `json:"screen_name"`
@@ -46,12 +46,12 @@ type Mention struct {
 
 type Media struct {
   URL
-  ID                int64   `json:"id"`
+  ID                uint64  `json:"id"`
   IDStr             string  `json:"id_str"`
   MediaURL          string  `json:"media_url"`
   MediaURLHttps     string  `json:"media_url_https"`
   Type              string  `json:"type"`
-  SourceStatusID    *int64  `json:"source_status_id"`
+  SourceStatusID    *uint64 `json:"source_status_id"`
   SourceStatusIDStr *string `json:"source_status_id_str"`
   AltText           string  `json:"ext_alt_text"`
 
@@ -64,17 +64,17 @@ type Media struct {
 }
 
 type MediaSize struct {
-  W      int    `json:"w"`
-  H      int    `json:"h"`
+  W      uint   `json:"w"`
+  H      uint   `json:"h"`
   Resize string `json:"resize"`
 }
 
 type Poll struct {
   EndTime         TwitterTime `json:"end_datetime"`
-  DurationMinutes int         `json:"duration_minutes"`
+  DurationMinutes uint        `json:"duration_minutes"`
 
   Options []struct {
-    Position int    `json:"position"`
+    Position uint   `json:"position"`
     Text     string `json:"text"`
   } `json:"options"`
 }
