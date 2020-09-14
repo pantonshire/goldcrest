@@ -123,6 +123,16 @@ message Media {
   MediaSize large = 11;
 }
 
+message Poll {
+  google.protobuf.Timestamp end_time = 1;
+  uint32 duration_minutes = 2;
+  message PollOption {
+    uint32 position = 1;
+    string text = 2;
+  }
+  repeated PollOption options = 3;
+}
+
 message RawAPIRequest {
   Authentication auth = 1;
   string version = 2;
