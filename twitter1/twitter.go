@@ -5,6 +5,7 @@ import (
   "fmt"
   "goldcrest"
   "goldcrest/twitter1/model"
+  "io/ioutil"
   "net/http"
   "path"
   "time"
@@ -78,6 +79,29 @@ func (t Twitter) requestJSON(req *http.Request, output interface{}) (err error) 
     return httpErr
   }
   return json.NewDecoder(resp.Body).Decode(output)
+}
+
+func (t Twitter) requestRaw(req *http.Request) (status int, headers map[string]string, body []byte, err error) {
+  resp, err := t.client.Do(req)
+  if err != nil {
+    return 0, nil, nil, err
+  }
+  defer func() {
+    if closeErr := resp.Body.Close(); closeErr != nil {
+      err = closeErr
+    }
+  }()
+  headers = make(map[string]string)
+  for key, val := range resp.Header {
+    if len(val) > 0 {
+      headers[key] = val[0]
+    }
+  }
+  body, err = ioutil.ReadAll(resp.Body)
+  if err != nil {
+    return 0, nil, nil, err
+  }
+  return resp.StatusCode, headers, body, nil
 }
 
 func (t Twitter) GetTweet(secret, auth Auth, id interface{}, params TweetParams) (model.Tweet, error) {
