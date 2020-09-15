@@ -28,12 +28,13 @@ message TweetOptions {
   bool trim_user = 1;
   bool include_my_retweet = 2;
   bool include_entities = 3;
-  bool include_card_uri = 4;
+  bool include_ext_alt_text = 4;
+  bool include_card_uri = 5;
   enum TweetMode {
     COMPAT = 0;
     EXTENDED = 1;
   }
-  TweetMode mode = 5;
+  TweetMode mode = 6;
 }
 
 message TweetRequest {
