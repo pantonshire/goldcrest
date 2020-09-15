@@ -172,10 +172,12 @@ message Poll {
 
 message RawAPIRequest {
   Authentication auth = 1;
-  string version = 2;
-  string path = 3;
-  map<string, string> query_params = 4;
-  map<string, string> body_params = 5;
+  string method = 2;
+  string protocol = 3;
+  string version = 4;
+  string path = 5;
+  map<string, string> query_params = 6;
+  map<string, string> body_params = 7;
 }
 
 message RawAPIResult {
