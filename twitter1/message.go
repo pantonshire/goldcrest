@@ -8,6 +8,36 @@ import (
   "time"
 )
 
+func decodeAuthPair(authMessage *rpc.Authentication) (secret Auth, auth Auth) {
+  if authMessage == nil {
+    return Auth{}, Auth{}
+  }
+  secret = Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken}
+  auth = Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken}
+  return secret, auth
+}
+
+func decodeTweetOptions(optsMessage *rpc.TweetOptions) TweetParams {
+  if optsMessage == nil {
+    return TweetParams{}
+  }
+  return TweetParams{
+    TrimUser:          optsMessage.TrimUser,
+    IncludeMyRetweet:  optsMessage.IncludeMyRetweet,
+    IncludeEntities:   optsMessage.IncludeEntities,
+    IncludeExtAltText: optsMessage.IncludeExtAltText,
+    IncludeCardURI:    optsMessage.TrimUser,
+    Mode:              decodeTweetMode(optsMessage.Mode),
+  }
+}
+
+func decodeTweetMode(mode rpc.TweetOptions_TweetMode) TweetMode {
+  if mode == rpc.TweetOptions_EXTENDED {
+    return ExtendedMode
+  }
+  return CompatibilityMode
+}
+
 func tweetModelToMessage(mod model.Tweet) (*rpc.Tweet, error) {
   var err error
   var msg rpc.Tweet
