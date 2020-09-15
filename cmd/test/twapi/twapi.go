@@ -25,12 +25,12 @@ func v1() {
     readLn(reader, "access token"),
     readLn(reader, "token secret")
 
-  twitter := twitter1.NewTwitter(twitter1.Config{ClientTimeoutSeconds: 5})
+  twitter := twitter1.NewTwitter(twitter1.TwitterConfig{ClientTimeoutSeconds: 5})
 
   tweet, err := twitter.GetTweet(
     twitter1.Auth{Key: secretKey, Token: tokenSecret},
     twitter1.Auth{Key: consumerKey, Token: token},
-    1270977459085881345,
+    1305385801723916289,
     twitter1.DefaultTweetParams(),
   )
 
