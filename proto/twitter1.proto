@@ -183,5 +183,5 @@ message RawAPIRequest {
 message RawAPIResult {
   map<string, string> headers = 1;
   uint32 status = 2;
-  string body = 3;
+  bytes body = 3;
 }
