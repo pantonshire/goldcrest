@@ -25,7 +25,7 @@ const (
   xRateLimitReset     = "X-Rate-Limit-Reset"
 )
 
-type Config struct {
+type TwitterConfig struct {
   ClientTimeoutSeconds uint `json:"client_timeout_seconds"`
 }
 
@@ -42,7 +42,7 @@ type TweetParams struct {
   Mode              TweetMode
 }
 
-func NewTwitter(config Config) *Twitter {
+func NewTwitter(config TwitterConfig) *Twitter {
   client := &http.Client{
     Timeout: time.Second * time.Duration(config.ClientTimeoutSeconds),
   }
