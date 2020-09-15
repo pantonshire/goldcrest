@@ -30,6 +30,8 @@ type OAuthRequest struct {
   Query, Body                    map[string]string
 }
 
+// Creates a new http.Request containing an authentication header as described at
+// https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
 func (or OAuthRequest) MakeRequest(secret, auth Auth) (*http.Request, error) {
   nonce, err := randBase36(oauthNonceBytes)
   if err != nil {
@@ -71,6 +73,8 @@ func (or OAuthRequest) MakeRequest(secret, auth Auth) (*http.Request, error) {
   return req, nil
 }
 
+// Creates an OAuth signature using the method described at
+// https://developer.twitter.com/en/docs/authentication/oauth-1-0a/creating-a-signature
 func signOAuth(secret Auth, method, baseURL string, oauthParams, queryParams, bodyParams PercentEncodedParams) string {
   allParams := PercentEncodedParams{}
   for key, value := range oauthParams {

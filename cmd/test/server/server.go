@@ -1,9 +1,8 @@
 package main
 
 import (
-  "context"
   "fmt"
-  "goldcrest/rpc"
+  "goldcrest/twitter1"
   "google.golang.org/grpc"
   "net"
 )
@@ -14,21 +13,14 @@ func main() {
     panic(err)
   }
   grpcServer := grpc.NewServer()
-  rpc.RegisterTestServer(grpcServer, &server{})
+
+  twitter := twitter1.NewTwitter(twitter1.TwitterConfig{ClientTimeoutSeconds: 5})
+
+  if err := twitter.Server(grpcServer); err != nil {
+    panic(err)
+  }
+
   if err := grpcServer.Serve(listener); err != nil {
     panic(err)
   }
-}
-
-type server struct {}
-
-func (s *server) GetTweet(ctx context.Context, twid *rpc.TweetID) (*rpc.Tweet, error) {
-  return &rpc.Tweet{
-    Id:   twid.Id,
-    Text: "foo baa",
-    Author: &rpc.User{
-      Id:     123,
-      Handle: "@tom",
-      Name:   "Tom P",
-    }}, nil
 }
