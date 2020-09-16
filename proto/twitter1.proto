@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/pantonshire/goldcrest/rpc";
+option go_package = "github.com/pantonshire/goldcrest/proto";
 
 package twitter1;
 
