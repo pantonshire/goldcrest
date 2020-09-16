@@ -3,13 +3,13 @@ package twitter1
 import (
   "fmt"
   "github.com/golang/protobuf/ptypes"
-  "goldcrest/rpc"
+  pb "goldcrest/proto"
   "goldcrest/twitter1/model"
   "time"
 )
 
-func encodeAuthPair(secret, auth Auth) *rpc.Authentication {
-  return &rpc.Authentication{
+func encodeAuthPair(secret, auth Auth) *pb.Authentication {
+  return &pb.Authentication{
     ConsumerKey: auth.Key,
     AccessToken: auth.Token,
     SecretKey:   secret.Key,
@@ -17,7 +17,7 @@ func encodeAuthPair(secret, auth Auth) *rpc.Authentication {
   }
 }
 
-func decodeAuthPair(authMessage *rpc.Authentication) (secret Auth, auth Auth) {
+func decodeAuthPair(authMessage *pb.Authentication) (secret Auth, auth Auth) {
   if authMessage == nil {
     return Auth{}, Auth{}
   }
@@ -26,8 +26,8 @@ func decodeAuthPair(authMessage *rpc.Authentication) (secret Auth, auth Auth) {
   return secret, auth
 }
 
-func encodeTweetOptions(params TweetParams) *rpc.TweetOptions {
-  return &rpc.TweetOptions{
+func encodeTweetOptions(params TweetParams) *pb.TweetOptions {
+  return &pb.TweetOptions{
     TrimUser:          params.TrimUser,
     IncludeMyRetweet:  params.IncludeMyRetweet,
     IncludeEntities:   params.IncludeEntities,
@@ -37,7 +37,7 @@ func encodeTweetOptions(params TweetParams) *rpc.TweetOptions {
   }
 }
 
-func decodeTweetOptions(optsMessage *rpc.TweetOptions) TweetParams {
+func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetParams {
   if optsMessage == nil {
     return TweetParams{}
   }
@@ -51,23 +51,23 @@ func decodeTweetOptions(optsMessage *rpc.TweetOptions) TweetParams {
   }
 }
 
-func encodeTweetMode(mode TweetMode) rpc.TweetOptions_TweetMode {
+func encodeTweetMode(mode TweetMode) pb.TweetOptions_TweetMode {
   if mode == ExtendedMode {
-    return rpc.TweetOptions_EXTENDED
+    return pb.TweetOptions_EXTENDED
   }
-  return rpc.TweetOptions_COMPAT
+  return pb.TweetOptions_COMPAT
 }
 
-func decodeTweetMode(mode rpc.TweetOptions_TweetMode) TweetMode {
-  if mode == rpc.TweetOptions_EXTENDED {
+func decodeTweetMode(mode pb.TweetOptions_TweetMode) TweetMode {
+  if mode == pb.TweetOptions_EXTENDED {
     return ExtendedMode
   }
   return CompatibilityMode
 }
 
-func tweetModelToMessage(mod model.Tweet) (*rpc.Tweet, error) {
+func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
   var err error
-  var msg rpc.Tweet
+  var msg pb.Tweet
 
   msg.Id = mod.ID
 
@@ -102,13 +102,13 @@ func tweetModelToMessage(mod model.Tweet) (*rpc.Tweet, error) {
   }
 
   if mod.ReplyStatusID != nil && mod.ReplyUserID != nil && mod.ReplyUserScreenName != nil {
-    msg.Reply = &rpc.Tweet_RepliedTweet{RepliedTweet: &rpc.Tweet_Reply{
+    msg.Reply = &pb.Tweet_RepliedTweet{RepliedTweet: &pb.Tweet_Reply{
       ReplyToTweetId:    *mod.ReplyStatusID,
       ReplyToUserId:     *mod.ReplyUserID,
       ReplyToUserHandle: *mod.ReplyUserScreenName,
     }}
   } else {
-    msg.Reply = &rpc.Tweet_NoReply{NoReply: true}
+    msg.Reply = &pb.Tweet_NoReply{NoReply: true}
   }
 
   if mod.QuotedStatus != nil {
@@ -116,9 +116,9 @@ func tweetModelToMessage(mod model.Tweet) (*rpc.Tweet, error) {
     if err != nil {
       return nil, err
     }
-    msg.Quote = &rpc.Tweet_QuotedTweet{QuotedTweet: quote}
+    msg.Quote = &pb.Tweet_QuotedTweet{QuotedTweet: quote}
   } else {
-    msg.Quote = &rpc.Tweet_NoQuote{NoQuote: true}
+    msg.Quote = &pb.Tweet_NoQuote{NoQuote: true}
   }
 
   if mod.RetweetedStatus != nil {
@@ -126,9 +126,9 @@ func tweetModelToMessage(mod model.Tweet) (*rpc.Tweet, error) {
     if err != nil {
       return nil, err
     }
-    msg.Retweet = &rpc.Tweet_RetweetedTweet{RetweetedTweet: retweet}
+    msg.Retweet = &pb.Tweet_RetweetedTweet{RetweetedTweet: retweet}
   } else {
-    msg.Retweet = &rpc.Tweet_NoRetweet{NoRetweet: true}
+    msg.Retweet = &pb.Tweet_NoRetweet{NoRetweet: true}
   }
 
   if mod.QuoteCount != nil {
@@ -197,7 +197,7 @@ func tweetModelToMessage(mod model.Tweet) (*rpc.Tweet, error) {
   return &msg, nil
 }
 
-func decodeTweet(msg *rpc.Tweet) Tweet {
+func decodeTweet(msg *pb.Tweet) Tweet {
   if msg == nil {
     return Tweet{}
   }
@@ -229,7 +229,7 @@ func decodeTweet(msg *rpc.Tweet) Tweet {
     WithheldScope:        msg.WithheldScope,
   }
   if msg.Reply != nil {
-    if reply, ok := msg.Reply.(*rpc.Tweet_RepliedTweet); ok {
+    if reply, ok := msg.Reply.(*pb.Tweet_RepliedTweet); ok {
       if reply.RepliedTweet != nil {
         tweet.RepliedTo = &ReplyData{
           TweetID:    reply.RepliedTweet.ReplyToTweetId,
@@ -240,13 +240,13 @@ func decodeTweet(msg *rpc.Tweet) Tweet {
     }
   }
   if msg.Quote != nil {
-    if quote, ok := msg.Quote.(*rpc.Tweet_QuotedTweet); ok {
+    if quote, ok := msg.Quote.(*pb.Tweet_QuotedTweet); ok {
       decodedQuote := decodeTweet(quote.QuotedTweet)
       tweet.Quoted = &decodedQuote
     }
   }
   if msg.Retweet != nil {
-    if retweet, ok := msg.Retweet.(*rpc.Tweet_RetweetedTweet); ok {
+    if retweet, ok := msg.Retweet.(*pb.Tweet_RetweetedTweet); ok {
       decodedRetweet := decodeTweet(retweet.RetweetedTweet)
       tweet.Retweeted = &decodedRetweet
     }
@@ -258,9 +258,9 @@ func decodeTweet(msg *rpc.Tweet) Tweet {
   return tweet
 }
 
-func userModelToMessage(mod model.User) (*rpc.User, error) {
+func userModelToMessage(mod model.User) (*pb.User, error) {
   var err error
-  var msg rpc.User
+  var msg pb.User
 
   msg.Id = mod.ID
 
@@ -323,7 +323,7 @@ func userModelToMessage(mod model.User) (*rpc.User, error) {
   return &msg, nil
 }
 
-func decodeUser(msg *rpc.User) User {
+func decodeUser(msg *pb.User) User {
   if msg == nil {
     return User{}
   }
@@ -353,23 +353,23 @@ func decodeUser(msg *rpc.User) User {
   }
 }
 
-func newIndicesMessage(indices []uint) (*rpc.Indices, error) {
+func newIndicesMessage(indices []uint) (*pb.Indices, error) {
   if len(indices) != 2 {
     return nil, fmt.Errorf("expected [start,end] index values pair, got %v", indices)
   }
-  return &rpc.Indices{Start: uint32(indices[0]), End: uint32(indices[1])}, nil
+  return &pb.Indices{Start: uint32(indices[0]), End: uint32(indices[1])}, nil
 }
 
-func decodeIndices(msg *rpc.Indices) Indices {
+func decodeIndices(msg *pb.Indices) Indices {
   if msg == nil {
     return Indices{}
   }
   return Indices{Start: uint(msg.Start), End: uint(msg.End)}
 }
 
-func urlModelToMessage(mod model.URL) (*rpc.URL, error) {
+func urlModelToMessage(mod model.URL) (*pb.URL, error) {
   var err error
-  msg := rpc.URL{
+  msg := pb.URL{
     TwitterUrl:  mod.URL,
     DisplayUrl:  mod.DisplayURL,
     ExpandedUrl: mod.ExpandedURL,
@@ -380,9 +380,9 @@ func urlModelToMessage(mod model.URL) (*rpc.URL, error) {
   return &msg, nil
 }
 
-func urlModelsToMessages(mods []model.URL) ([]*rpc.URL, error) {
+func urlModelsToMessages(mods []model.URL) ([]*pb.URL, error) {
   var err error
-  msgs := make([]*rpc.URL, len(mods))
+  msgs := make([]*pb.URL, len(mods))
   for i, mod := range mods {
     if msgs[i], err = urlModelToMessage(mod); err != nil {
       return nil, err
@@ -391,7 +391,7 @@ func urlModelsToMessages(mods []model.URL) ([]*rpc.URL, error) {
   return msgs, nil
 }
 
-func decodeURL(msg *rpc.URL) URL {
+func decodeURL(msg *pb.URL) URL {
   if msg == nil {
     return URL{}
   }
@@ -403,7 +403,7 @@ func decodeURL(msg *rpc.URL) URL {
   }
 }
 
-func decodeURLs(msgs []*rpc.URL) []URL {
+func decodeURLs(msgs []*pb.URL) []URL {
   urls := make([]URL, len(msgs))
   for i, msg := range msgs {
     urls[i] = decodeURL(msg)
@@ -411,11 +411,11 @@ func decodeURLs(msgs []*rpc.URL) []URL {
   return urls
 }
 
-func symbolModelsToMessages(mods []model.Symbol) ([]*rpc.Symbol, error) {
+func symbolModelsToMessages(mods []model.Symbol) ([]*pb.Symbol, error) {
   var err error
-  msgs := make([]*rpc.Symbol, len(mods))
+  msgs := make([]*pb.Symbol, len(mods))
   for i, mod := range mods {
-    msg := rpc.Symbol{Text: mod.Text}
+    msg := pb.Symbol{Text: mod.Text}
     if msg.Indices, err = newIndicesMessage(mod.Indices); err != nil {
       return nil, err
     }
@@ -424,7 +424,7 @@ func symbolModelsToMessages(mods []model.Symbol) ([]*rpc.Symbol, error) {
   return msgs, nil
 }
 
-func decodeSymbols(msgs []*rpc.Symbol) []Symbol {
+func decodeSymbols(msgs []*pb.Symbol) []Symbol {
   symbols := make([]Symbol, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
@@ -437,11 +437,11 @@ func decodeSymbols(msgs []*rpc.Symbol) []Symbol {
   return symbols
 }
 
-func mentionModelsToMessages(mods []model.Mention) ([]*rpc.Mention, error) {
+func mentionModelsToMessages(mods []model.Mention) ([]*pb.Mention, error) {
   var err error
-  msgs := make([]*rpc.Mention, len(mods))
+  msgs := make([]*pb.Mention, len(mods))
   for i, mod := range mods {
-    msg := rpc.Mention{
+    msg := pb.Mention{
       UserId:      mod.ID,
       Handle:      mod.ScreenName,
       DisplayName: mod.Name,
@@ -454,7 +454,7 @@ func mentionModelsToMessages(mods []model.Mention) ([]*rpc.Mention, error) {
   return msgs, nil
 }
 
-func decodeMentions(msgs []*rpc.Mention) []Mention {
+func decodeMentions(msgs []*pb.Mention) []Mention {
   mentions := make([]Mention, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
@@ -469,30 +469,30 @@ func decodeMentions(msgs []*rpc.Mention) []Mention {
   return mentions
 }
 
-func mediaModelsToMessages(mods []model.Media) ([]*rpc.Media, error) {
+func mediaModelsToMessages(mods []model.Media) ([]*pb.Media, error) {
   var err error
-  msgs := make([]*rpc.Media, len(mods))
+  msgs := make([]*pb.Media, len(mods))
   for i, mod := range mods {
-    msg := rpc.Media{
+    msg := pb.Media{
       Id:   mod.ID,
       Type: mod.Type,
       Alt:  mod.AltText,
-      Thumb: &rpc.Media_MediaSize{
+      Thumb: &pb.Media_MediaSize{
         Width:  uint32(mod.Sizes.Thumb.W),
         Height: uint32(mod.Sizes.Thumb.H),
         Resize: mod.Sizes.Thumb.Resize,
       },
-      Small: &rpc.Media_MediaSize{
+      Small: &pb.Media_MediaSize{
         Width:  uint32(mod.Sizes.Small.W),
         Height: uint32(mod.Sizes.Small.H),
         Resize: mod.Sizes.Small.Resize,
       },
-      Medium: &rpc.Media_MediaSize{
+      Medium: &pb.Media_MediaSize{
         Width:  uint32(mod.Sizes.Medium.W),
         Height: uint32(mod.Sizes.Medium.H),
         Resize: mod.Sizes.Medium.Resize,
       },
-      Large: &rpc.Media_MediaSize{
+      Large: &pb.Media_MediaSize{
         Width:  uint32(mod.Sizes.Large.W),
         Height: uint32(mod.Sizes.Large.H),
         Resize: mod.Sizes.Large.Resize,
@@ -507,16 +507,16 @@ func mediaModelsToMessages(mods []model.Media) ([]*rpc.Media, error) {
       msg.MediaUrl = mod.MediaURL
     }
     if mod.SourceStatusID != nil {
-      msg.Source = &rpc.Media_SourceTweetId{SourceTweetId: *mod.SourceStatusID}
+      msg.Source = &pb.Media_SourceTweetId{SourceTweetId: *mod.SourceStatusID}
     } else {
-      msg.Source = &rpc.Media_NoSource{NoSource: true}
+      msg.Source = &pb.Media_NoSource{NoSource: true}
     }
     msgs[i] = &msg
   }
   return msgs, nil
 }
 
-func decodeMedia(msgs []*rpc.Media) []Media {
+func decodeMedia(msgs []*pb.Media) []Media {
   media := make([]Media, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
@@ -537,35 +537,35 @@ func decodeMedia(msgs []*rpc.Media) []Media {
   return media
 }
 
-func decodeMediaSource(msg *rpc.Media) *uint64 {
+func decodeMediaSource(msg *pb.Media) *uint64 {
   if msg.Source == nil {
     return nil
   }
-  if source, ok := msg.Source.(*rpc.Media_SourceTweetId); ok {
+  if source, ok := msg.Source.(*pb.Media_SourceTweetId); ok {
     sourceID := source.SourceTweetId
     return &sourceID
   }
   return nil
 }
 
-func decodeMediaSize(msg *rpc.Media_MediaSize) MediaSize {
+func decodeMediaSize(msg *pb.Media_MediaSize) MediaSize {
   if msg == nil {
     return MediaSize{}
   }
   return MediaSize{Width: uint(msg.Width), Height: uint(msg.Height), Resize: msg.Resize}
 }
 
-func pollModelsToMessages(mods []model.Poll) ([]*rpc.Poll, error) {
+func pollModelsToMessages(mods []model.Poll) ([]*pb.Poll, error) {
   var err error
-  msgs := make([]*rpc.Poll, len(mods))
+  msgs := make([]*pb.Poll, len(mods))
   for i, mod := range mods {
-    msg := rpc.Poll{DurationMinutes: uint32(mod.DurationMinutes)}
+    msg := pb.Poll{DurationMinutes: uint32(mod.DurationMinutes)}
     if msg.EndTime, err = ptypes.TimestampProto(time.Time(mod.EndTime)); err != nil {
       return nil, err
     }
-    msg.Options = make([]*rpc.Poll_PollOption, len(mod.Options))
+    msg.Options = make([]*pb.Poll_PollOption, len(mod.Options))
     for j, optionMod := range mod.Options {
-      msg.Options[j] = &rpc.Poll_PollOption{
+      msg.Options[j] = &pb.Poll_PollOption{
         Position: uint32(optionMod.Position),
         Text:     optionMod.Text,
       }
@@ -575,7 +575,7 @@ func pollModelsToMessages(mods []model.Poll) ([]*rpc.Poll, error) {
   return msgs, nil
 }
 
-func decodePolls(msgs []*rpc.Poll) []Poll {
+func decodePolls(msgs []*pb.Poll) []Poll {
   polls := make([]Poll, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
