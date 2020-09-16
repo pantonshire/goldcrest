@@ -48,7 +48,7 @@ func (tweet Tweet) TextOnly() string {
   for _, hashtag := range tweet.Hashtags {
     removeIndices = append(removeIndices, hashtag.Indices)
   }
-  for _, url := range tweet.Hashtags {
+  for _, url := range tweet.URLs {
     removeIndices = append(removeIndices, url.Indices)
   }
   for _, mention := range tweet.Mentions {
