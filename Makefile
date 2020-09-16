@@ -9,11 +9,9 @@ EXEC := goldcrest
 BUILD_TARGETS := linux-amd64 linux-arm linux-arm64 darwin-amd64 windows-amd64 windows-arm
 FULL_BUILD_TARGETS := $(addprefix build-,$(BUILD_TARGETS))
 
-PROTO_SRC := proto
-PROTO_BUILD := rpc
-
-PROTO_SOURCES := $(wildcard $(PROTO_SRC)/*.proto)
-PROTO_GO := $(addprefix $(PROTO_BUILD)/,$(notdir $(PROTO_SOURCES:.proto=.pb.go)))
+PROTO_PATH := proto
+PROTO_SOURCE := $(wildcard $(PROTO_PATH)/*.proto)
+PROTO_BUILD := $(PROTO_SOURCE:.proto=.pb.go)
 
 build: buildpath
 	$(GO_BUILD) -v -o $(BUILD)/$(EXEC) $(MAIN)
@@ -30,12 +28,12 @@ buildpath:
 clean:
 	rm -rf $(BUILD)
 
-proto: $(PROTO_GO)
+proto: $(PROTO_BUILD)
 
-$(PROTO_BUILD)/%.pb.go: $(PROTO_SRC)/%.proto
-	$(PROTOC) -I $(PROTO_SRC) --go_out=plugins=grpc,paths=source_relative:$(PROTO_BUILD) $<
+$(PROTO_PATH)/%.pb.go: $(PROTO_PATH)/%.proto
+	$(PROTOC) -I $(PROTO_PATH) --go_out=plugins=grpc,paths=source_relative:$(PROTO_PATH) $<
 
 clean-proto:
-	rm $(wildcard $(PROTO_BUILD)/*.pb.go)
+	rm $(wildcard $(PROTO_PATH)/*.pb.go)
 
 .PHONY: buildpath build dist build-% clean proto clean-proto
