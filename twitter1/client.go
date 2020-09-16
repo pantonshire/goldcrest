@@ -2,7 +2,7 @@ package twitter1
 
 import (
   "context"
-  "goldcrest/rpc"
+  pb "goldcrest/proto"
   "google.golang.org/grpc"
 )
 
@@ -52,9 +52,9 @@ func (rc remote) GetTweet(params TweetParams, id uint64) (Tweet, error) {
   }
   defer conn.Close()
 
-  client := rpc.NewTwitter1Client(conn)
+  client := pb.NewTwitter1Client(conn)
 
-  tweetMsg, err := client.GetTweet(context.Background(), &rpc.TweetRequest{
+  tweetMsg, err := client.GetTweet(context.Background(), &pb.TweetRequest{
     Auth:    encodeAuthPair(rc.secret, rc.auth),
     Id:      id,
     Options: encodeTweetOptions(params),

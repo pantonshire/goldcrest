@@ -2,7 +2,7 @@ package twitter1
 
 import (
   "context"
-  "goldcrest/rpc"
+  pb "goldcrest/proto"
   "google.golang.org/grpc"
   "path"
 )
@@ -13,11 +13,11 @@ type twitterServer struct {
 
 func (t *Twitter) Server(server *grpc.Server) error {
   ts := &twitterServer{twitter: t}
-  rpc.RegisterTwitter1Server(server, ts)
+  pb.RegisterTwitter1Server(server, ts)
   return nil
 }
 
-func (s *twitterServer) GetTweet(ctx context.Context, req *rpc.TweetRequest) (*rpc.Tweet, error) {
+func (s *twitterServer) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tweet, error) {
   secret, auth := decodeAuthPair(req.Auth)
   opts := decodeTweetOptions(req.Options)
   mod, err := s.twitter.GetTweet(secret, auth, req.Id, opts)
@@ -27,11 +27,11 @@ func (s *twitterServer) GetTweet(ctx context.Context, req *rpc.TweetRequest) (*r
   return tweetModelToMessage(mod)
 }
 
-func (s *twitterServer) GetTweets(req *rpc.TweetsRequest, srv rpc.Twitter1_GetTweetsServer) error {
+func (s *twitterServer) GetTweets(req *pb.TweetsRequest, srv pb.Twitter1_GetTweetsServer) error {
   return nil
 }
 
-func (s *twitterServer) GetRaw(ctx context.Context, rr *rpc.RawAPIRequest) (*rpc.RawAPIResult, error) {
+func (s *twitterServer) GetRaw(ctx context.Context, rr *pb.RawAPIRequest) (*pb.RawAPIResult, error) {
   secret, auth := decodeAuthPair(rr.Auth)
   or := OAuthRequest{
     Method:   rr.Method,
@@ -49,5 +49,5 @@ func (s *twitterServer) GetRaw(ctx context.Context, rr *rpc.RawAPIRequest) (*rpc
   if err != nil {
     return nil, err
   }
-  return &rpc.RawAPIResult{Status: uint32(status), Headers: headers, Body: body}, nil
+  return &pb.RawAPIResult{Status: uint32(status), Headers: headers, Body: body}, nil
 }

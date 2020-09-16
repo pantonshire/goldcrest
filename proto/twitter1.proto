@@ -1,10 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/pantonshire/goldcrest/rpc";
+option go_package = "github.com/pantonshire/goldcrest/proto";
 
 package twitter1;
-
-import "google/protobuf/timestamp.proto";
 
 service Twitter1 {
   rpc GetTweet(TweetRequest) returns (Tweet);
@@ -30,11 +28,11 @@ message TweetOptions {
   bool include_entities = 3;
   bool include_ext_alt_text = 4;
   bool include_card_uri = 5;
-  enum TweetMode {
+  enum Mode {
     COMPAT = 0;
     EXTENDED = 1;
   }
-  TweetMode mode = 6;
+  Mode mode = 6;
 }
 
 message TweetRequest {
@@ -51,7 +49,7 @@ message TweetsRequest {
 
 message Tweet {
   fixed64 id = 1;
-  google.protobuf.Timestamp created_at = 2;
+  int64 created_at = 2;
   string text = 3;
   Indices text_display_range = 4;
   bool truncated = 5;
@@ -99,7 +97,7 @@ message User {
   fixed64 id = 1;
   string handle = 2;
   string display_name = 3;
-  google.protobuf.Timestamp created_at = 4;
+  int64 created_at = 4;
   string bio = 5;
   string url = 6;
   string location = 7;
@@ -149,25 +147,25 @@ message Media {
     bool no_source = 6;
     fixed64 source_tweet_id = 7;
   }
-  message MediaSize {
+  message Size {
     uint32 width = 1;
     uint32 height = 2;
     string resize = 3;
   }
-  MediaSize thumb = 8;
-  MediaSize small = 9;
-  MediaSize medium = 10;
-  MediaSize large = 11;
+  Size thumb = 8;
+  Size small = 9;
+  Size medium = 10;
+  Size large = 11;
 }
 
 message Poll {
-  google.protobuf.Timestamp end_time = 1;
+  int64 end_time = 1;
   uint32 duration_minutes = 2;
-  message PollOption {
+  message Option {
     uint32 position = 1;
     string text = 2;
   }
-  repeated PollOption options = 3;
+  repeated Option options = 3;
 }
 
 message RawAPIRequest {
