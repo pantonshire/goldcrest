@@ -2,7 +2,6 @@ package twitter1
 
 import (
   "fmt"
-  "github.com/golang/protobuf/ptypes"
   pb "goldcrest/proto"
   "goldcrest/twitter1/model"
   "time"
@@ -71,9 +70,7 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
 
   msg.Id = mod.ID
 
-  if msg.CreatedAt, err = ptypes.TimestampProto(time.Time(mod.CreatedAt)); err != nil {
-    return nil, err
-  }
+  msg.CreatedAt = time.Time(mod.CreatedAt).Unix()
 
   if mod.ExtendedTweet != nil {
     msg.Text = mod.ExtendedTweet.FullText
@@ -203,7 +200,7 @@ func decodeTweet(msg *pb.Tweet) Tweet {
   }
   tweet := Tweet{
     ID:                   msg.Id,
-    CreatedAt:            msg.CreatedAt.AsTime(),
+    CreatedAt:            time.Unix(msg.CreatedAt, 0),
     Text:                 msg.Text,
     TextDisplayRange:     decodeIndices(msg.TextDisplayRange),
     Truncated:            msg.Truncated,
@@ -268,9 +265,7 @@ func userModelToMessage(mod model.User) (*pb.User, error) {
 
   msg.DisplayName = mod.Name
 
-  if msg.CreatedAt, err = ptypes.TimestampProto(time.Time(mod.CreatedAt)); err != nil {
-    return nil, err
-  }
+  msg.CreatedAt = time.Time(mod.CreatedAt).Unix()
 
   if mod.Description != nil {
     msg.Bio = *mod.Description
@@ -331,7 +326,7 @@ func decodeUser(msg *pb.User) User {
     ID:                  msg.Id,
     Handle:              msg.Handle,
     DisplayName:         msg.DisplayName,
-    CreatedAt:           msg.CreatedAt.AsTime(),
+    CreatedAt:           time.Unix(msg.CreatedAt, 0),
     Bio:                 msg.Bio,
     URL:                 msg.Url,
     Location:            msg.Location,
@@ -556,12 +551,11 @@ func decodeMediaSize(msg *pb.Media_MediaSize) MediaSize {
 }
 
 func pollModelsToMessages(mods []model.Poll) ([]*pb.Poll, error) {
-  var err error
   msgs := make([]*pb.Poll, len(mods))
   for i, mod := range mods {
-    msg := pb.Poll{DurationMinutes: uint32(mod.DurationMinutes)}
-    if msg.EndTime, err = ptypes.TimestampProto(time.Time(mod.EndTime)); err != nil {
-      return nil, err
+    msg := pb.Poll{
+      DurationMinutes: uint32(mod.DurationMinutes),
+      EndTime:         time.Time(mod.EndTime).Unix(),
     }
     msg.Options = make([]*pb.Poll_PollOption, len(mod.Options))
     for j, optionMod := range mod.Options {
@@ -580,7 +574,7 @@ func decodePolls(msgs []*pb.Poll) []Poll {
   for i, msg := range msgs {
     if msg != nil {
       polls[i] = Poll{
-        EndTime:  msg.EndTime.AsTime(),
+        EndTime:  time.Unix(msg.EndTime, 0),
         Duration: time.Minute * time.Duration(msg.DurationMinutes),
         Options:  make([]PollOption, len(msg.Options)),
       }
