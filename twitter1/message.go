@@ -50,14 +50,14 @@ func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetParams {
   }
 }
 
-func encodeTweetMode(mode TweetMode) pb.TweetOptions_TweetMode {
+func encodeTweetMode(mode TweetMode) pb.TweetOptions_Mode {
   if mode == ExtendedMode {
     return pb.TweetOptions_EXTENDED
   }
   return pb.TweetOptions_COMPAT
 }
 
-func decodeTweetMode(mode pb.TweetOptions_TweetMode) TweetMode {
+func decodeTweetMode(mode pb.TweetOptions_Mode) TweetMode {
   if mode == pb.TweetOptions_EXTENDED {
     return ExtendedMode
   }
@@ -472,22 +472,22 @@ func mediaModelsToMessages(mods []model.Media) ([]*pb.Media, error) {
       Id:   mod.ID,
       Type: mod.Type,
       Alt:  mod.AltText,
-      Thumb: &pb.Media_MediaSize{
+      Thumb: &pb.Media_Size{
         Width:  uint32(mod.Sizes.Thumb.W),
         Height: uint32(mod.Sizes.Thumb.H),
         Resize: mod.Sizes.Thumb.Resize,
       },
-      Small: &pb.Media_MediaSize{
+      Small: &pb.Media_Size{
         Width:  uint32(mod.Sizes.Small.W),
         Height: uint32(mod.Sizes.Small.H),
         Resize: mod.Sizes.Small.Resize,
       },
-      Medium: &pb.Media_MediaSize{
+      Medium: &pb.Media_Size{
         Width:  uint32(mod.Sizes.Medium.W),
         Height: uint32(mod.Sizes.Medium.H),
         Resize: mod.Sizes.Medium.Resize,
       },
-      Large: &pb.Media_MediaSize{
+      Large: &pb.Media_Size{
         Width:  uint32(mod.Sizes.Large.W),
         Height: uint32(mod.Sizes.Large.H),
         Resize: mod.Sizes.Large.Resize,
@@ -543,7 +543,7 @@ func decodeMediaSource(msg *pb.Media) *uint64 {
   return nil
 }
 
-func decodeMediaSize(msg *pb.Media_MediaSize) MediaSize {
+func decodeMediaSize(msg *pb.Media_Size) MediaSize {
   if msg == nil {
     return MediaSize{}
   }
@@ -557,9 +557,9 @@ func pollModelsToMessages(mods []model.Poll) ([]*pb.Poll, error) {
       DurationMinutes: uint32(mod.DurationMinutes),
       EndTime:         time.Time(mod.EndTime).Unix(),
     }
-    msg.Options = make([]*pb.Poll_PollOption, len(mod.Options))
+    msg.Options = make([]*pb.Poll_Option, len(mod.Options))
     for j, optionMod := range mod.Options {
-      msg.Options[j] = &pb.Poll_PollOption{
+      msg.Options[j] = &pb.Poll_Option{
         Position: uint32(optionMod.Position),
         Text:     optionMod.Text,
       }
