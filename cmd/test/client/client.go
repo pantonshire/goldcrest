@@ -2,24 +2,14 @@ package main
 
 import (
   "bufio"
-  "context"
   "fmt"
   "github.com/davecgh/go-spew/spew"
-  "goldcrest/rpc"
-  "google.golang.org/grpc"
+  "goldcrest/twitter1"
   "os"
   "strings"
 )
 
 func main() {
-  conn, err := grpc.Dial("localhost:7400", grpc.WithInsecure())
-  if err != nil {
-    panic(err)
-  }
-  defer conn.Close()
-
-  client := rpc.NewTwitter1Client(conn)
-
   reader := bufio.NewReader(os.Stdin)
 
   consumerKey, secretKey, token, tokenSecret :=
@@ -28,29 +18,25 @@ func main() {
     readLn(reader, "access token"),
     readLn(reader, "token secret")
 
-  tweet, err := client.GetTweet(context.Background(), &rpc.TweetRequest{
-    Auth: &rpc.Authentication{
-      ConsumerKey: consumerKey,
-      AccessToken: token,
-      SecretKey:   secretKey,
-      SecretToken: tokenSecret,
-    },
-    Id: 1305748179338629120,
-    Options: &rpc.TweetOptions{
-      TrimUser:          false,
-      IncludeMyRetweet:  true,
-      IncludeEntities:   true,
-      IncludeExtAltText: true,
-      IncludeCardUri:    true,
-      Mode:              rpc.TweetOptions_EXTENDED,
-    },
-  })
+  client, closeClient := twitter1.Remote(
+    twitter1.Auth{Key: secretKey, Token: tokenSecret},
+    twitter1.Auth{Key: consumerKey, Token: token},
+    "localhost:7400",
+  )
+  defer closeClient()
+
+  tweet, err := client.GetTweet(twitter1.DefaultTweetParams(), 1305748179338629120)
 
   if err != nil {
     panic(err)
   }
 
   spew.Dump(tweet)
+
+  fmt.Println(tweet.TextOnly())
+  if tweet.Quoted != nil {
+    fmt.Println(tweet.Quoted.TextOnly())
+  }
 }
 
 func readLn(reader *bufio.Reader, prompt string) string {
