@@ -8,6 +8,15 @@ import (
   "time"
 )
 
+func encodeAuthPair(secret, auth Auth) *rpc.Authentication {
+  return &rpc.Authentication{
+    ConsumerKey: auth.Key,
+    AccessToken: auth.Token,
+    SecretKey:   secret.Key,
+    SecretToken: secret.Token,
+  }
+}
+
 func decodeAuthPair(authMessage *rpc.Authentication) (secret Auth, auth Auth) {
   if authMessage == nil {
     return Auth{}, Auth{}
@@ -15,6 +24,17 @@ func decodeAuthPair(authMessage *rpc.Authentication) (secret Auth, auth Auth) {
   secret = Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken}
   auth = Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken}
   return secret, auth
+}
+
+func encodeTweetOptions(params TweetParams) *rpc.TweetOptions {
+  return &rpc.TweetOptions{
+    TrimUser:          params.TrimUser,
+    IncludeMyRetweet:  params.IncludeMyRetweet,
+    IncludeEntities:   params.IncludeEntities,
+    IncludeExtAltText: params.IncludeExtAltText,
+    IncludeCardUri:    params.TrimUser,
+    Mode:              encodeTweetMode(params.Mode),
+  }
 }
 
 func decodeTweetOptions(optsMessage *rpc.TweetOptions) TweetParams {
@@ -29,6 +49,13 @@ func decodeTweetOptions(optsMessage *rpc.TweetOptions) TweetParams {
     IncludeCardURI:    optsMessage.TrimUser,
     Mode:              decodeTweetMode(optsMessage.Mode),
   }
+}
+
+func encodeTweetMode(mode TweetMode) rpc.TweetOptions_TweetMode {
+  if mode == ExtendedMode {
+    return rpc.TweetOptions_EXTENDED
+  }
+  return rpc.TweetOptions_COMPAT
 }
 
 func decodeTweetMode(mode rpc.TweetOptions_TweetMode) TweetMode {
