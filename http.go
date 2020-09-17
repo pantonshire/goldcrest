@@ -3,6 +3,7 @@ package goldcrest
 import (
   "fmt"
   "net/http"
+  "strings"
 )
 
 type HttpError struct {
@@ -22,7 +23,11 @@ func NewHttpError(code int, status string) *HttpError {
 }
 
 func HttpErrorFor(resp *http.Response) *HttpError {
-  return NewHttpError(resp.StatusCode, resp.Status)
+  var status string
+  if splitStatus := strings.SplitN(resp.Status, " ", 2); len(splitStatus) > 1 {
+    status = splitStatus[1]
+  }
+  return NewHttpError(resp.StatusCode, status)
 }
 
 func IsStatusOK(code int) bool {
