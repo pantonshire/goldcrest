@@ -225,28 +225,22 @@ func decodeTweet(msg *pb.Tweet) Tweet {
     WithheldCounties:     msg.WithheldCountries,
     WithheldScope:        msg.WithheldScope,
   }
-  if msg.Reply != nil {
-    if reply, ok := msg.Reply.(*pb.Tweet_RepliedTweet); ok {
-      if reply.RepliedTweet != nil {
-        tweet.RepliedTo = &ReplyData{
-          TweetID:    reply.RepliedTweet.ReplyToTweetId,
-          UserID:     reply.RepliedTweet.ReplyToUserId,
-          UserHandle: reply.RepliedTweet.ReplyToUserHandle,
-        }
+  if reply, ok := msg.Reply.(*pb.Tweet_RepliedTweet); ok && reply != nil {
+    if reply.RepliedTweet != nil {
+      tweet.RepliedTo = &ReplyData{
+        TweetID:    reply.RepliedTweet.ReplyToTweetId,
+        UserID:     reply.RepliedTweet.ReplyToUserId,
+        UserHandle: reply.RepliedTweet.ReplyToUserHandle,
       }
     }
   }
-  if msg.Quote != nil {
-    if quote, ok := msg.Quote.(*pb.Tweet_QuotedTweet); ok {
-      decodedQuote := decodeTweet(quote.QuotedTweet)
-      tweet.Quoted = &decodedQuote
-    }
+  if quote, ok := msg.Quote.(*pb.Tweet_QuotedTweet); ok && quote != nil {
+    decodedQuote := decodeTweet(quote.QuotedTweet)
+    tweet.Quoted = &decodedQuote
   }
-  if msg.Retweet != nil {
-    if retweet, ok := msg.Retweet.(*pb.Tweet_RetweetedTweet); ok {
-      decodedRetweet := decodeTweet(retweet.RetweetedTweet)
-      tweet.Retweeted = &decodedRetweet
-    }
+  if retweet, ok := msg.Retweet.(*pb.Tweet_RetweetedTweet); ok && retweet != nil {
+    decodedRetweet := decodeTweet(retweet.RetweetedTweet)
+    tweet.Retweeted = &decodedRetweet
   }
   if msg.CurrentUserRetweetId != 0 {
     retweetID := msg.CurrentUserRetweetId
@@ -533,10 +527,7 @@ func decodeMedia(msgs []*pb.Media) []Media {
 }
 
 func decodeMediaSource(msg *pb.Media) *uint64 {
-  if msg.Source == nil {
-    return nil
-  }
-  if source, ok := msg.Source.(*pb.Media_SourceTweetId); ok {
+  if source, ok := msg.Source.(*pb.Media_SourceTweetId); ok && source != nil {
     sourceID := source.SourceTweetId
     return &sourceID
   }
