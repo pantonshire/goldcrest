@@ -78,3 +78,28 @@ func (rc remote) GetTweet(params TweetParams, id uint64) (tweet Tweet, err error
   }
   return tweet, nil
 }
+
+func (rc remote) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
+  err = rc.handleRequest(func() error {
+    resp, err := rc.client.GetRaw(rc.newContext(), &pb.RawAPIRequest{
+      Auth:        encodeAuthPair(rc.secret, rc.auth),
+      Method:      method,
+      Protocol:    protocol,
+      Version:     version,
+      Path:        path,
+      QueryParams: queryParams,
+      BodyParams:  bodyParams,
+    })
+    if err != nil {
+      return err
+    }
+    headers = resp.Headers
+    status = uint(resp.Status)
+    body = resp.Body
+    return nil
+  })
+  if err != nil {
+    return nil, 0, nil, err
+  }
+  return headers, status, body, nil
+}
