@@ -2,8 +2,11 @@ package twitter1
 
 import (
   "context"
+  "goldcrest"
   pb "goldcrest/proto"
   "google.golang.org/grpc"
+  "google.golang.org/grpc/codes"
+  "google.golang.org/grpc/status"
 )
 
 type Client interface {
@@ -22,49 +25,46 @@ func (lc local) GetTweet(params TweetParams, id uint64) (Tweet, error) {
   return Tweet{}, nil
 }
 
-//TODO: connection pool to reuse connections
 //TODO: server health checks
 type remote struct {
   secret, auth Auth
   address      string
+  client       pb.Twitter1Client
 }
 
-func Remote(secret, auth Auth, address string) (client Client, closeClient func() error) {
-  client = remote{
+func Remote(conn *grpc.ClientConn, secret, auth Auth) Client {
+  return remote{
     secret:  secret,
     auth:    auth,
-    address: address,
+    address: conn.Target(),
+    client:  pb.NewTwitter1Client(conn),
   }
-
-  closeClient = func() error {
-    return nil
-  }
-
-  return client, closeClient
 }
 
-//TODO: do not open a new connection each time
-//TODO: connection options (eg. TLS)
+func (rc remote) handleRequest(handler func() error) (error) {
+  err := handler()
+  if httpErr, ok := err.(*goldcrest.HttpError); ok {
+    return status.Errorf(codes.Internal, "twitter error %s", httpErr.Error())
+  }
+  return err
+}
+
 func (rc remote) GetTweet(params TweetParams, id uint64) (Tweet, error) {
-  conn, err := grpc.Dial(rc.address, grpc.WithInsecure())
-  if err != nil {
-    return Tweet{}, err
-  }
-  defer conn.Close()
-
-  client := pb.NewTwitter1Client(conn)
-
-  tweetMsg, err := client.GetTweet(context.Background(), &pb.TweetRequest{
-    Auth:    encodeAuthPair(rc.secret, rc.auth),
-    Id:      id,
-    Options: encodeTweetOptions(params),
+  var tweet Tweet
+  err := rc.handleRequest(func() error {
+    tweetMsg, err := rc.client.GetTweet(context.Background(), &pb.TweetRequest{
+      Auth:    encodeAuthPair(rc.secret, rc.auth),
+      Id:      id,
+      Options: encodeTweetOptions(params),
+    })
+    if err != nil {
+      return err
+    }
+    tweet = decodeTweet(tweetMsg)
+    return nil
   })
-
   if err != nil {
     return Tweet{}, err
   }
-
-  tweet := decodeTweet(tweetMsg)
-
   return tweet, nil
 }
