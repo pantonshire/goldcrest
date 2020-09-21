@@ -7,6 +7,7 @@ import (
   "google.golang.org/grpc"
   "google.golang.org/grpc/codes"
   "google.golang.org/grpc/status"
+  "time"
 )
 
 type Client interface {
@@ -30,15 +31,25 @@ type remote struct {
   secret, auth Auth
   address      string
   client       pb.Twitter1Client
+  callTimeout  time.Duration
 }
 
-func Remote(conn *grpc.ClientConn, secret, auth Auth) Client {
+func Remote(conn *grpc.ClientConn, secret, auth Auth, timeout time.Duration) Client {
   return remote{
-    secret:  secret,
-    auth:    auth,
-    address: conn.Target(),
-    client:  pb.NewTwitter1Client(conn),
+    secret:      secret,
+    auth:        auth,
+    address:     conn.Target(),
+    client:      pb.NewTwitter1Client(conn),
+    callTimeout: timeout,
   }
+}
+
+func (rc remote) newContext() context.Context {
+  if rc.callTimeout == 0 {
+    return context.Background()
+  }
+  ctx, _ := context.WithTimeout(context.Background(), rc.callTimeout)
+  return ctx
 }
 
 func (rc remote) handleRequest(handler func() error) error {
@@ -49,10 +60,9 @@ func (rc remote) handleRequest(handler func() error) error {
   return err
 }
 
-func (rc remote) GetTweet(params TweetParams, id uint64) (Tweet, error) {
-  var tweet Tweet
-  err := rc.handleRequest(func() error {
-    tweetMsg, err := rc.client.GetTweet(context.Background(), &pb.TweetRequest{
+func (rc remote) GetTweet(params TweetParams, id uint64) (tweet Tweet, err error) {
+  err = rc.handleRequest(func() error {
+    tweetMsg, err := rc.client.GetTweet(rc.newContext(), &pb.TweetRequest{
       Auth:    encodeAuthPair(rc.secret, rc.auth),
       Id:      id,
       Options: encodeTweetOptions(params),
