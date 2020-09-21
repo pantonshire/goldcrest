@@ -2,8 +2,12 @@ package twitter1
 
 import (
   "context"
+  "goldcrest"
   pb "goldcrest/proto"
   "google.golang.org/grpc"
+  "google.golang.org/grpc/codes"
+  "google.golang.org/grpc/status"
+  "time"
 )
 
 type Client interface {
@@ -22,49 +26,80 @@ func (lc local) GetTweet(params TweetParams, id uint64) (Tweet, error) {
   return Tweet{}, nil
 }
 
-//TODO: connection pool to reuse connections
 //TODO: server health checks
 type remote struct {
   secret, auth Auth
   address      string
+  client       pb.Twitter1Client
+  callTimeout  time.Duration
 }
 
-func Remote(secret, auth Auth, address string) (client Client, closeClient func() error) {
-  client = remote{
-    secret:  secret,
-    auth:    auth,
-    address: address,
+func Remote(conn *grpc.ClientConn, secret, auth Auth, timeout time.Duration) Client {
+  return remote{
+    secret:      secret,
+    auth:        auth,
+    address:     conn.Target(),
+    client:      pb.NewTwitter1Client(conn),
+    callTimeout: timeout,
   }
+}
 
-  closeClient = func() error {
+func (rc remote) newContext() context.Context {
+  if rc.callTimeout == 0 {
+    return context.Background()
+  }
+  ctx, _ := context.WithTimeout(context.Background(), rc.callTimeout)
+  return ctx
+}
+
+func (rc remote) handleRequest(handler func() error) error {
+  err := handler()
+  if httpErr, ok := err.(*goldcrest.HttpError); ok {
+    return status.Errorf(codes.Internal, "twitter error %s", httpErr.Error())
+  }
+  return err
+}
+
+func (rc remote) GetTweet(params TweetParams, id uint64) (tweet Tweet, err error) {
+  err = rc.handleRequest(func() error {
+    tweetMsg, err := rc.client.GetTweet(rc.newContext(), &pb.TweetRequest{
+      Auth:    encodeAuthPair(rc.secret, rc.auth),
+      Id:      id,
+      Options: encodeTweetOptions(params),
+    })
+    if err != nil {
+      return err
+    }
+    tweet = decodeTweet(tweetMsg)
     return nil
+  })
+  if err != nil {
+    return Tweet{}, err
   }
-
-  return client, closeClient
+  return tweet, nil
 }
 
-//TODO: do not open a new connection each time
-//TODO: connection options (eg. TLS)
-func (rc remote) GetTweet(params TweetParams, id uint64) (Tweet, error) {
-  conn, err := grpc.Dial(rc.address, grpc.WithInsecure())
-  if err != nil {
-    return Tweet{}, err
-  }
-  defer conn.Close()
-
-  client := pb.NewTwitter1Client(conn)
-
-  tweetMsg, err := client.GetTweet(context.Background(), &pb.TweetRequest{
-    Auth:    encodeAuthPair(rc.secret, rc.auth),
-    Id:      id,
-    Options: encodeTweetOptions(params),
+func (rc remote) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
+  err = rc.handleRequest(func() error {
+    resp, err := rc.client.GetRaw(rc.newContext(), &pb.RawAPIRequest{
+      Auth:        encodeAuthPair(rc.secret, rc.auth),
+      Method:      method,
+      Protocol:    protocol,
+      Version:     version,
+      Path:        path,
+      QueryParams: queryParams,
+      BodyParams:  bodyParams,
+    })
+    if err != nil {
+      return err
+    }
+    headers = resp.Headers
+    status = uint(resp.Status)
+    body = resp.Body
+    return nil
   })
-
   if err != nil {
-    return Tweet{}, err
+    return nil, 0, nil, err
   }
-
-  tweet := decodeTweet(tweetMsg)
-
-  return tweet, nil
+  return headers, status, body, nil
 }

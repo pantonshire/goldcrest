@@ -5,6 +5,7 @@ import (
   "fmt"
   "github.com/davecgh/go-spew/spew"
   "goldcrest/twitter1"
+  "google.golang.org/grpc"
   "os"
   "strings"
 )
@@ -18,12 +19,16 @@ func main() {
     readLn(reader, "access token"),
     readLn(reader, "token secret")
 
-  client, closeClient := twitter1.Remote(
+  conn, err := grpc.Dial("localhost:7400", grpc.WithBlock(), grpc.WithInsecure())
+  if err != nil {
+    panic(err)
+  }
+  defer conn.Close()
+
+  client := twitter1.Remote(conn,
     twitter1.Auth{Key: secretKey, Token: tokenSecret},
     twitter1.Auth{Key: consumerKey, Token: token},
-    "localhost:7400",
   )
-  defer closeClient()
 
   tweet, err := client.GetTweet(twitter1.DefaultTweetParams(), 1305748179338629120)
 

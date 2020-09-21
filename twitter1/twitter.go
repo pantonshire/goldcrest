@@ -64,7 +64,7 @@ func DefaultTweetParams() TweetParams {
   }
 }
 
-func (t Twitter) requestJSON(req *http.Request, output interface{}) (err error) {
+func (t Twitter) request(req *http.Request, handler func(resp *http.Response) error) (err error) {
   resp, err := t.client.Do(req)
   if err != nil {
     return err
@@ -78,30 +78,35 @@ func (t Twitter) requestJSON(req *http.Request, output interface{}) (err error) 
   if httpErr != nil {
     return httpErr
   }
-  return json.NewDecoder(resp.Body).Decode(output)
+  return handler(resp)
+}
+
+func (t Twitter) requestJSON(req *http.Request, output interface{}) (err error) {
+  return t.request(req, func(resp *http.Response) error {
+    return json.NewDecoder(resp.Body).Decode(output)
+  })
 }
 
 func (t Twitter) requestRaw(req *http.Request) (status int, headers map[string]string, body []byte, err error) {
-  resp, err := t.client.Do(req)
+  err = t.request(req, func(resp *http.Response) error {
+    headers = make(map[string]string)
+    for key, val := range resp.Header {
+      if len(val) > 0 {
+        headers[key] = val[0]
+      }
+    }
+    var ioErr error
+    body, ioErr = ioutil.ReadAll(resp.Body)
+    if err != nil {
+      return ioErr
+    }
+    status = resp.StatusCode
+    return nil
+  })
   if err != nil {
     return 0, nil, nil, err
   }
-  defer func() {
-    if closeErr := resp.Body.Close(); closeErr != nil {
-      err = closeErr
-    }
-  }()
-  headers = make(map[string]string)
-  for key, val := range resp.Header {
-    if len(val) > 0 {
-      headers[key] = val[0]
-    }
-  }
-  body, err = ioutil.ReadAll(resp.Body)
-  if err != nil {
-    return 0, nil, nil, err
-  }
-  return resp.StatusCode, headers, body, nil
+  return status, headers, body, nil
 }
 
 func (t Twitter) GetTweet(secret, auth Auth, id interface{}, params TweetParams) (model.Tweet, error) {
