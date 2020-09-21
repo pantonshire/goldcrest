@@ -41,7 +41,7 @@ func Remote(conn *grpc.ClientConn, secret, auth Auth) Client {
   }
 }
 
-func (rc remote) handleRequest(handler func() error) (error) {
+func (rc remote) handleRequest(handler func() error) error {
   err := handler()
   if httpErr, ok := err.(*goldcrest.HttpError); ok {
     return status.Errorf(codes.Internal, "twitter error %s", httpErr.Error())
