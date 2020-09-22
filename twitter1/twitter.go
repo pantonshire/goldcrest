@@ -1,6 +1,7 @@
 package twitter1
 
 import (
+  "context"
   "encoding/json"
   "fmt"
   "goldcrest"
@@ -81,14 +82,14 @@ func (t Twitter) request(req *http.Request, handler func(resp *http.Response) er
   return handler(resp)
 }
 
-func (t Twitter) requestJSON(req *http.Request, output interface{}) (err error) {
-  return t.request(req, func(resp *http.Response) error {
+func (t Twitter) requestJSON(ctx context.Context, req *http.Request, token string, group limitGroup, output interface{}) (err error) {
+  return t.request(ctx, req, token, group, func(resp *http.Response) error {
     return json.NewDecoder(resp.Body).Decode(output)
   })
 }
 
-func (t Twitter) requestRaw(req *http.Request) (status int, headers map[string]string, body []byte, err error) {
-  err = t.request(req, func(resp *http.Response) error {
+func (t Twitter) requestRaw(ctx context.Context, req *http.Request) (status int, headers map[string]string, body []byte, err error) {
+  err = t.request(ctx, req, "", limitNone, func(resp *http.Response) error {
     headers = make(map[string]string)
     for key, val := range resp.Header {
       if len(val) > 0 {
@@ -109,7 +110,7 @@ func (t Twitter) requestRaw(req *http.Request) (status int, headers map[string]s
   return status, headers, body, nil
 }
 
-func (t Twitter) GetTweet(secret, auth Auth, id interface{}, params TweetParams) (model.Tweet, error) {
+func (t Twitter) GetTweet(ctx context.Context, secret, auth Auth, id interface{}, params TweetParams) (model.Tweet, error) {
   or := OAuthRequest{
     Method:   "GET",
     Protocol: protocol,
@@ -125,12 +126,12 @@ func (t Twitter) GetTweet(secret, auth Auth, id interface{}, params TweetParams)
       "tweet_mode":           string(params.Mode),
     },
   }
-  req, err := or.MakeRequest(secret, auth)
+  req, err := or.MakeRequest(ctx, secret, auth)
   if err != nil {
     return model.Tweet{}, err
   }
   var tweet model.Tweet
-  if err := t.requestJSON(req, &tweet); err != nil {
+  if err := t.requestJSON(ctx, req, auth.Token, limitStatusShow, &tweet); err != nil {
     return model.Tweet{}, err
   }
   return tweet, nil

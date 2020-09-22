@@ -2,6 +2,7 @@ package twitter1
 
 import (
   "bytes"
+  "context"
   "crypto/hmac"
   "crypto/rand"
   "crypto/sha1"
@@ -32,7 +33,7 @@ type OAuthRequest struct {
 
 // Creates a new http.Request containing an authentication header as described at
 // https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
-func (or OAuthRequest) MakeRequest(secret, auth Auth) (*http.Request, error) {
+func (or OAuthRequest) MakeRequest(ctx context.Context, secret, auth Auth) (*http.Request, error) {
   nonce, err := randBase36(oauthNonceBytes)
   if err != nil {
     return nil, err
@@ -60,7 +61,7 @@ func (or OAuthRequest) MakeRequest(secret, auth Auth) (*http.Request, error) {
   fullURL := baseURL + "?" + queryParams.Encode("&", false)
   bodyStr := bodyParams.Encode("&", false)
 
-  req, err := http.NewRequest(or.Method, fullURL, bytes.NewBufferString(bodyStr))
+  req, err := http.NewRequestWithContext(ctx, or.Method, fullURL, bytes.NewBufferString(bodyStr))
   if err != nil {
     return nil, err
   }
