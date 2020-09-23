@@ -44,12 +44,11 @@ func Remote(conn *grpc.ClientConn, secret, auth Auth, timeout time.Duration) Cli
   }
 }
 
-func (rc remote) newContext() context.Context {
+func (rc remote) newContext() (context.Context, context.CancelFunc) {
   if rc.callTimeout == 0 {
-    return context.Background()
+    return context.Background(), nil
   }
-  ctx, _ := context.WithTimeout(context.Background(), rc.callTimeout)
-  return ctx
+  return context.WithTimeout(context.Background(), rc.callTimeout)
 }
 
 func (rc remote) handleRequest(handler func() error) error {
@@ -62,7 +61,11 @@ func (rc remote) handleRequest(handler func() error) error {
 
 func (rc remote) GetTweet(params TweetParams, id uint64) (tweet Tweet, err error) {
   err = rc.handleRequest(func() error {
-    tweetMsg, err := rc.client.GetTweet(rc.newContext(), &pb.TweetRequest{
+    ctx, cancel := rc.newContext()
+    if cancel != nil {
+      defer cancel()
+    }
+    tweetMsg, err := rc.client.GetTweet(ctx, &pb.TweetRequest{
       Auth:    encodeAuthPair(rc.secret, rc.auth),
       Id:      id,
       Options: encodeTweetOptions(params),
@@ -81,7 +84,11 @@ func (rc remote) GetTweet(params TweetParams, id uint64) (tweet Tweet, err error
 
 func (rc remote) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
   err = rc.handleRequest(func() error {
-    resp, err := rc.client.GetRaw(rc.newContext(), &pb.RawAPIRequest{
+    ctx, cancel := rc.newContext()
+    if cancel != nil {
+      defer cancel()
+    }
+    resp, err := rc.client.GetRaw(ctx, &pb.RawAPIRequest{
       Auth:        encodeAuthPair(rc.secret, rc.auth),
       Method:      method,
       Protocol:    protocol,

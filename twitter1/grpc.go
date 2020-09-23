@@ -20,7 +20,7 @@ func (t *Twitter) Server(server *grpc.Server) error {
 func (s *twitterServer) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tweet, error) {
   secret, auth := decodeAuthPair(req.Auth)
   opts := decodeTweetOptions(req.Options)
-  mod, err := s.twitter.GetTweet(secret, auth, req.Id, opts)
+  mod, err := s.twitter.GetTweet(ctx, secret, auth, req.Id, opts)
   if err != nil {
     return nil, err
   }
@@ -41,11 +41,11 @@ func (s *twitterServer) GetRaw(ctx context.Context, rr *pb.RawAPIRequest) (*pb.R
     Query:    rr.QueryParams,
     Body:     rr.BodyParams,
   }
-  req, err := or.MakeRequest(secret, auth)
+  req, err := or.MakeRequest(ctx, secret, auth)
   if err != nil {
     return nil, err
   }
-  status, headers, body, err := s.twitter.requestRaw(req)
+  status, headers, body, err := s.twitter.requestRaw(ctx, req)
   if err != nil {
     return nil, err
   }

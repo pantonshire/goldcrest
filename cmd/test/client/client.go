@@ -8,6 +8,7 @@ import (
   "google.golang.org/grpc"
   "os"
   "strings"
+  "time"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
   client := twitter1.Remote(conn,
     twitter1.Auth{Key: secretKey, Token: tokenSecret},
     twitter1.Auth{Key: consumerKey, Token: token},
+    time.Second*5,
   )
 
   tweet, err := client.GetTweet(twitter1.DefaultTweetParams(), 1305748179338629120)

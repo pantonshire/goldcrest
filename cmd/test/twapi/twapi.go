@@ -2,6 +2,7 @@ package main
 
 import (
   "bufio"
+  "context"
   "fmt"
   "github.com/davecgh/go-spew/spew"
   "goldcrest/twitter1"
@@ -28,6 +29,7 @@ func v1() {
   twitter := twitter1.NewTwitter(twitter1.TwitterConfig{ClientTimeoutSeconds: 5})
 
   tweet, err := twitter.GetTweet(
+    context.Background(),
     twitter1.Auth{Key: secretKey, Token: tokenSecret},
     twitter1.Auth{Key: consumerKey, Token: token},
     1305385801723916289,
