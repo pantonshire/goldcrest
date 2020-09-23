@@ -86,24 +86,44 @@ func (rl *rateLimit) do(ctx context.Context, fn func() (*http.Response, error)) 
   if err != nil {
     return resp, err
   }
-  if limCurrent := resp.Header.Get(xRateLimitRemaining); limCurrent != "" {
-    rl.current, err = strconv.Atoi(limCurrent)
-    if err != nil {
-      return resp, fmt.Errorf("invalid rate limit header for %s: \"%s\"", xRateLimitRemaining, limCurrent)
-    }
+  current, next, resets, err := getRateLimitHeaders(resp.Header)
+  if current != nil {
+    rl.current = *current
   }
-  if limNext := resp.Header.Get(xRateLimit); limNext != "" {
-    rl.next, err = strconv.Atoi(limNext)
-    if err != nil {
-      return resp, fmt.Errorf("invalid rate limit header for %s: \"%s\"", xRateLimit, limNext)
-    }
+  if next != nil {
+    rl.next = *next
   }
-  if limResets := resp.Header.Get(xRateLimitReset); limResets != "" {
-    resetsUnix, err := strconv.ParseInt(limResets, 10, 64)
-    if err != nil {
-      return resp, fmt.Errorf("invalid rate limit header for %s: \"%s\"", xRateLimitReset, limResets)
-    }
-    rl.resets = time.Unix(resetsUnix, 0)
+  if resets != nil {
+    rl.resets = *resets
+  }
+  if err != nil {
+    return resp, err
   }
   return resp, nil
+}
+
+func getRateLimitHeaders(header http.Header) (current, next *int, resets *time.Time, err error) {
+  if currentStr := header.Get(xRateLimitRemaining); currentStr != "" {
+    currentVal, parseErr := strconv.Atoi(currentStr)
+    if parseErr != nil {
+      err = fmt.Errorf("invalid rate limit header for %s: \"%s\"", xRateLimitRemaining, currentStr)
+    }
+    current = &currentVal
+  }
+  if nextStr := header.Get(xRateLimit); nextStr != "" {
+    nextVal, parseErr := strconv.Atoi(nextStr)
+    if parseErr != nil {
+      err = fmt.Errorf("invalid rate limit header for %s: \"%s\"", xRateLimit, nextStr)
+    }
+    next = &nextVal
+  }
+  if resetsStr := header.Get(xRateLimitReset); resetsStr != "" {
+    resetsUnix, parseErr := strconv.ParseInt(resetsStr, 10, 64)
+    if parseErr != nil {
+      err = fmt.Errorf("invalid rate limit header for %s: \"%s\"", xRateLimitReset, resetsStr)
+    }
+    resetsVal := time.Unix(resetsUnix, 0)
+    resets = &resetsVal
+  }
+  return current, next, resets, err
 }
