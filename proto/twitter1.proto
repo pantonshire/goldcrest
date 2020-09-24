@@ -7,6 +7,10 @@ package twitter1;
 service Twitter1 {
   rpc GetTweet(TweetRequest) returns (Tweet);
   rpc GetTweets(TweetsRequest) returns (stream Tweet);
+  rpc GetHomeTimeline(HomeTimelineRequest) returns (Timeline);
+  rpc GetMentionTimeline(MentionTimelineRequest) returns (Timeline);
+  rpc GetUserTimeline(UserTimelineRequest) returns (Timeline);
+  rpc UpdateProfile(UpdateProfileRequest) returns (User);
   rpc GetRaw(RawAPIRequest) returns (RawAPIResult);
 }
 
@@ -45,6 +49,63 @@ message TweetsRequest {
   Authentication auth = 1;
   repeated fixed64 id = 2;
   TweetOptions options = 3;
+}
+
+message HomeTimelineRequest {
+  uint32 count = 1;
+  uint64 min_id = 2;
+  uint64 max_id = 3;
+  bool include_replies = 4;
+  TweetOptions tweet_options = 5;
+}
+
+message MentionTimelineRequest {
+  uint32 count = 1;
+  uint64 min_id = 2;
+  uint64 max_id = 3;
+  TweetOptions tweet_options = 4;
+}
+
+message UserTimelineRequest {
+  oneof user {
+    fixed64 user_id = 1;
+    string user_handle = 2;
+  }
+  uint32 count_limit = 3;
+  uint64 min_id = 4;
+  uint64 max_id = 5;
+  bool include_replies = 6;
+  bool include_retweets = 7;
+  TweetOptions tweet_options = 8;
+}
+
+message UpdateProfileRequest {
+  oneof update_name {
+    bool no_update_name = 1;
+    string name = 2;
+  }
+  oneof update_url {
+    bool no_update_url = 3;
+    string url = 4;
+  }
+  oneof update_location {
+    bool no_update_location = 5;
+    string location = 6;
+  }
+  oneof update_bio {
+    bool no_update_bio = 7;
+    string bio = 8;
+  }
+  oneof update_profile_link_color {
+    bool no_update_profile_link_color = 9;
+    string profile_link_color = 10;
+  }
+  bool include_entities = 11;
+  bool include_statuses = 12;
+}
+
+message Timeline {
+  repeated Tweet tweets = 1;
 }
 
 message Tweet {
