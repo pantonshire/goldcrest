@@ -125,7 +125,7 @@ func (t Twitter) requestRaw(ctx context.Context, req *http.Request) (status int,
   return status, headers, body, nil
 }
 
-func (t Twitter) GetTweet(ctx context.Context, secret, auth Auth, id interface{}, params TweetParams) (model.Tweet, error) {
+func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, params TweetParams) (model.Tweet, error) {
   or := OAuthRequest{
     Method:   "GET",
     Protocol: protocol,
@@ -141,12 +141,8 @@ func (t Twitter) GetTweet(ctx context.Context, secret, auth Auth, id interface{}
       "tweet_mode":           string(params.Mode),
     },
   }
-  req, err := or.MakeRequest(ctx, secret, auth)
-  if err != nil {
-    return model.Tweet{}, err
-  }
   var tweet model.Tweet
-  if err := t.requestJSON(ctx, req, auth.Token, limitStatusShow, &tweet); err != nil {
+  if err := t.standardRequest(ctx, limitStatusShow, or, auth, &tweet); err != nil {
     return model.Tweet{}, err
   }
   return tweet, nil
