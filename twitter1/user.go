@@ -16,9 +16,13 @@ const (
   xRateLimitRemaining = "X-Rate-Limit-Remaining"
   xRateLimitReset     = "X-Rate-Limit-Reset"
 
-  limitNone         limitGroup = ""
-  limitStatusUpdate limitGroup = "statuses/update"
-  limitStatusShow   limitGroup = "statuses/show"
+  limitNone            limitGroup = ""
+  limitStatusUpdate    limitGroup = "statuses/update"
+  limitStatusShow      limitGroup = "statuses/show"
+  limitHomeTimeline    limitGroup = "statuses/home_timeline"
+  limitMentionTimeline limitGroup = "statuses/mentions_timeline"
+  limitUserTimeline    limitGroup = "statuses/user_timeline"
+  limitUpdateProfile   limitGroup = "statuses/update_profile"
 )
 
 type users struct {
