@@ -16,13 +16,14 @@ func encodeAuthPair(secret, auth Auth) *pb.Authentication {
   }
 }
 
-func decodeAuthPair(authMessage *pb.Authentication) (secret Auth, auth Auth) {
+func decodeAuthPair(authMessage *pb.Authentication) AuthPair {
   if authMessage == nil {
-    return Auth{}, Auth{}
+    return AuthPair{}
   }
-  secret = Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken}
-  auth = Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken}
-  return secret, auth
+  return AuthPair{
+    Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken},
+    Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken},
+  }
 }
 
 func encodeTweetOptions(params TweetParams) *pb.TweetOptions {
