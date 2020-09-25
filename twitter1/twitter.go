@@ -62,6 +62,17 @@ func DefaultTweetOptions() TweetOptions {
   }
 }
 
+func (twopts TweetOptions) encode() map[string]string {
+  return map[string]string{
+    "trim_user":            fmt.Sprint(twopts.TrimUser),
+    "include_my_retweet":   fmt.Sprint(twopts.IncludeMyRetweet),
+    "include_entities":     fmt.Sprint(twopts.IncludeEntities),
+    "include_ext_alt_text": fmt.Sprint(twopts.IncludeExtAltText),
+    "include_card_uri":     fmt.Sprint(twopts.IncludeCardURI),
+    "tweet_mode":           string(twopts.Mode),
+  }
+}
+
 func (t Twitter) request(ctx context.Context, req *http.Request, token string, group limitGroup, handler func(resp *http.Response) error) (err error) {
   var resp *http.Response
   if token != "" {
@@ -131,15 +142,9 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, tw
     Protocol: protocol,
     Domain:   domain,
     Path:     path.Join(version, "statuses/show.json"),
-    Query: map[string]string{
-      "id":                   fmt.Sprint(id),
-      "trim_user":            fmt.Sprint(twopts.TrimUser),
-      "include_my_retweet":   fmt.Sprint(twopts.IncludeMyRetweet),
-      "include_entities":     fmt.Sprint(twopts.IncludeEntities),
-      "include_ext_alt_text": fmt.Sprint(twopts.IncludeExtAltText),
-      "include_card_uri":     fmt.Sprint(twopts.IncludeCardURI),
-      "tweet_mode":           string(twopts.Mode),
-    },
+    Query: joinParamMaps(map[string]string{
+      "id": fmt.Sprint(id),
+    }, twopts.encode()),
   }
   var tweet model.Tweet
   if err := t.standardRequest(ctx, limitStatusShow, or, auth, &tweet); err != nil {
@@ -149,15 +154,9 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, tw
 }
 
 func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twopts TweetOptions, count *uint, minID, maxID *uint64, includeReplies bool) ([]model.Tweet, error) {
-  query := map[string]string{
-    "trim_user":            fmt.Sprint(twopts.TrimUser),
-    "include_my_retweet":   fmt.Sprint(twopts.IncludeMyRetweet),
-    "include_entities":     fmt.Sprint(twopts.IncludeEntities),
-    "include_ext_alt_text": fmt.Sprint(twopts.IncludeExtAltText),
-    "include_card_uri":     fmt.Sprint(twopts.IncludeCardURI),
-    "tweet_mode":           string(twopts.Mode),
-    "exclude_replies":      fmt.Sprint(!includeReplies),
-  }
+  query := joinParamMaps(map[string]string{
+    "exclude_replies": fmt.Sprint(!includeReplies),
+  }, twopts.encode())
   if count != nil {
     query["count"] = fmt.Sprint(*count)
   }
@@ -179,4 +178,14 @@ func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twopts Twee
     return nil, err
   }
   return tweets, nil
+}
+
+func joinParamMaps(ms ...map[string]string) map[string]string {
+  master := make(map[string]string)
+  for _, m := range ms {
+    for key, val := range m {
+      master[key] = val
+    }
+  }
+  return master
 }
