@@ -92,12 +92,12 @@ func (t Twitter) requestJSON(ctx context.Context, req *http.Request, token strin
   })
 }
 
-func (t Twitter) standardRequest(ctx context.Context, or OAuthRequest, auth AuthPair, output interface{}) error {
+func (t Twitter) standardRequest(ctx context.Context, group limitGroup, or OAuthRequest, auth AuthPair, output interface{}) error {
   req, err := or.MakeRequest(ctx, auth.Secret, auth.Public)
   if err != nil {
     return err
   }
-  if err := t.requestJSON(ctx, req, auth.Public.Token, limitStatusShow, output); err != nil {
+  if err := t.requestJSON(ctx, req, auth.Public.Token, group, output); err != nil {
     return err
   }
   return nil
