@@ -35,7 +35,7 @@ func v1() {
       Public: twitter1.Auth{Key: consumerKey, Token: token},
     },
     1305385801723916289,
-    twitter1.DefaultTweetParams(),
+    twitter1.DefaultTweetOptions(),
   )
 
   if err != nil {

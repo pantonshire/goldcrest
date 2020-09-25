@@ -11,7 +11,7 @@ import (
 )
 
 type Client interface {
-  GetTweet(params TweetParams, id uint64) (Tweet, error)
+  GetTweet(params TweetOptions, id uint64) (Tweet, error)
 }
 
 type local struct {
@@ -22,7 +22,7 @@ func Local(secret, auth Auth) Client {
   return local{secret: secret, auth: auth}
 }
 
-func (lc local) GetTweet(params TweetParams, id uint64) (Tweet, error) {
+func (lc local) GetTweet(params TweetOptions, id uint64) (Tweet, error) {
   return Tweet{}, nil
 }
 
@@ -59,7 +59,7 @@ func (rc remote) handleRequest(handler func() error) error {
   return err
 }
 
-func (rc remote) GetTweet(params TweetParams, id uint64) (tweet Tweet, err error) {
+func (rc remote) GetTweet(params TweetOptions, id uint64) (tweet Tweet, err error) {
   err = rc.handleRequest(func() error {
     ctx, cancel := rc.newContext()
     if cancel != nil {

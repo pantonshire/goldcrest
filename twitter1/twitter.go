@@ -32,7 +32,7 @@ type Twitter struct {
   users  *users
 }
 
-type TweetParams struct {
+type TweetOptions struct {
   TrimUser          bool
   IncludeMyRetweet  bool
   IncludeEntities   bool
@@ -51,8 +51,8 @@ func NewTwitter(config TwitterConfig) *Twitter {
   }
 }
 
-func DefaultTweetParams() TweetParams {
-  return TweetParams{
+func DefaultTweetOptions() TweetOptions {
+  return TweetOptions{
     TrimUser:          false,
     IncludeMyRetweet:  true,
     IncludeEntities:   true,
@@ -125,7 +125,7 @@ func (t Twitter) requestRaw(ctx context.Context, req *http.Request) (status int,
   return status, headers, body, nil
 }
 
-func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, params TweetParams) (model.Tweet, error) {
+func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, twopts TweetOptions) (model.Tweet, error) {
   or := OAuthRequest{
     Method:   "GET",
     Protocol: protocol,
@@ -133,12 +133,12 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, pa
     Path:     path.Join(version, "statuses/show.json"),
     Query: map[string]string{
       "id":                   fmt.Sprint(id),
-      "trim_user":            fmt.Sprint(params.TrimUser),
-      "include_my_retweet":   fmt.Sprint(params.IncludeMyRetweet),
-      "include_entities":     fmt.Sprint(params.IncludeEntities),
-      "include_ext_alt_text": fmt.Sprint(params.IncludeExtAltText),
-      "include_card_uri":     fmt.Sprint(params.IncludeCardURI),
-      "tweet_mode":           string(params.Mode),
+      "trim_user":            fmt.Sprint(twopts.TrimUser),
+      "include_my_retweet":   fmt.Sprint(twopts.IncludeMyRetweet),
+      "include_entities":     fmt.Sprint(twopts.IncludeEntities),
+      "include_ext_alt_text": fmt.Sprint(twopts.IncludeExtAltText),
+      "include_card_uri":     fmt.Sprint(twopts.IncludeCardURI),
+      "tweet_mode":           string(twopts.Mode),
     },
   }
   var tweet model.Tweet
@@ -148,14 +148,14 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, pa
   return tweet, nil
 }
 
-func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, tweetParams TweetParams, count *uint, minID, maxID *uint64, includeReplies bool) ([]model.Tweet, error) {
+func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twopts TweetOptions, count *uint, minID, maxID *uint64, includeReplies bool) ([]model.Tweet, error) {
   query := map[string]string{
-    "trim_user":            fmt.Sprint(tweetParams.TrimUser),
-    "include_my_retweet":   fmt.Sprint(tweetParams.IncludeMyRetweet),
-    "include_entities":     fmt.Sprint(tweetParams.IncludeEntities),
-    "include_ext_alt_text": fmt.Sprint(tweetParams.IncludeExtAltText),
-    "include_card_uri":     fmt.Sprint(tweetParams.IncludeCardURI),
-    "tweet_mode":           string(tweetParams.Mode),
+    "trim_user":            fmt.Sprint(twopts.TrimUser),
+    "include_my_retweet":   fmt.Sprint(twopts.IncludeMyRetweet),
+    "include_entities":     fmt.Sprint(twopts.IncludeEntities),
+    "include_ext_alt_text": fmt.Sprint(twopts.IncludeExtAltText),
+    "include_card_uri":     fmt.Sprint(twopts.IncludeCardURI),
+    "tweet_mode":           string(twopts.Mode),
     "exclude_replies":      fmt.Sprint(!includeReplies),
   }
   if count != nil {

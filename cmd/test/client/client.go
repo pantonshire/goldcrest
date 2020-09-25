@@ -32,7 +32,7 @@ func main() {
     time.Second*5,
   )
 
-  tweet, err := client.GetTweet(twitter1.DefaultTweetParams(), 1305748179338629120)
+  tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
 
   if err != nil {
     panic(err)

@@ -26,7 +26,7 @@ func decodeAuthPair(authMessage *pb.Authentication) AuthPair {
   }
 }
 
-func encodeTweetOptions(params TweetParams) *pb.TweetOptions {
+func encodeTweetOptions(params TweetOptions) *pb.TweetOptions {
   return &pb.TweetOptions{
     TrimUser:          params.TrimUser,
     IncludeMyRetweet:  params.IncludeMyRetweet,
@@ -37,11 +37,11 @@ func encodeTweetOptions(params TweetParams) *pb.TweetOptions {
   }
 }
 
-func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetParams {
+func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetOptions {
   if optsMessage == nil {
-    return TweetParams{}
+    return TweetOptions{}
   }
-  return TweetParams{
+  return TweetOptions{
     TrimUser:          optsMessage.TrimUser,
     IncludeMyRetweet:  optsMessage.IncludeMyRetweet,
     IncludeEntities:   optsMessage.IncludeEntities,
