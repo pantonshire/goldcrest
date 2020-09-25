@@ -283,6 +283,40 @@ func (t Twitter) UpdateStatus(ctx context.Context, auth AuthPair, text string, r
   return tweet, nil
 }
 
+func (t Twitter) UpdateProfile(ctx context.Context, auth AuthPair, name, url, location, bio, linkColor *string, includeEntities, includeStatuses bool) (model.User, error) {
+  query := map[string]string{
+    "include_entities": fmt.Sprint(includeEntities),
+    "skip_status":      fmt.Sprint(!includeStatuses),
+  }
+  if name != nil {
+    query["name"] = *name
+  }
+  if url != nil {
+    query["url"] = *url
+  }
+  if location != nil {
+    query["location"] = *location
+  }
+  if bio != nil {
+    query["description"] = *bio
+  }
+  if linkColor != nil {
+    query["profile_link_color"] = *linkColor
+  }
+  or := OAuthRequest{
+    Method:   "POST",
+    Protocol: protocol,
+    Domain:   domain,
+    Path:     path.Join(version, "statuses/update.json"),
+    Query:    query,
+  }
+  var user model.User
+  if err := t.standardRequest(ctx, limitUpdateProfile, or, auth, &user); err != nil {
+    return model.User{}, err
+  }
+  return user, nil
+}
+
 func joinParamMaps(ms ...map[string]string) map[string]string {
   master := make(map[string]string)
   for _, m := range ms {
