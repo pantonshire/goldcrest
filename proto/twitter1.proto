@@ -97,7 +97,6 @@ message UpdateStatusRequest {
   bool trim_user = 10;
   bool enable_dm_commands = 11;
   bool fail_dm_commands = 12;
-  string card_uri = 13;
 }
 
 message UpdateProfileRequest {
