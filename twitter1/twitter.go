@@ -92,6 +92,17 @@ func (t Twitter) requestJSON(ctx context.Context, req *http.Request, token strin
   })
 }
 
+func (t Twitter) standardRequest(ctx context.Context, or OAuthRequest, auth AuthPair, output interface{}) error {
+  req, err := or.MakeRequest(ctx, auth.Secret, auth.Public)
+  if err != nil {
+    return err
+  }
+  if err := t.requestJSON(ctx, req, auth.Public.Token, limitStatusShow, output); err != nil {
+    return err
+  }
+  return nil
+}
+
 func (t Twitter) requestRaw(ctx context.Context, req *http.Request) (status int, headers map[string]string, body []byte, err error) {
   err = t.request(ctx, req, "", limitNone, func(resp *http.Response) error {
     headers = make(map[string]string)
