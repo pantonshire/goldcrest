@@ -10,6 +10,7 @@ service Twitter1 {
   rpc GetHomeTimeline(HomeTimelineRequest) returns (Timeline);
   rpc GetMentionTimeline(MentionTimelineRequest) returns (Timeline);
   rpc GetUserTimeline(UserTimelineRequest) returns (Timeline);
+  rpc UpdateStatus(UpdateStatusRequest) returns (Tweet);
   rpc UpdateProfile(UpdateProfileRequest) returns (User);
   rpc GetRaw(RawAPIRequest) returns (RawAPIResult);
 }
@@ -77,6 +78,26 @@ message UserTimelineRequest {
   bool include_replies = 6;
   bool include_retweets = 7;
   TweetOptions tweet_options = 8;
+}
+
+message UpdateStatusRequest {
+  string text = 1;
+  oneof reply {
+    bool no_reply = 2;
+    fixed64 reply_id = 3;
+  }
+  bool auto_populate_reply_metadata = 4;
+  repeated fixed64 exclude_reply_user_ids = 5;
+  oneof attachment {
+    bool no_attachment = 6;
+    string attachment_url = 7;
+  }
+  repeated fixed64 media_ids = 8;
+  bool possibly_sensitive = 9;
+  bool trim_user = 10;
+  bool enable_dm_commands = 11;
+  bool fail_dm_commands = 12;
+  string card_uri = 13;
 }
 
 message UpdateProfileRequest {
