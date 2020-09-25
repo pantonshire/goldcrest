@@ -147,3 +147,36 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, pa
   }
   return tweet, nil
 }
+
+func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, tweetParams TweetParams, count *uint, minID, maxID *uint64, includeReplies bool) ([]model.Tweet, error) {
+  query := map[string]string{
+    "trim_user":            fmt.Sprint(tweetParams.TrimUser),
+    "include_my_retweet":   fmt.Sprint(tweetParams.IncludeMyRetweet),
+    "include_entities":     fmt.Sprint(tweetParams.IncludeEntities),
+    "include_ext_alt_text": fmt.Sprint(tweetParams.IncludeExtAltText),
+    "include_card_uri":     fmt.Sprint(tweetParams.IncludeCardURI),
+    "tweet_mode":           string(tweetParams.Mode),
+    "exclude_replies":      fmt.Sprint(!includeReplies),
+  }
+  if count != nil {
+    query["count"] = fmt.Sprint(*count)
+  }
+  if minID != nil {
+    query["since_id"] = fmt.Sprint(*minID)
+  }
+  if maxID != nil {
+    query["max_id"] = fmt.Sprint(*maxID)
+  }
+  or := OAuthRequest{
+    Method:   "GET",
+    Protocol: protocol,
+    Domain:   domain,
+    Path:     path.Join(version, "statuses/home_timeline.json"),
+    Query:    query,
+  }
+  var tweets []model.Tweet
+  if err := t.standardRequest(ctx, limitHomeTimeline, or, auth, &tweets); err != nil {
+    return nil, err
+  }
+  return tweets, nil
+}
