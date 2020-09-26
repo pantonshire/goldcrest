@@ -77,6 +77,17 @@ func tweetModelsToMessage(mods []model.Tweet) (*pb.Timeline, error) {
   return &pb.Timeline{Tweets: msgs}, nil
 }
 
+func decodeTimeline(msg *pb.Timeline) []Tweet {
+  if msg == nil {
+    return nil
+  }
+  tweets := make([]Tweet, len(msg.Tweets))
+  for i, tweetMsg := range msg.Tweets {
+    tweets[i] = decodeTweet(tweetMsg)
+  }
+  return tweets
+}
+
 func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
   var err error
   var msg pb.Tweet
