@@ -240,7 +240,7 @@ func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twopts Twee
   return tweets, nil
 }
 
-func (t Twitter) UpdateStatus(ctx context.Context, auth AuthPair, text string, replyID *uint64, autoReply bool, excludeReplyUserIDs []uint64, attachmentURL *string, mediaIDs []int64, sensitive, trimUser, enableDMCommands, failDMCommands bool) (model.Tweet, error) {
+func (t Twitter) UpdateStatus(ctx context.Context, auth AuthPair, text string, replyID *uint64, autoReply bool, excludeReplyUserIDs []uint64, attachmentURL *string, mediaIDs []uint64, sensitive, trimUser, enableDMCommands, failDMCommands bool) (model.Tweet, error) {
   query := map[string]string{
     "status":                       text,
     "auto_populate_reply_metadata": fmt.Sprint(autoReply),
