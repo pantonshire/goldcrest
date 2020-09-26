@@ -367,7 +367,9 @@ func decodeUser(msg *pb.User) User {
 }
 
 func newIndicesMessage(indices []uint) (*pb.Indices, error) {
-  if len(indices) != 2 {
+  if len(indices) == 0 {
+    return &pb.Indices{Start: 0, End: 0}, nil
+  } else if len(indices) != 2 {
     return nil, fmt.Errorf("expected [start,end] index values pair, got %v", indices)
   }
   return &pb.Indices{Start: uint32(indices[0]), End: uint32(indices[1])}, nil

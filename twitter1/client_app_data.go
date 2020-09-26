@@ -44,21 +44,34 @@ type ReplyData struct {
 }
 
 func (tweet Tweet) TextOnly() string {
-  removeIndices := tweet.TextDisplayRange.Invert(uint(len(tweet.Text)))
+  var removeIndices []Indices
+  if !tweet.TextDisplayRange.IsZero() {
+    removeIndices = append(removeIndices, tweet.TextDisplayRange.Invert(uint(len(tweet.Text)))...)
+  }
   for _, hashtag := range tweet.Hashtags {
-    removeIndices = append(removeIndices, hashtag.Indices)
+    if !hashtag.Indices.IsZero() {
+      removeIndices = append(removeIndices, hashtag.Indices)
+    }
   }
   for _, url := range tweet.URLs {
-    removeIndices = append(removeIndices, url.Indices)
+    if !url.Indices.IsZero() {
+      removeIndices = append(removeIndices, url.Indices)
+    }
   }
   for _, mention := range tweet.Mentions {
-    removeIndices = append(removeIndices, mention.Indices)
+    if !mention.Indices.IsZero() {
+      removeIndices = append(removeIndices, mention.Indices)
+    }
   }
   for _, symbol := range tweet.Symbols {
-    removeIndices = append(removeIndices, symbol.Indices)
+    if !symbol.Indices.IsZero() {
+      removeIndices = append(removeIndices, symbol.Indices)
+    }
   }
   for _, media := range tweet.Media {
-    removeIndices = append(removeIndices, media.Indices)
+    if !media.Indices.IsZero() {
+      removeIndices = append(removeIndices, media.Indices)
+    }
   }
   return removeFromString(tweet.Text, removeIndices...)
 }
@@ -91,6 +104,10 @@ type User struct {
 type Indices struct {
   Start uint
   End   uint
+}
+
+func (indices Indices) IsZero() bool {
+  return indices.Start == 0 && indices.End == 0
 }
 
 func (indices Indices) Invert(l uint) []Indices {
