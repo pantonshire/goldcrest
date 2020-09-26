@@ -43,27 +43,26 @@ type TweetOptions struct {
 }
 
 type TimelineOptions struct {
-  count        uint
-  minID, maxID uint64
+  Count        uint
+  MinID, MaxID uint64
 }
 
 type StatusUpdateOptions struct {
-  replyID                          *uint64
-  autoReply                        bool
-  excludeReplyUserIDs              []uint64
-  attachmentURL                    *string
-  mediaIDs                         []uint64
-  sensitive                        bool
-  trimUser                         bool
-  enableDMCommands, failDMCommands bool
+  ReplyID                          *uint64
+  AutoReply                        bool
+  ExcludeReplyUserIDs              []uint64
+  AttachmentURL                    *string
+  MediaIDs                         []uint64
+  Sensitive                        bool
+  EnableDMCommands, FailDMCommands bool
 }
 
 type ProfileUpdateOptions struct {
-  name      *string
-  url       *string
-  location  *string
-  bio       *string
-  linkColor *string
+  Name      *string
+  Url       *string
+  Location  *string
+  Bio       *string
+  LinkColor *string
 }
 
 func NewTwitter(config TwitterConfig) *Twitter {
