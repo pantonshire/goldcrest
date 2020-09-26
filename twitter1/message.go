@@ -65,6 +65,18 @@ func decodeTweetMode(mode pb.TweetOptions_Mode) TweetMode {
   return CompatibilityMode
 }
 
+func tweetModelsToMessage(mods []model.Tweet) (*pb.Timeline, error) {
+  msgs := make([]*pb.Tweet, len(mods))
+  for i, mod := range mods {
+    msg, err := tweetModelToMessage(mod)
+    if err != nil {
+      return nil, err
+    }
+    msgs[i] = msg
+  }
+  return &pb.Timeline{Tweets: msgs}, nil
+}
+
 func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
   var err error
   var msg pb.Tweet
