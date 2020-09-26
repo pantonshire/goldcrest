@@ -27,7 +27,8 @@ type Auth struct {
 }
 
 type AuthPair struct {
-  Secret, Public Auth
+  Secret Auth `json:"secret"`
+  Public Auth `json:"public"`
 }
 
 type OAuthRequest struct {
