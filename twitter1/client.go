@@ -11,7 +11,13 @@ import (
 )
 
 type Client interface {
-  GetTweet(params TweetOptions, id uint64) (Tweet, error)
+  GetTweet(twOpts TweetOptions, id uint64) (Tweet, error)
+  GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, replies bool) ([]Tweet, error)
+  GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error)
+  GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error)
+  GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error)
+  UpdateStatus(text string, stOpts StatusUpdateOptions) (Tweet, error)
+  UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses bool) (User, error)
   GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error)
 }
 
@@ -23,7 +29,31 @@ func Local(secret, auth Auth) Client {
   return local{secret: secret, auth: auth}
 }
 
-func (lc local) GetTweet(params TweetOptions, id uint64) (Tweet, error) {
+func (lc local) GetTweet(twOpts TweetOptions, id uint64) (Tweet, error) {
+  panic("implement me")
+}
+
+func (lc local) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, replies bool) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (lc local) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (lc local) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (lc local) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (lc local) UpdateStatus(text string, stOpts StatusUpdateOptions) (Tweet, error) {
+  panic("implement me")
+}
+
+func (lc local) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses bool) (User, error) {
   panic("implement me")
 }
 
@@ -64,7 +94,7 @@ func (rc remote) handleRequest(handler func() error) error {
   return err
 }
 
-func (rc remote) GetTweet(params TweetOptions, id uint64) (tweet Tweet, err error) {
+func (rc remote) GetTweet(twOpts TweetOptions, id uint64) (tweet Tweet, err error) {
   err = rc.handleRequest(func() error {
     ctx, cancel := rc.newContext()
     if cancel != nil {
@@ -73,7 +103,7 @@ func (rc remote) GetTweet(params TweetOptions, id uint64) (tweet Tweet, err erro
     tweetMsg, err := rc.client.GetTweet(ctx, &pb.TweetRequest{
       Auth:    encodeAuthPair(rc.secret, rc.auth),
       Id:      id,
-      Options: encodeTweetOptions(params),
+      Options: encodeTweetOptions(twOpts),
     })
     if err != nil {
       return err
@@ -85,6 +115,30 @@ func (rc remote) GetTweet(params TweetOptions, id uint64) (tweet Tweet, err erro
     return Tweet{}, err
   }
   return tweet, nil
+}
+
+func (rc remote) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, replies bool) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (rc remote) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (rc remote) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (rc remote) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
+  panic("implement me")
+}
+
+func (rc remote) UpdateStatus(text string, stOpts StatusUpdateOptions) (Tweet, error) {
+  panic("implement me")
+}
+
+func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses bool) (User, error) {
+  panic("implement me")
 }
 
 func (rc remote) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {

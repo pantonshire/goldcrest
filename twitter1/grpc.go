@@ -33,7 +33,7 @@ func (s *twitterServer) GetTweets(req *pb.TweetsRequest, srv pb.Twitter1_GetTwee
 
 func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.Timeline, error) {
   auth := decodeAuthPair(req.Auth)
-  twopts := decodeTweetOptions(req.TweetOptions)
+  twOpts := decodeTweetOptions(req.TweetOptions)
   var count *uint
   var minID, maxID *uint64
   if req.Count > 0 {
@@ -46,7 +46,7 @@ func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelin
   if req.MaxId > 0 {
     maxID = &req.MaxId
   }
-  mods, err := s.twitter.GetHomeTimeline(ctx, auth, twopts, count, minID, maxID, req.IncludeReplies)
+  mods, err := s.twitter.GetHomeTimeline(ctx, auth, twOpts, count, minID, maxID, req.IncludeReplies)
   if err != nil {
     return nil, err
   }
@@ -55,7 +55,7 @@ func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelin
 
 func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.Timeline, error) {
   auth := decodeAuthPair(req.Auth)
-  twopts := decodeTweetOptions(req.TweetOptions)
+  twOpts := decodeTweetOptions(req.TweetOptions)
   var count *uint
   var minID, maxID *uint64
   if req.Count > 0 {
@@ -68,7 +68,7 @@ func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionT
   if req.MaxId > 0 {
     maxID = &req.MaxId
   }
-  mods, err := s.twitter.GetMentionTimeline(ctx, auth, twopts, count, minID, maxID)
+  mods, err := s.twitter.GetMentionTimeline(ctx, auth, twOpts, count, minID, maxID)
   if err != nil {
     return nil, err
   }
@@ -77,7 +77,7 @@ func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionT
 
 func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.Timeline, error) {
   auth := decodeAuthPair(req.Auth)
-  twopts := decodeTweetOptions(req.TweetOptions)
+  twOpts := decodeTweetOptions(req.TweetOptions)
   var userID *uint64
   var userHandle *string
   var count *uint
@@ -98,7 +98,7 @@ func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelin
   if req.MaxId > 0 {
     maxID = &req.MaxId
   }
-  mods, err := s.twitter.GetUserTimeline(ctx, auth, twopts, userID, userHandle, count, minID, maxID, req.IncludeReplies, req.IncludeRetweets)
+  mods, err := s.twitter.GetUserTimeline(ctx, auth, twOpts, userID, userHandle, count, minID, maxID, req.IncludeReplies, req.IncludeRetweets)
   if err != nil {
     return nil, err
   }
