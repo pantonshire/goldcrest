@@ -106,7 +106,20 @@ func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelin
 }
 
 func (s *twitterServer) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (*pb.Tweet, error) {
-  panic("implement me")
+  auth := decodeAuthPair(req.Auth)
+  var replyID *uint64
+  if id, ok := req.Reply.(*pb.UpdateStatusRequest_ReplyId); ok {
+    replyID = &id.ReplyId
+  }
+  var attachmentURL *string
+  if url, ok := req.Attachment.(*pb.UpdateStatusRequest_AttachmentUrl); ok {
+    attachmentURL = &url.AttachmentUrl
+  }
+  mod, err := s.twitter.UpdateStatus(ctx, auth, req.Text, replyID, req.AutoPopulateReplyMetadata, req.ExcludeReplyUserIds, attachmentURL, req.MediaIds, req.PossiblySensitive, req.TrimUser, req.EnableDmCommands, req.FailDmCommands)
+  if err != nil {
+    return nil, err
+  }
+  return tweetModelToMessage(mod)
 }
 
 func (s *twitterServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.User, error) {
