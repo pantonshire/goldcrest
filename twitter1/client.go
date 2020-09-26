@@ -12,6 +12,7 @@ import (
 
 type Client interface {
   GetTweet(params TweetOptions, id uint64) (Tweet, error)
+  GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error)
 }
 
 type local struct {
@@ -23,7 +24,11 @@ func Local(secret, auth Auth) Client {
 }
 
 func (lc local) GetTweet(params TweetOptions, id uint64) (Tweet, error) {
-  return Tweet{}, nil
+  panic("implement me")
+}
+
+func (lc local) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
+  panic("implement me")
 }
 
 //TODO: server health checks
