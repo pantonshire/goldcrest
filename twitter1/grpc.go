@@ -123,7 +123,32 @@ func (s *twitterServer) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRe
 }
 
 func (s *twitterServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.User, error) {
-  panic("implement me")
+  auth := decodeAuthPair(req.Auth)
+  var name *string
+  if val, ok := req.UpdateName.(*pb.UpdateProfileRequest_Name); ok {
+    name = &val.Name
+  }
+  var url *string
+  if val, ok := req.UpdateUrl.(*pb.UpdateProfileRequest_Url); ok {
+    url = &val.Url
+  }
+  var location *string
+  if val, ok := req.UpdateLocation.(*pb.UpdateProfileRequest_Location); ok {
+    location = &val.Location
+  }
+  var bio *string
+  if val, ok := req.UpdateBio.(*pb.UpdateProfileRequest_Bio); ok {
+    bio = &val.Bio
+  }
+  var linkColor *string
+  if val, ok := req.UpdateProfileLinkColor.(*pb.UpdateProfileRequest_ProfileLinkColor); ok {
+    linkColor = &val.ProfileLinkColor
+  }
+  mod, err := s.twitter.UpdateProfile(ctx, auth, name, url, location, bio, linkColor, req.IncludeEntities, req.IncludeStatuses)
+  if err != nil {
+    return nil, err
+  }
+  return userModelToMessage(mod)
 }
 
 func (s *twitterServer) GetRaw(ctx context.Context, rr *pb.RawAPIRequest) (*pb.RawAPIResult, error) {
