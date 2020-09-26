@@ -330,7 +330,7 @@ func (t Twitter) UpdateProfile(ctx context.Context, auth AuthPair, name, url, lo
     Method:   "POST",
     Protocol: protocol,
     Domain:   domain,
-    Path:     path.Join(version, "statuses/update.json"),
+    Path:     path.Join(version, "account/update_profile.json"),
     Query:    query,
   }
   var user model.User
