@@ -72,6 +72,6 @@ func main() {
     case err := <-fatal:
       panic(err)
     }
-    fmt.Println("Goodbye!")
+    fmt.Println("\nGoodbye!")
   }
 }
