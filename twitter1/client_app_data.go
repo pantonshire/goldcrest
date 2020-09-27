@@ -43,6 +43,13 @@ type ReplyData struct {
   UserHandle string
 }
 
+func (tweet Tweet) Unfold() Tweet {
+  if tweet.Retweeted != nil {
+    return *tweet.Retweeted
+  }
+  return tweet
+}
+
 func (tweet Tweet) TextOnly() string {
   var removeIndices []Indices
   if !tweet.TextDisplayRange.IsZero() {
@@ -76,6 +83,10 @@ func (tweet Tweet) TextOnly() string {
   return removeFromString(tweet.Text, removeIndices...)
 }
 
+func (tweet Tweet) ReplyText(text string) string {
+  return tweet.User.AtHandle() + " " + text
+}
+
 type User struct {
   ID                  uint64
   Handle              string
@@ -99,6 +110,10 @@ type User struct {
   WithheldScope       string
   URLs                []URL
   BioURLs             []URL
+}
+
+func (user User) AtHandle() string {
+  return "@" + user.Handle
 }
 
 type Indices struct {
@@ -138,6 +153,10 @@ type Mention struct {
   UserID          uint64
   UserHandle      string
   UserDisplayName string
+}
+
+func (mention Mention) AtHandle() string {
+  return "@" + mention.UserHandle
 }
 
 type Media struct {
