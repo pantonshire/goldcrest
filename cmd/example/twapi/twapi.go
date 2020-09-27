@@ -30,10 +30,12 @@ func v1() {
 
   tweet, err := twitter.GetTweet(
     context.Background(),
-    twitter1.Auth{Key: secretKey, Token: tokenSecret},
-    twitter1.Auth{Key: consumerKey, Token: token},
+    twitter1.AuthPair{
+      Secret: twitter1.Auth{Key: secretKey, Token: tokenSecret},
+      Public: twitter1.Auth{Key: consumerKey, Token: token},
+    },
     1305385801723916289,
-    twitter1.DefaultTweetParams(),
+    twitter1.DefaultTweetOptions(),
   )
 
   if err != nil {

@@ -16,16 +16,17 @@ func encodeAuthPair(secret, auth Auth) *pb.Authentication {
   }
 }
 
-func decodeAuthPair(authMessage *pb.Authentication) (secret Auth, auth Auth) {
+func decodeAuthPair(authMessage *pb.Authentication) AuthPair {
   if authMessage == nil {
-    return Auth{}, Auth{}
+    return AuthPair{}
   }
-  secret = Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken}
-  auth = Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken}
-  return secret, auth
+  return AuthPair{
+    Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken},
+    Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken},
+  }
 }
 
-func encodeTweetOptions(params TweetParams) *pb.TweetOptions {
+func encodeTweetOptions(params TweetOptions) *pb.TweetOptions {
   return &pb.TweetOptions{
     TrimUser:          params.TrimUser,
     IncludeMyRetweet:  params.IncludeMyRetweet,
@@ -36,11 +37,11 @@ func encodeTweetOptions(params TweetParams) *pb.TweetOptions {
   }
 }
 
-func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetParams {
+func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetOptions {
   if optsMessage == nil {
-    return TweetParams{}
+    return TweetOptions{}
   }
-  return TweetParams{
+  return TweetOptions{
     TrimUser:          optsMessage.TrimUser,
     IncludeMyRetweet:  optsMessage.IncludeMyRetweet,
     IncludeEntities:   optsMessage.IncludeEntities,
@@ -62,6 +63,29 @@ func decodeTweetMode(mode pb.TweetOptions_Mode) TweetMode {
     return ExtendedMode
   }
   return CompatibilityMode
+}
+
+func tweetModelsToMessage(mods []model.Tweet) (*pb.Timeline, error) {
+  msgs := make([]*pb.Tweet, len(mods))
+  for i, mod := range mods {
+    msg, err := tweetModelToMessage(mod)
+    if err != nil {
+      return nil, err
+    }
+    msgs[i] = msg
+  }
+  return &pb.Timeline{Tweets: msgs}, nil
+}
+
+func decodeTimeline(msg *pb.Timeline) []Tweet {
+  if msg == nil {
+    return nil
+  }
+  tweets := make([]Tweet, len(msg.Tweets))
+  for i, tweetMsg := range msg.Tweets {
+    tweets[i] = decodeTweet(tweetMsg)
+  }
+  return tweets
 }
 
 func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
@@ -343,7 +367,9 @@ func decodeUser(msg *pb.User) User {
 }
 
 func newIndicesMessage(indices []uint) (*pb.Indices, error) {
-  if len(indices) != 2 {
+  if len(indices) == 0 {
+    return &pb.Indices{Start: 0, End: 0}, nil
+  } else if len(indices) != 2 {
     return nil, fmt.Errorf("expected [start,end] index values pair, got %v", indices)
   }
   return &pb.Indices{Start: uint32(indices[0]), End: uint32(indices[1])}, nil

@@ -26,6 +26,11 @@ type Auth struct {
   Token string `json:"token"`
 }
 
+type AuthPair struct {
+  Secret Auth `json:"secret"`
+  Public Auth `json:"public"`
+}
+
 type OAuthRequest struct {
   Method, Protocol, Domain, Path string
   Query, Body                    map[string]string
