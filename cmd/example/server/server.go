@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-  ok, err, fatal, stop := proxy.StartTwitter1(proxy.Twitter1Config{
+  ok, err, fatal, stop := proxy.ServeTwitter1(proxy.Twitter1Config{
     ProxyConfig: proxy.ProxyConfig{
       Enabled: true,
       Port:    7400,
