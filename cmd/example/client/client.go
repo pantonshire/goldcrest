@@ -30,7 +30,7 @@ func main() {
 
   client := twitter1.Remote(conn, auth.Secret, auth.Public, time.Second*5)
 
-  //tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
+  tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
 
   //var replyID uint64 = 1309875852180705282
   //tweet, err := client.UpdateStatus("@SmolbotbotT Reply test", twitter1.StatusUpdateOptions{ReplyID: &replyID}, false)
@@ -50,28 +50,28 @@ func main() {
   //  true,
   //)
 
-  url := "github.com/pantonshire/smolbotbot"
-  location := "Test"
-
-  user, err := client.UpdateProfile(twitter1.ProfileUpdateOptions{
-    Url:      &url,
-    Location: &location,
-  }, true, true)
+  //url := "github.com/pantonshire/smolbotbot"
+  //location := "Test"
+  //
+  //user, err := client.UpdateProfile(twitter1.ProfileUpdateOptions{
+  //  Url:      &url,
+  //  Location: &location,
+  //}, true, true)
 
   if err != nil {
-    panic(err)
+   panic(err)
   }
 
-  //spew.Dump(tweet)
-  //
-  //fmt.Println(tweet.TextOnly())
-  //if tweet.Quoted != nil {
-  //  fmt.Println(tweet.Quoted.TextOnly())
-  //}
+  spew.Dump(tweet)
+
+  fmt.Println(tweet.TextOnly())
+  if tweet.Quoted != nil {
+   fmt.Println(tweet.Quoted.TextOnly())
+  }
 
   //spew.Dump(timeline)
 
-  spew.Dump(user)
+  //spew.Dump(user)
 }
 
 func readLn(reader *bufio.Reader, prompt string) string {
