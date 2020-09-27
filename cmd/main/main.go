@@ -58,7 +58,7 @@ func main() {
   if err := json.Unmarshal(configData, &config); err != nil {
     panic(err)
   }
-  ok, err, fatal, stop := proxy.StartTwitter1(config.Twitter1)
+  ok, err, fatal, stop := proxy.ServeTwitter1(config.Twitter1)
   if err != nil {
     panic(err)
   }

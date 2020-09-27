@@ -65,10 +65,10 @@ func decodeTweetMode(mode pb.TweetOptions_Mode) TweetMode {
   return CompatibilityMode
 }
 
-func tweetModelsToMessage(mods []model.Tweet) (*pb.Timeline, error) {
+func encodeTweets(mods []model.Tweet) (*pb.Timeline, error) {
   msgs := make([]*pb.Tweet, len(mods))
   for i, mod := range mods {
-    msg, err := tweetModelToMessage(mod)
+    msg, err := encodeTweet(mod)
     if err != nil {
       return nil, err
     }
@@ -88,7 +88,7 @@ func decodeTimeline(msg *pb.Timeline) []Tweet {
   return tweets
 }
 
-func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
+func encodeTweet(mod model.Tweet) (*pb.Tweet, error) {
   var err error
   var msg pb.Tweet
 
@@ -110,7 +110,7 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
   } else {
     displayTextRange = mod.DisplayTextRange
   }
-  if msg.TextDisplayRange, err = newIndicesMessage(displayTextRange); err != nil {
+  if msg.TextDisplayRange, err = encodeIndices(displayTextRange); err != nil {
     return nil, err
   }
 
@@ -118,7 +118,7 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
 
   msg.Source = mod.Source
 
-  if msg.User, err = userModelToMessage(mod.User); err != nil {
+  if msg.User, err = encodeUser(mod.User); err != nil {
     return nil, err
   }
 
@@ -133,7 +133,7 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
   }
 
   if mod.QuotedStatus != nil {
-    quote, err := tweetModelToMessage(*mod.QuotedStatus)
+    quote, err := encodeTweet(*mod.QuotedStatus)
     if err != nil {
       return nil, err
     }
@@ -143,7 +143,7 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
   }
 
   if mod.RetweetedStatus != nil {
-    retweet, err := tweetModelToMessage(*mod.RetweetedStatus)
+    retweet, err := encodeTweet(*mod.RetweetedStatus)
     if err != nil {
       return nil, err
     }
@@ -177,23 +177,23 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
     entities, extendedEntities = mod.Entities, mod.ExtendedEntities
   }
 
-  if msg.Hashtags, err = symbolModelsToMessages(entities.Hashtags); err != nil {
+  if msg.Hashtags, err = encodeSymbols(entities.Hashtags); err != nil {
     return nil, err
   }
 
-  if msg.Urls, err = urlModelsToMessages(entities.URLs); err != nil {
+  if msg.Urls, err = encodeURLs(entities.URLs); err != nil {
     return nil, err
   }
 
-  if msg.Mentions, err = mentionModelsToMessages(entities.Mentions); err != nil {
+  if msg.Mentions, err = encodeMentions(entities.Mentions); err != nil {
     return nil, err
   }
 
-  if msg.Symbols, err = symbolModelsToMessages(entities.Symbols); err != nil {
+  if msg.Symbols, err = encodeSymbols(entities.Symbols); err != nil {
     return nil, err
   }
 
-  if msg.Polls, err = pollModelsToMessages(entities.Polls); err != nil {
+  if msg.Polls, err = encodePolls(entities.Polls); err != nil {
     return nil, err
   }
 
@@ -211,7 +211,7 @@ func tweetModelToMessage(mod model.Tweet) (*pb.Tweet, error) {
       mediaIDs[mm.ID] = true
     }
   }
-  if msg.Media, err = mediaModelsToMessages(media); err != nil {
+  if msg.Media, err = encodeMedia(media); err != nil {
     return nil, err
   }
 
@@ -273,7 +273,7 @@ func decodeTweet(msg *pb.Tweet) Tweet {
   return tweet
 }
 
-func userModelToMessage(mod model.User) (*pb.User, error) {
+func encodeUser(mod model.User) (*pb.User, error) {
   var err error
   var msg pb.User
 
@@ -325,11 +325,11 @@ func userModelToMessage(mod model.User) (*pb.User, error) {
     msg.WithheldScope = *mod.WithheldScope
   }
 
-  if msg.UrlUrls, err = urlModelsToMessages(mod.Entities.URL.URLs); err != nil {
+  if msg.UrlUrls, err = encodeURLs(mod.Entities.URL.URLs); err != nil {
     return nil, err
   }
 
-  if msg.BioUrls, err = urlModelsToMessages(mod.Entities.Description.URLs); err != nil {
+  if msg.BioUrls, err = encodeURLs(mod.Entities.Description.URLs); err != nil {
     return nil, err
   }
 
@@ -366,7 +366,7 @@ func decodeUser(msg *pb.User) User {
   }
 }
 
-func newIndicesMessage(indices []uint) (*pb.Indices, error) {
+func encodeIndices(indices []uint) (*pb.Indices, error) {
   if len(indices) == 0 {
     return &pb.Indices{Start: 0, End: 0}, nil
   } else if len(indices) != 2 {
@@ -382,24 +382,24 @@ func decodeIndices(msg *pb.Indices) Indices {
   return Indices{Start: uint(msg.Start), End: uint(msg.End)}
 }
 
-func urlModelToMessage(mod model.URL) (*pb.URL, error) {
+func encodeURL(mod model.URL) (*pb.URL, error) {
   var err error
   msg := pb.URL{
     TwitterUrl:  mod.URL,
     DisplayUrl:  mod.DisplayURL,
     ExpandedUrl: mod.ExpandedURL,
   }
-  if msg.Indices, err = newIndicesMessage(mod.Indices); err != nil {
+  if msg.Indices, err = encodeIndices(mod.Indices); err != nil {
     return nil, err
   }
   return &msg, nil
 }
 
-func urlModelsToMessages(mods []model.URL) ([]*pb.URL, error) {
+func encodeURLs(mods []model.URL) ([]*pb.URL, error) {
   var err error
   msgs := make([]*pb.URL, len(mods))
   for i, mod := range mods {
-    if msgs[i], err = urlModelToMessage(mod); err != nil {
+    if msgs[i], err = encodeURL(mod); err != nil {
       return nil, err
     }
   }
@@ -426,12 +426,12 @@ func decodeURLs(msgs []*pb.URL) []URL {
   return urls
 }
 
-func symbolModelsToMessages(mods []model.Symbol) ([]*pb.Symbol, error) {
+func encodeSymbols(mods []model.Symbol) ([]*pb.Symbol, error) {
   var err error
   msgs := make([]*pb.Symbol, len(mods))
   for i, mod := range mods {
     msg := pb.Symbol{Text: mod.Text}
-    if msg.Indices, err = newIndicesMessage(mod.Indices); err != nil {
+    if msg.Indices, err = encodeIndices(mod.Indices); err != nil {
       return nil, err
     }
     msgs[i] = &msg
@@ -452,7 +452,7 @@ func decodeSymbols(msgs []*pb.Symbol) []Symbol {
   return symbols
 }
 
-func mentionModelsToMessages(mods []model.Mention) ([]*pb.Mention, error) {
+func encodeMentions(mods []model.Mention) ([]*pb.Mention, error) {
   var err error
   msgs := make([]*pb.Mention, len(mods))
   for i, mod := range mods {
@@ -461,7 +461,7 @@ func mentionModelsToMessages(mods []model.Mention) ([]*pb.Mention, error) {
       Handle:      mod.ScreenName,
       DisplayName: mod.Name,
     }
-    if msg.Indices, err = newIndicesMessage(mod.Indices); err != nil {
+    if msg.Indices, err = encodeIndices(mod.Indices); err != nil {
       return nil, err
     }
     msgs[i] = &msg
@@ -484,7 +484,7 @@ func decodeMentions(msgs []*pb.Mention) []Mention {
   return mentions
 }
 
-func mediaModelsToMessages(mods []model.Media) ([]*pb.Media, error) {
+func encodeMedia(mods []model.Media) ([]*pb.Media, error) {
   var err error
   msgs := make([]*pb.Media, len(mods))
   for i, mod := range mods {
@@ -513,7 +513,7 @@ func mediaModelsToMessages(mods []model.Media) ([]*pb.Media, error) {
         Resize: mod.Sizes.Large.Resize,
       },
     }
-    if msg.Url, err = urlModelToMessage(mod.URL); err != nil {
+    if msg.Url, err = encodeURL(mod.URL); err != nil {
       return nil, err
     }
     if mod.MediaURLHttps != "" {
@@ -567,7 +567,7 @@ func decodeMediaSize(msg *pb.Media_Size) MediaSize {
   return MediaSize{Width: uint(msg.Width), Height: uint(msg.Height), Resize: msg.Resize}
 }
 
-func pollModelsToMessages(mods []model.Poll) ([]*pb.Poll, error) {
+func encodePolls(mods []model.Poll) ([]*pb.Poll, error) {
   msgs := make([]*pb.Poll, len(mods))
   for i, mod := range mods {
     msg := pb.Poll{

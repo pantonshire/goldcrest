@@ -29,7 +29,7 @@ type Twitter1Config struct {
   twitter1.TwitterConfig
 }
 
-func StartTwitter1(conf Twitter1Config) (ok bool, startupErr error, fatal <-chan error, shutdown func()) {
+func ServeTwitter1(conf Twitter1Config) (ok bool, startupErr error, fatal <-chan error, shutdown func()) {
   if !conf.Enabled {
     return false, nil, nil, nil
   }
