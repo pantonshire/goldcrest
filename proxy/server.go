@@ -1,4 +1,4 @@
-package goldcrest
+package proxy
 
 import (
   "fmt"
