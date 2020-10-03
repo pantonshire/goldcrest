@@ -28,7 +28,7 @@ func main() {
   }
   defer conn.Close()
 
-  client := twitter1.Remote(conn, auth.Secret, auth.Public, time.Second*5)
+  client := twitter1.Remote(conn, auth, time.Second*5)
 
   tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
 

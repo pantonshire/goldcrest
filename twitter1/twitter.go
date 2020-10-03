@@ -160,6 +160,7 @@ func (t Twitter) requestRaw(ctx context.Context, req *http.Request) (status int,
   return status, headers, body, nil
 }
 
+//TODO: return app data rather than model
 func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, twOpts TweetOptions) (model.Tweet, error) {
   or := OAuthRequest{
     Method:   "GET",

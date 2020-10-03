@@ -7,12 +7,12 @@ import (
   "time"
 )
 
-func encodeAuthPair(secret, auth Auth) *pb.Authentication {
+func encodeAuthPair(auth AuthPair) *pb.Authentication {
   return &pb.Authentication{
-    ConsumerKey: auth.Key,
-    AccessToken: auth.Token,
-    SecretKey:   secret.Key,
-    SecretToken: secret.Token,
+    ConsumerKey: auth.Public.Key,
+    AccessToken: auth.Public.Token,
+    SecretKey:   auth.Secret.Key,
+    SecretToken: auth.Secret.Token,
   }
 }
 

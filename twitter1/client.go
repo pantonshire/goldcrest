@@ -22,11 +22,15 @@ type Client interface {
 }
 
 type local struct {
-  secret, auth Auth
+  auth    AuthPair
+  twitter *Twitter
 }
 
-func Local(secret, auth Auth) Client {
-  return local{secret: secret, auth: auth}
+func Local(auth AuthPair, twitterConfig TwitterConfig) Client {
+  return local{
+    auth:    auth,
+    twitter: NewTwitter(twitterConfig),
+  }
 }
 
 func (lc local) GetTweet(twOpts TweetOptions, id uint64) (Tweet, error) {
@@ -61,17 +65,15 @@ func (lc local) GetRaw(method, protocol, version, path string, queryParams, body
   panic("implement me")
 }
 
-//TODO: server health checks
 type remote struct {
-  secret, auth Auth
-  address      string
-  client       pb.Twitter1Client
-  callTimeout  time.Duration
+  auth        AuthPair
+  address     string
+  client      pb.Twitter1Client
+  callTimeout time.Duration
 }
 
-func Remote(conn *grpc.ClientConn, secret, auth Auth, timeout time.Duration) Client {
+func Remote(conn *grpc.ClientConn, auth AuthPair, timeout time.Duration) Client {
   return remote{
-    secret:      secret,
     auth:        auth,
     address:     conn.Target(),
     client:      pb.NewTwitter1Client(conn),
@@ -101,7 +103,7 @@ func (rc remote) handleRequest(handler func(ctx context.Context) error) error {
 func (rc remote) GetTweet(twOpts TweetOptions, id uint64) (tweet Tweet, err error) {
   err = rc.handleRequest(func(ctx context.Context) error {
     tweetMsg, err := rc.client.GetTweet(ctx, &pb.TweetRequest{
-      Auth:    encodeAuthPair(rc.secret, rc.auth),
+      Auth:    encodeAuthPair(rc.auth),
       Id:      id,
       Options: encodeTweetOptions(twOpts),
     })
@@ -121,7 +123,7 @@ func (rc remote) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, re
   var tweets []Tweet
   err := rc.handleRequest(func(ctx context.Context) error {
     msg, err := rc.client.GetHomeTimeline(ctx, &pb.HomeTimelineRequest{
-      Auth:           encodeAuthPair(rc.secret, rc.auth),
+      Auth:           encodeAuthPair(rc.auth),
       Count:          uint32(tlOpts.Count),
       MinId:          tlOpts.MinID,
       MaxId:          tlOpts.MaxID,
@@ -144,7 +146,7 @@ func (rc remote) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions)
   var tweets []Tweet
   err := rc.handleRequest(func(ctx context.Context) error {
     msg, err := rc.client.GetMentionTimeline(ctx, &pb.MentionTimelineRequest{
-      Auth:         encodeAuthPair(rc.secret, rc.auth),
+      Auth:         encodeAuthPair(rc.auth),
       Count:        uint32(tlOpts.Count),
       MinId:        tlOpts.MinID,
       MaxId:        tlOpts.MaxID,
@@ -166,7 +168,7 @@ func (rc remote) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts Timeli
   var tweets []Tweet
   err := rc.handleRequest(func(ctx context.Context) error {
     msg, err := rc.client.GetUserTimeline(ctx, &pb.UserTimelineRequest{
-      Auth:            encodeAuthPair(rc.secret, rc.auth),
+      Auth:            encodeAuthPair(rc.auth),
       User:            &pb.UserTimelineRequest_UserId{UserId: id},
       CountLimit:      uint32(tlOpts.Count),
       MinId:           tlOpts.MinID,
@@ -191,7 +193,7 @@ func (rc remote) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpt
   var tweets []Tweet
   err := rc.handleRequest(func(ctx context.Context) error {
     msg, err := rc.client.GetUserTimeline(ctx, &pb.UserTimelineRequest{
-      Auth:            encodeAuthPair(rc.secret, rc.auth),
+      Auth:            encodeAuthPair(rc.auth),
       User:            &pb.UserTimelineRequest_UserHandle{UserHandle: handle},
       CountLimit:      uint32(tlOpts.Count),
       MinId:           tlOpts.MinID,
@@ -216,7 +218,7 @@ func (rc remote) UpdateStatus(text string, stOpts StatusUpdateOptions, trimUser 
   var tweet Tweet
   err := rc.handleRequest(func(ctx context.Context) error {
     req := pb.UpdateStatusRequest{
-      Auth:                      encodeAuthPair(rc.secret, rc.auth),
+      Auth:                      encodeAuthPair(rc.auth),
       Text:                      text,
       AutoPopulateReplyMetadata: stOpts.AutoReply,
       ExcludeReplyUserIds:       stOpts.ExcludeReplyUserIDs,
@@ -253,7 +255,7 @@ func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses b
   var user User
   err := rc.handleRequest(func(ctx context.Context) error {
     req := pb.UpdateProfileRequest{
-      Auth:            encodeAuthPair(rc.secret, rc.auth),
+      Auth:            encodeAuthPair(rc.auth),
       IncludeEntities: entities,
       IncludeStatuses: statuses,
     }
@@ -298,7 +300,7 @@ func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses b
 func (rc remote) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
   err = rc.handleRequest(func(ctx context.Context) error {
     resp, err := rc.client.GetRaw(ctx, &pb.RawAPIRequest{
-      Auth:        encodeAuthPair(rc.secret, rc.auth),
+      Auth:        encodeAuthPair(rc.auth),
       Method:      method,
       Protocol:    protocol,
       Version:     version,
