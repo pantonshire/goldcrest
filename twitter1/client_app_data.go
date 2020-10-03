@@ -122,7 +122,7 @@ type Indices struct {
 }
 
 func (indices Indices) IsZero() bool {
-  return indices.Start == 0 && indices.End == 0
+  return indices.Start <= indices.End
 }
 
 func (indices Indices) Invert(l uint) []Indices {
