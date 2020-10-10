@@ -7,7 +7,7 @@ import (
   "time"
 )
 
-func encodeAuthPair(auth AuthPair) *pb.Authentication {
+func authPairToMsg(auth AuthPair) *pb.Authentication {
   return &pb.Authentication{
     ConsumerKey: auth.Public.Key,
     AccessToken: auth.Public.Token,
@@ -16,7 +16,7 @@ func encodeAuthPair(auth AuthPair) *pb.Authentication {
   }
 }
 
-func decodeAuthPair(authMessage *pb.Authentication) AuthPair {
+func authPairFromMsg(authMessage *pb.Authentication) AuthPair {
   if authMessage == nil {
     return AuthPair{}
   }
@@ -26,18 +26,18 @@ func decodeAuthPair(authMessage *pb.Authentication) AuthPair {
   }
 }
 
-func encodeTweetOptions(params TweetOptions) *pb.TweetOptions {
+func tweetOptionsToMsg(params TweetOptions) *pb.TweetOptions {
   return &pb.TweetOptions{
     TrimUser:          params.TrimUser,
     IncludeMyRetweet:  params.IncludeMyRetweet,
     IncludeEntities:   params.IncludeEntities,
     IncludeExtAltText: params.IncludeExtAltText,
     IncludeCardUri:    params.TrimUser,
-    Mode:              encodeTweetMode(params.Mode),
+    Mode:              tweetModeToMsg(params.Mode),
   }
 }
 
-func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetOptions {
+func tweetOptionsFromMsg(optsMessage *pb.TweetOptions) TweetOptions {
   if optsMessage == nil {
     return TweetOptions{}
   }
@@ -47,18 +47,18 @@ func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetOptions {
     IncludeEntities:   optsMessage.IncludeEntities,
     IncludeExtAltText: optsMessage.IncludeExtAltText,
     IncludeCardURI:    optsMessage.TrimUser,
-    Mode:              decodeTweetMode(optsMessage.Mode),
+    Mode:              tweetModeFromMsg(optsMessage.Mode),
   }
 }
 
-func encodeTweetMode(mode TweetMode) pb.TweetOptions_Mode {
+func tweetModeToMsg(mode TweetMode) pb.TweetOptions_Mode {
   if mode == ExtendedMode {
     return pb.TweetOptions_EXTENDED
   }
   return pb.TweetOptions_COMPAT
 }
 
-func decodeTweetMode(mode pb.TweetOptions_Mode) TweetMode {
+func tweetModeFromMsg(mode pb.TweetOptions_Mode) TweetMode {
   if mode == pb.TweetOptions_EXTENDED {
     return ExtendedMode
   }
@@ -86,6 +86,107 @@ func decodeTimeline(msg *pb.Timeline) []Tweet {
     tweets[i] = decodeTweet(tweetMsg)
   }
   return tweets
+}
+
+func tweetsNewDecode(ms []model.Tweet) []Tweet {
+  tweets := make([]Tweet, len(ms))
+  for i, m := range ms {
+    tweets[i] = tweetNewDecode(m)
+  }
+  return tweets
+}
+
+func tweetNewDecode(m model.Tweet) Tweet {
+  tweet := Tweet{
+    ID:                   m.ID,
+    CreatedAt:            time.Time(m.CreatedAt),
+    Source:               m.Source,
+    User:                 userNewDecode(m.User),
+    Replies:              m.ReplyCount,
+    Retweets:             m.RetweetCount,
+    CurrentUserRetweeted: m.Retweeted,
+    FilterLevel:          m.FilterLevel,
+    WithheldCopyright:    m.WithheldCopyright,
+    WithheldCounties:     m.WithheldInCountries,
+  }
+  var mEntities model.TweetEntities
+  var mExtendedEntities model.TweetExtendedEntities
+  if m.ExtendedTweet != nil {
+    tweet.Text = m.ExtendedTweet.FullText
+    tweet.Truncated = false
+    tweet.TextDisplayRange = indicesNewDecode(m.ExtendedTweet.DisplayTextRange)
+    mEntities = m.ExtendedTweet.Entities
+    mExtendedEntities = m.ExtendedTweet.ExtendedEntities
+  } else {
+    if m.FullText != "" {
+      tweet.Text = m.FullText
+      tweet.Truncated = false
+    } else {
+      tweet.Text = m.Text
+      tweet.Truncated = m.Truncated
+    }
+    tweet.TextDisplayRange = indicesNewDecode(m.DisplayTextRange)
+    mEntities = m.Entities
+    mExtendedEntities = m.ExtendedEntities
+  }
+  tweet.Hashtags = symbolsNewDecode(mEntities.Hashtags)
+  tweet.URLs = urlsNewDecode(mEntities.URLs)
+  tweet.Mentions = mentionsNewDecode(mEntities.Mentions)
+  tweet.Symbols = symbolsNewDecode(mEntities.Symbols)
+  tweet.Polls = pollsNewDecode(mEntities.Polls)
+  var media []model.Media
+  mediaIDs := make(map[uint64]bool)
+  for _, mMedia := range mExtendedEntities.Media {
+    if !mediaIDs[mMedia.ID] {
+      media = append(media, mMedia)
+      mediaIDs[mMedia.ID] = true
+    }
+  }
+  for _, mMedia := range mEntities.Media {
+    if !mediaIDs[mMedia.ID] {
+      media = append(media, mMedia)
+      mediaIDs[mMedia.ID] = true
+    }
+  }
+  tweet.Media = mediasNewDecode(media)
+  if m.ReplyStatusID != nil && m.ReplyUserID != nil && m.ReplyUserScreenName != nil {
+    tweet.RepliedTo = &ReplyData{
+      TweetID:    *m.ReplyStatusID,
+      UserID:     *m.ReplyUserID,
+      UserHandle: *m.ReplyUserScreenName,
+    }
+  }
+  if m.QuotedStatus != nil {
+    qt := tweetNewDecode(*m.QuotedStatus)
+    tweet.Quoted = &qt
+  }
+  if m.RetweetedStatus != nil {
+    rt := tweetNewDecode(*m.RetweetedStatus)
+    tweet.Retweeted = &rt
+  }
+  if m.QuoteCount != nil {
+    tweet.Quotes = *m.QuoteCount
+  }
+  if m.FavoriteCount != nil {
+    tweet.Likes = *m.FavoriteCount
+  }
+  if m.Favorited != nil {
+    tweet.CurrentUserLiked = *m.Favorited
+  }
+  if m.CurrentUserRetweet != nil {
+    rtID := m.CurrentUserRetweet.ID
+    tweet.CurrentUserRetweetID = &rtID
+  }
+  if m.PossiblySensitive != nil {
+    tweet.PossiblySensitive = *m.PossiblySensitive
+  }
+  if m.Lang != nil {
+    tweet.Lang = *m.Lang
+  }
+  if m.WithheldScope != nil {
+    tweet.WithheldScope = *m.WithheldScope
+  }
+  return tweet
 }
 
 func encodeTweet(mod model.Tweet) (*pb.Tweet, error) {
@@ -273,6 +374,41 @@ func decodeTweet(msg *pb.Tweet) Tweet {
   return tweet
 }
 
+func userNewDecode(m model.User) User {
+  user := User{
+    ID:                m.ID,
+    Handle:            m.ScreenName,
+    DisplayName:       m.Name,
+    CreatedAt:         time.Time(m.CreatedAt),
+    Protected:         m.Protected,
+    Verified:          m.Verified,
+    FollowerCount:     m.FollowersCount,
+    FollowingCount:    m.FriendsCount,
+    ListedCount:       m.ListedCount,
+    FavouritesCount:   m.FavoritesCount,
+    StatusesCount:     m.StatusesCount,
+    ProfileBanner:     m.ProfileBanner,
+    ProfileImage:      m.ProfileImage,
+    DefaultProfile:    m.DefaultProfile,
+    WithheldCountries: m.WithheldCountries,
+    URLs:              urlsNewDecode(m.Entities.URL.URLs),
+    BioURLs:           urlsNewDecode(m.Entities.Description.URLs),
+  }
+  if m.Description != nil {
+    user.Bio = *m.Description
+  }
+  if m.URL != nil {
+    user.URL = *m.URL
+  }
+  if m.Location != nil {
+    user.Location = *m.Location
+  }
+  if m.WithheldScope != nil {
+    user.WithheldScope = *m.WithheldScope
+  }
+  return user
+}
+
 func encodeUser(mod model.User) (*pb.User, error) {
   var err error
   var msg pb.User
@@ -366,6 +502,17 @@ func decodeUser(msg *pb.User) User {
   }
 }
 
+func indicesNewDecode(m model.Indices) Indices {
+  var start, end uint
+  if len(m) > 0 {
+    start = m[0]
+    if len(m) > 1 {
+      end = m[1]
+    }
+  }
+  return Indices{Start: start, End: end}
+}
+
 func encodeIndices(indices []uint) (*pb.Indices, error) {
   if len(indices) == 0 {
     return &pb.Indices{Start: 0, End: 0}, nil
@@ -380,6 +527,23 @@ func decodeIndices(msg *pb.Indices) Indices {
     return Indices{}
   }
   return Indices{Start: uint(msg.Start), End: uint(msg.End)}
+}
+
+func urlsNewDecode(ms []model.URL) []URL {
+  urls := make([]URL, len(ms))
+  for i, m := range ms {
+    urls[i] = urlNewDecode(m)
+  }
+  return urls
+}
+
+func urlNewDecode(m model.URL) URL {
+  return URL{
+    Indices:     indicesNewDecode(m.Indices),
+    TwitterURL:  m.URL,
+    DisplayURL:  m.DisplayURL,
+    ExpandedURL: m.ExpandedURL,
+  }
 }
 
 func encodeURL(mod model.URL) (*pb.URL, error) {
@@ -426,6 +590,21 @@ func decodeURLs(msgs []*pb.URL) []URL {
   return urls
 }
 
+func symbolsNewDecode(ms []model.Symbol) []Symbol {
+  symbols := make([]Symbol, len(ms))
+  for i, m := range ms {
+    symbols[i] = symbolNewDecode(m)
+  }
+  return symbols
+}
+
+func symbolNewDecode(m model.Symbol) Symbol {
+  return Symbol{
+    Indices: indicesNewDecode(m.Indices),
+    Text:    m.Text,
+  }
+}
+
 func encodeSymbols(mods []model.Symbol) ([]*pb.Symbol, error) {
   var err error
   msgs := make([]*pb.Symbol, len(mods))
@@ -450,6 +629,23 @@ func decodeSymbols(msgs []*pb.Symbol) []Symbol {
     }
   }
   return symbols
+}
+
+func mentionsNewDecode(ms []model.Mention) []Mention {
+  mentions := make([]Mention, len(ms))
+  for i, m := range ms {
+    mentions[i] = mentionNewDecode(m)
+  }
+  return mentions
+}
+
+func mentionNewDecode(m model.Mention) Mention {
+  return Mention{
+    Indices:         indicesNewDecode(m.Indices),
+    UserID:          m.ID,
+    UserHandle:      m.ScreenName,
+    UserDisplayName: m.Name,
+  }
 }
 
 func encodeMentions(mods []model.Mention) ([]*pb.Mention, error) {
@@ -482,6 +678,29 @@ func decodeMentions(msgs []*pb.Mention) []Mention {
     }
   }
   return mentions
+}
+
+func mediasNewDecode(ms []model.Media) []Media {
+  medias := make([]Media, len(ms))
+  for i, m := range ms {
+    medias[i] = mediaNewDecode(m)
+  }
+  return medias
+}
+
+func mediaNewDecode(m model.Media) Media {
+  return Media{
+    URL:           urlNewDecode(m.URL),
+    ID:            m.ID,
+    Type:          m.Type,
+    MediaURL:      m.MediaURL,
+    Alt:           m.AltText,
+    SourceTweetID: m.SourceStatusID,
+    Thumb:         mediaSizeNewDecode(m.Sizes.Thumb),
+    Small:         mediaSizeNewDecode(m.Sizes.Small),
+    Medium:        mediaSizeNewDecode(m.Sizes.Medium),
+    Large:         mediaSizeNewDecode(m.Sizes.Large),
+  }
 }
 
 func encodeMedia(mods []model.Media) ([]*pb.Media, error) {
@@ -560,11 +779,38 @@ func decodeMediaSource(msg *pb.Media) *uint64 {
   return nil
 }
 
+func mediaSizeNewDecode(m model.MediaSize) MediaSize {
+  return MediaSize{Width: m.W, Height: m.H, Resize: m.Resize}
+}
+
 func decodeMediaSize(msg *pb.Media_Size) MediaSize {
   if msg == nil {
     return MediaSize{}
   }
   return MediaSize{Width: uint(msg.Width), Height: uint(msg.Height), Resize: msg.Resize}
+}
+
+func pollsNewDecode(ms []model.Poll) []Poll {
+  polls := make([]Poll, len(ms))
+  for i, m := range ms {
+    polls[i] = pollNewDecode(m)
+  }
+  return polls
+}
+
+func pollNewDecode(m model.Poll) Poll {
+  poll := Poll{
+    EndTime:  time.Time(m.EndTime),
+    Duration: time.Minute * time.Duration(m.DurationMinutes),
+    Options:  make([]PollOption, len(m.Options)),
+  }
+  for i, optM := range m.Options {
+    poll.Options[i] = PollOption{
+      Position: optM.Position,
+      Text:     optM.Text,
+    }
+  }
+  return poll
 }
 
 func encodePolls(mods []model.Poll) ([]*pb.Poll, error) {
