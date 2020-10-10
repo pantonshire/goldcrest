@@ -59,14 +59,14 @@ func main() {
   //}, true, true)
 
   if err != nil {
-   panic(err)
+    panic(err)
   }
 
   spew.Dump(tweet)
 
   fmt.Println(tweet.TextOnly())
   if tweet.Quoted != nil {
-   fmt.Println(tweet.Quoted.TextOnly())
+    fmt.Println(tweet.Quoted.TextOnly())
   }
 
   //spew.Dump(timeline)
