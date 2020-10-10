@@ -164,7 +164,7 @@ message Tweet {
   uint32 favorite_count = 17;
   bool favorited = 18;
   bool retweeted = 19;
-  fixed64 current_user_retweet_id = 20;
+  uint64 current_user_retweet_id = 20;
   repeated Symbol hashtags = 21;
   repeated URL urls = 22;
   repeated Mention mentions = 23;
