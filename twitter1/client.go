@@ -110,7 +110,7 @@ func (rc remote) GetTweet(twOpts TweetOptions, id uint64) (tweet Tweet, err erro
     if err != nil {
       return err
     }
-    tweet = decodeTweet(tweetMsg)
+    tweet = decodeTweetMessage(tweetMsg)
     return nil
   })
   if err != nil {
@@ -133,7 +133,7 @@ func (rc remote) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, re
     if err != nil {
       return err
     }
-    tweets = decodeTimeline(msg)
+    tweets = decodeTimelineMessage(msg)
     return nil
   })
   if err != nil {
@@ -155,7 +155,7 @@ func (rc remote) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions)
     if err != nil {
       return err
     }
-    tweets = decodeTimeline(msg)
+    tweets = decodeTimelineMessage(msg)
     return nil
   })
   if err != nil {
@@ -180,7 +180,7 @@ func (rc remote) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts Timeli
     if err != nil {
       return err
     }
-    tweets = decodeTimeline(msg)
+    tweets = decodeTimelineMessage(msg)
     return nil
   })
   if err != nil {
@@ -205,7 +205,7 @@ func (rc remote) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpt
     if err != nil {
       return err
     }
-    tweets = decodeTimeline(msg)
+    tweets = decodeTimelineMessage(msg)
     return nil
   })
   if err != nil {
@@ -242,7 +242,7 @@ func (rc remote) UpdateStatus(text string, stOpts StatusUpdateOptions, trimUser 
     if err != nil {
       return err
     }
-    tweet = decodeTweet(msg)
+    tweet = decodeTweetMessage(msg)
     return nil
   })
   if err != nil {
@@ -288,7 +288,7 @@ func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses b
     if err != nil {
       return err
     }
-    user = decodeUser(msg)
+    user = decodeUserMessage(msg)
     return nil
   })
   if err != nil {

@@ -24,7 +24,7 @@ func (s *twitterServer) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb
   if err != nil {
     return nil, err
   }
-  return encodeTweet(mod)
+  return encodeTweetMessage(mod)
 }
 
 func (s *twitterServer) GetTweets(req *pb.TweetsRequest, srv pb.Twitter1_GetTweetsServer) error {
@@ -50,7 +50,7 @@ func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelin
   if err != nil {
     return nil, err
   }
-  return encodeTweets(mods)
+  return encodeTimelineMessage(mods)
 }
 
 func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.Timeline, error) {
@@ -72,7 +72,7 @@ func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionT
   if err != nil {
     return nil, err
   }
-  return encodeTweets(mods)
+  return encodeTimelineMessage(mods)
 }
 
 func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.Timeline, error) {
@@ -102,7 +102,7 @@ func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelin
   if err != nil {
     return nil, err
   }
-  return encodeTweets(mods)
+  return encodeTimelineMessage(mods)
 }
 
 func (s *twitterServer) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (*pb.Tweet, error) {
@@ -119,7 +119,7 @@ func (s *twitterServer) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRe
   if err != nil {
     return nil, err
   }
-  return encodeTweet(mod)
+  return encodeTweetMessage(mod)
 }
 
 func (s *twitterServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.User, error) {
@@ -148,7 +148,7 @@ func (s *twitterServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfile
   if err != nil {
     return nil, err
   }
-  return encodeUser(mod)
+  return encodeUserMessage(mod)
 }
 
 func (s *twitterServer) GetRaw(ctx context.Context, rr *pb.RawAPIRequest) (*pb.RawAPIResult, error) {
