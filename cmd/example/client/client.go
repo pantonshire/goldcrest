@@ -30,25 +30,27 @@ func main() {
 
   client := twitter1.Remote(conn, auth, time.Second*5)
 
-  tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
+  //tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
 
   //var replyID uint64 = 1309875852180705282
   //tweet, err := client.UpdateStatus("@SmolbotbotT Reply test", twitter1.StatusUpdateOptions{ReplyID: &replyID}, false)
 
-  //timeline, err := client.GetUserHandleTimeline(
-  //  twitter1.TweetOptions{
-  //    TrimUser:          true,
-  //    IncludeMyRetweet:  true,
-  //    IncludeEntities:   true,
-  //    IncludeExtAltText: true,
-  //    IncludeCardURI:    true,
-  //    Mode:              twitter1.ExtendedMode,
-  //  },
-  //  "smolrobots",
-  //  twitter1.TimelineOptions{Count: 3},
-  //  true,
-  //  true,
-  //)
+  var timelineLimit uint = 3
+
+  timeline, err := client.GetUserHandleTimeline(
+   twitter1.TweetOptions{
+     TrimUser:          true,
+     IncludeMyRetweet:  true,
+     IncludeEntities:   true,
+     IncludeExtAltText: true,
+     IncludeCardURI:    true,
+     Mode:              twitter1.ExtendedMode,
+   },
+   "smolrobots",
+   twitter1.TimelineOptions{Count: &timelineLimit},
+   true,
+   true,
+  )
 
   //url := "github.com/pantonshire/smolbotbot"
   //location := "Test"
@@ -62,14 +64,14 @@ func main() {
     panic(err)
   }
 
-  spew.Dump(tweet)
+  //spew.Dump(tweet)
+  //
+  //fmt.Println(tweet.TextOnly())
+  //if tweet.Quoted != nil {
+  //  fmt.Println(tweet.Quoted.TextOnly())
+  //}
 
-  fmt.Println(tweet.TextOnly())
-  if tweet.Quoted != nil {
-    fmt.Println(tweet.Quoted.TextOnly())
-  }
-
-  //spew.Dump(timeline)
+  spew.Dump(timeline)
 
   //spew.Dump(user)
 }
