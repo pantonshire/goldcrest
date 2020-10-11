@@ -52,21 +52,23 @@ message TweetsRequest {
   TweetOptions options = 3;
 }
 
+message TimelineOptions {
+  uint32 count = 1;
+  uint64 min_id = 2;
+  uint64 max_id = 3;
+}
+
 message HomeTimelineRequest {
   Authentication auth = 1;
-  uint32 count = 2;
-  uint64 min_id = 3;
-  uint64 max_id = 4;
-  bool include_replies = 5;
-  TweetOptions tweet_options = 6;
+  TimelineOptions timeline_options = 2;
+  TweetOptions tweet_options = 3;
+  bool include_replies = 4;
 }
 
 message MentionTimelineRequest {
   Authentication auth = 1;
-  uint32 count = 2;
-  uint64 min_id = 3;
-  uint64 max_id = 4;
-  TweetOptions tweet_options = 5;
+  TimelineOptions timeline_options = 2;
+  TweetOptions tweet_options = 3;
 }
 
 message UserTimelineRequest {
@@ -75,12 +77,10 @@ message UserTimelineRequest {
     fixed64 user_id = 2;
     string user_handle = 3;
   }
-  uint32 count_limit = 4;
-  uint64 min_id = 5;
-  uint64 max_id = 6;
-  bool include_replies = 7;
-  bool include_retweets = 8;
-  TweetOptions tweet_options = 9;
+  TimelineOptions timeline_options = 4;
+  TweetOptions tweet_options = 5;
+  bool include_replies = 6;
+  bool include_retweets = 7;
 }
 
 message UpdateStatusRequest {
