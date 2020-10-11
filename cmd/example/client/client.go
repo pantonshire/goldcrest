@@ -28,7 +28,7 @@ func main() {
   }
   defer conn.Close()
 
-  client := twitter1.Remote(conn, auth.Secret, auth.Public, time.Second*5)
+  client := twitter1.Remote(conn, auth, time.Second*5)
 
   tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
 
@@ -59,14 +59,14 @@ func main() {
   //}, true, true)
 
   if err != nil {
-   panic(err)
+    panic(err)
   }
 
   spew.Dump(tweet)
 
   fmt.Println(tweet.TextOnly())
   if tweet.Quoted != nil {
-   fmt.Println(tweet.Quoted.TextOnly())
+    fmt.Println(tweet.Quoted.TextOnly())
   }
 
   //spew.Dump(timeline)

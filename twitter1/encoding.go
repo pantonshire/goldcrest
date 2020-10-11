@@ -1,224 +1,277 @@
 package twitter1
 
 import (
-  "fmt"
   pb "goldcrest/proto"
   "goldcrest/twitter1/model"
+  "math"
   "time"
 )
 
-func encodeAuthPair(secret, auth Auth) *pb.Authentication {
+func encodeAuthPairMessage(auth AuthPair) *pb.Authentication {
   return &pb.Authentication{
-    ConsumerKey: auth.Key,
-    AccessToken: auth.Token,
-    SecretKey:   secret.Key,
-    SecretToken: secret.Token,
+    ConsumerKey: auth.Public.Key,
+    AccessToken: auth.Public.Token,
+    SecretKey:   auth.Secret.Key,
+    SecretToken: auth.Secret.Token,
   }
 }
 
-func decodeAuthPair(authMessage *pb.Authentication) AuthPair {
-  if authMessage == nil {
+func decodeAuthPairMessage(msg *pb.Authentication) AuthPair {
+  if msg == nil {
     return AuthPair{}
   }
   return AuthPair{
-    Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken},
-    Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken},
+    Auth{Key: msg.SecretKey, Token: msg.SecretToken},
+    Auth{Key: msg.ConsumerKey, Token: msg.AccessToken},
   }
 }
 
-func encodeTweetOptions(params TweetOptions) *pb.TweetOptions {
+func encodeTweetOptionsMessage(twopts TweetOptions) *pb.TweetOptions {
   return &pb.TweetOptions{
-    TrimUser:          params.TrimUser,
-    IncludeMyRetweet:  params.IncludeMyRetweet,
-    IncludeEntities:   params.IncludeEntities,
-    IncludeExtAltText: params.IncludeExtAltText,
-    IncludeCardUri:    params.TrimUser,
-    Mode:              encodeTweetMode(params.Mode),
+    TrimUser:          twopts.TrimUser,
+    IncludeMyRetweet:  twopts.IncludeMyRetweet,
+    IncludeEntities:   twopts.IncludeEntities,
+    IncludeExtAltText: twopts.IncludeExtAltText,
+    IncludeCardUri:    twopts.TrimUser,
+    Mode:              encodeTweetModeMessage(twopts.Mode),
   }
 }
 
-func decodeTweetOptions(optsMessage *pb.TweetOptions) TweetOptions {
-  if optsMessage == nil {
+func decodeTweetOptionsMessage(msg *pb.TweetOptions) TweetOptions {
+  if msg == nil {
     return TweetOptions{}
   }
   return TweetOptions{
-    TrimUser:          optsMessage.TrimUser,
-    IncludeMyRetweet:  optsMessage.IncludeMyRetweet,
-    IncludeEntities:   optsMessage.IncludeEntities,
-    IncludeExtAltText: optsMessage.IncludeExtAltText,
-    IncludeCardURI:    optsMessage.TrimUser,
-    Mode:              decodeTweetMode(optsMessage.Mode),
+    TrimUser:          msg.TrimUser,
+    IncludeMyRetweet:  msg.IncludeMyRetweet,
+    IncludeEntities:   msg.IncludeEntities,
+    IncludeExtAltText: msg.IncludeExtAltText,
+    IncludeCardURI:    msg.TrimUser,
+    Mode:              decodeTweetModeMessage(msg.Mode),
   }
 }
 
-func encodeTweetMode(mode TweetMode) pb.TweetOptions_Mode {
+func encodeTimelineOptionsMessage(tlOpts TimelineOptions) *pb.TimelineOptions {
+  msg := pb.TimelineOptions{}
+  if tlOpts.Count != nil {
+    msg.Count = uint32(*tlOpts.Count)
+  }
+  if tlOpts.MinID != nil {
+    msg.MinId = *tlOpts.MinID
+  }
+  if tlOpts.MaxID != nil {
+    msg.MaxId = *tlOpts.MaxID
+  }
+  return &msg
+}
+
+func decodeTimelineOptionsMessage(msg *pb.TimelineOptions) TimelineOptions {
+  tlOpts := TimelineOptions{}
+  if msg.Count != 0 {
+    count := uint(msg.Count)
+    tlOpts.Count = &count
+  }
+  if msg.MinId != 0 {
+    minID := msg.MinId
+    tlOpts.MinID = &minID
+  }
+  if msg.MaxId != 0 {
+    maxID := msg.MaxId
+    tlOpts.MaxID = &maxID
+  }
+  return tlOpts
+}
+
+func encodeTweetModeMessage(mode TweetMode) pb.TweetOptions_Mode {
   if mode == ExtendedMode {
     return pb.TweetOptions_EXTENDED
   }
   return pb.TweetOptions_COMPAT
 }
 
-func decodeTweetMode(mode pb.TweetOptions_Mode) TweetMode {
-  if mode == pb.TweetOptions_EXTENDED {
+func decodeTweetModeMessage(msg pb.TweetOptions_Mode) TweetMode {
+  if msg == pb.TweetOptions_EXTENDED {
     return ExtendedMode
   }
   return CompatibilityMode
 }
 
-func encodeTweets(mods []model.Tweet) (*pb.Timeline, error) {
-  msgs := make([]*pb.Tweet, len(mods))
-  for i, mod := range mods {
-    msg, err := encodeTweet(mod)
-    if err != nil {
-      return nil, err
-    }
-    msgs[i] = msg
+func decodeTweetModels(ms []model.Tweet) []Tweet {
+  tweets := make([]Tweet, len(ms))
+  for i, m := range ms {
+    tweets[i] = decodeTweetModel(m)
   }
-  return &pb.Timeline{Tweets: msgs}, nil
+  return tweets
 }
 
-func decodeTimeline(msg *pb.Timeline) []Tweet {
+func decodeTweetModel(m model.Tweet) Tweet {
+  tweet := Tweet{
+    ID:                   m.ID,
+    CreatedAt:            time.Time(m.CreatedAt),
+    Source:               m.Source,
+    User:                 decodeUserModel(m.User),
+    Replies:              m.ReplyCount,
+    Retweets:             m.RetweetCount,
+    CurrentUserRetweeted: m.Retweeted,
+    FilterLevel:          m.FilterLevel,
+    WithheldCopyright:    m.WithheldCopyright,
+    WithheldCounties:     m.WithheldInCountries,
+  }
+  var mEntities model.TweetEntities
+  var mExtendedEntities model.TweetExtendedEntities
+  if m.ExtendedTweet != nil {
+    tweet.Text = m.ExtendedTweet.FullText
+    tweet.Truncated = false
+    tweet.TextDisplayRange = decodeIndicesModel(m.ExtendedTweet.DisplayTextRange)
+    mEntities = m.ExtendedTweet.Entities
+    mExtendedEntities = m.ExtendedTweet.ExtendedEntities
+  } else {
+    if m.FullText != "" {
+      tweet.Text = m.FullText
+      tweet.Truncated = false
+    } else {
+      tweet.Text = m.Text
+      tweet.Truncated = m.Truncated
+    }
+    tweet.TextDisplayRange = decodeIndicesModel(m.DisplayTextRange)
+    mEntities = m.Entities
+    mExtendedEntities = m.ExtendedEntities
+  }
+  tweet.Hashtags = decodeSymbolModels(mEntities.Hashtags)
+  tweet.URLs = decodeURLModels(mEntities.URLs)
+  tweet.Mentions = decodeMentionModels(mEntities.Mentions)
+  tweet.Symbols = decodeSymbolModels(mEntities.Symbols)
+  tweet.Polls = decodePollModels(mEntities.Polls)
+  var media []model.Media
+  mediaIDs := make(map[uint64]bool)
+  for _, mMedia := range mExtendedEntities.Media {
+    if !mediaIDs[mMedia.ID] {
+      media = append(media, mMedia)
+      mediaIDs[mMedia.ID] = true
+    }
+  }
+  for _, mMedia := range mEntities.Media {
+    if !mediaIDs[mMedia.ID] {
+      media = append(media, mMedia)
+      mediaIDs[mMedia.ID] = true
+    }
+  }
+  tweet.Media = decodeMediaModels(media)
+  if m.ReplyStatusID != nil && m.ReplyUserID != nil && m.ReplyUserScreenName != nil {
+    tweet.RepliedTo = &ReplyData{
+      TweetID:    *m.ReplyStatusID,
+      UserID:     *m.ReplyUserID,
+      UserHandle: *m.ReplyUserScreenName,
+    }
+  }
+  if m.QuotedStatus != nil {
+    qt := decodeTweetModel(*m.QuotedStatus)
+    tweet.Quoted = &qt
+  }
+  if m.RetweetedStatus != nil {
+    rt := decodeTweetModel(*m.RetweetedStatus)
+    tweet.Retweeted = &rt
+  }
+  if m.QuoteCount != nil {
+    tweet.Quotes = *m.QuoteCount
+  }
+  if m.FavoriteCount != nil {
+    tweet.Likes = *m.FavoriteCount
+  }
+  if m.Favorited != nil {
+    tweet.CurrentUserLiked = *m.Favorited
+  }
+  if m.CurrentUserRetweet != nil {
+    rtID := m.CurrentUserRetweet.ID
+    tweet.CurrentUserRetweetID = &rtID
+  }
+  if m.PossiblySensitive != nil {
+    tweet.PossiblySensitive = *m.PossiblySensitive
+  }
+  if m.Lang != nil {
+    tweet.Lang = *m.Lang
+  }
+  if m.WithheldScope != nil {
+    tweet.WithheldScope = *m.WithheldScope
+  }
+  return tweet
+}
+
+func encodeTimelineMessage(tweets []Tweet) *pb.Timeline {
+  msgs := make([]*pb.Tweet, len(tweets))
+  for i, tweet := range tweets {
+    msgs[i] = encodeTweetMessage(tweet)
+  }
+  return &pb.Timeline{Tweets: msgs}
+}
+
+func decodeTimelineMessage(msg *pb.Timeline) []Tweet {
   if msg == nil {
     return nil
   }
   tweets := make([]Tweet, len(msg.Tweets))
   for i, tweetMsg := range msg.Tweets {
-    tweets[i] = decodeTweet(tweetMsg)
+    tweets[i] = decodeTweetMessage(tweetMsg)
   }
   return tweets
 }
 
-func encodeTweet(mod model.Tweet) (*pb.Tweet, error) {
-  var err error
-  var msg pb.Tweet
-
-  msg.Id = mod.ID
-
-  msg.CreatedAt = time.Time(mod.CreatedAt).Unix()
-
-  if mod.ExtendedTweet != nil {
-    msg.Text = mod.ExtendedTweet.FullText
-  } else if mod.FullText != "" {
-    msg.Text = mod.FullText
-  } else {
-    msg.Text = mod.Text
+func encodeTweetMessage(tweet Tweet) *pb.Tweet {
+  msg := pb.Tweet{
+    Id:                tweet.ID,
+    CreatedAt:         tweet.CreatedAt.Unix(),
+    Text:              tweet.Text,
+    TextDisplayRange:  encodeIndicesMessage(tweet.TextDisplayRange),
+    Truncated:         tweet.Truncated,
+    Source:            tweet.Source,
+    User:              encodeUserMessage(tweet.User),
+    QuoteCount:        uint32(tweet.Quotes),
+    ReplyCount:        uint32(tweet.Replies),
+    RetweetCount:      uint32(tweet.Retweets),
+    FavoriteCount:     uint32(tweet.Likes),
+    Favorited:         tweet.CurrentUserLiked,
+    Retweeted:         tweet.CurrentUserRetweeted,
+    Hashtags:          encodeSymbolMessages(tweet.Hashtags),
+    Urls:              encodeURLMessages(tweet.URLs),
+    Mentions:          encodeMentionMessages(tweet.Mentions),
+    Symbols:           encodeSymbolMessages(tweet.Symbols),
+    Media:             encodeMediaMessages(tweet.Media),
+    Polls:             encodePollMessages(tweet.Polls),
+    PossiblySensitive: tweet.PossiblySensitive,
+    FilterLevel:       tweet.FilterLevel,
+    Lang:              tweet.Lang,
+    WithheldCopyright: tweet.WithheldCopyright,
+    WithheldCountries: tweet.WithheldCounties,
+    WithheldScope:     tweet.WithheldScope,
   }
-
-  var displayTextRange []uint
-  if mod.ExtendedTweet != nil {
-    displayTextRange = mod.ExtendedTweet.DisplayTextRange
-  } else {
-    displayTextRange = mod.DisplayTextRange
-  }
-  if msg.TextDisplayRange, err = encodeIndices(displayTextRange); err != nil {
-    return nil, err
-  }
-
-  msg.Truncated = mod.Truncated
-
-  msg.Source = mod.Source
-
-  if msg.User, err = encodeUser(mod.User); err != nil {
-    return nil, err
-  }
-
-  if mod.ReplyStatusID != nil && mod.ReplyUserID != nil && mod.ReplyUserScreenName != nil {
+  if tweet.RepliedTo != nil {
     msg.Reply = &pb.Tweet_RepliedTweet{RepliedTweet: &pb.Tweet_Reply{
-      ReplyToTweetId:    *mod.ReplyStatusID,
-      ReplyToUserId:     *mod.ReplyUserID,
-      ReplyToUserHandle: *mod.ReplyUserScreenName,
+      ReplyToTweetId:    tweet.RepliedTo.TweetID,
+      ReplyToUserId:     tweet.RepliedTo.UserID,
+      ReplyToUserHandle: tweet.RepliedTo.UserHandle,
     }}
   } else {
     msg.Reply = &pb.Tweet_NoReply{NoReply: true}
   }
-
-  if mod.QuotedStatus != nil {
-    quote, err := encodeTweet(*mod.QuotedStatus)
-    if err != nil {
-      return nil, err
-    }
-    msg.Quote = &pb.Tweet_QuotedTweet{QuotedTweet: quote}
+  if tweet.Quoted != nil {
+    msg.Quote = &pb.Tweet_QuotedTweet{QuotedTweet: encodeTweetMessage(*tweet.Quoted)}
   } else {
     msg.Quote = &pb.Tweet_NoQuote{NoQuote: true}
   }
-
-  if mod.RetweetedStatus != nil {
-    retweet, err := encodeTweet(*mod.RetweetedStatus)
-    if err != nil {
-      return nil, err
-    }
-    msg.Retweet = &pb.Tweet_RetweetedTweet{RetweetedTweet: retweet}
+  if tweet.Retweeted != nil {
+    msg.Retweet = &pb.Tweet_RetweetedTweet{RetweetedTweet: encodeTweetMessage(*tweet.Retweeted)}
   } else {
     msg.Retweet = &pb.Tweet_NoRetweet{NoRetweet: true}
   }
-
-  if mod.QuoteCount != nil {
-    msg.QuoteCount = uint32(*mod.QuoteCount)
-  }
-
-  msg.ReplyCount = uint32(mod.ReplyCount)
-
-  msg.RetweetCount = uint32(mod.RetweetCount)
-
-  if mod.FavoriteCount != nil {
-    msg.FavoriteCount = uint32(*mod.FavoriteCount)
-  }
-
-  if mod.CurrentUserRetweet != nil {
-    msg.CurrentUserRetweetId = mod.CurrentUserRetweet.ID
-  }
-
-  var entities model.TweetEntities
-  var extendedEntities model.TweetExtendedEntities
-
-  if mod.ExtendedTweet != nil {
-    entities, extendedEntities = mod.ExtendedTweet.Entities, mod.ExtendedTweet.ExtendedEntities
+  if tweet.CurrentUserRetweetID != nil {
+    msg.CurrentUserRetweetId = *tweet.CurrentUserRetweetID
   } else {
-    entities, extendedEntities = mod.Entities, mod.ExtendedEntities
+    msg.CurrentUserRetweetId = 0
   }
-
-  if msg.Hashtags, err = encodeSymbols(entities.Hashtags); err != nil {
-    return nil, err
-  }
-
-  if msg.Urls, err = encodeURLs(entities.URLs); err != nil {
-    return nil, err
-  }
-
-  if msg.Mentions, err = encodeMentions(entities.Mentions); err != nil {
-    return nil, err
-  }
-
-  if msg.Symbols, err = encodeSymbols(entities.Symbols); err != nil {
-    return nil, err
-  }
-
-  if msg.Polls, err = encodePolls(entities.Polls); err != nil {
-    return nil, err
-  }
-
-  var media []model.Media
-  mediaIDs := make(map[uint64]bool)
-  for _, mm := range extendedEntities.Media {
-    if !mediaIDs[mm.ID] {
-      media = append(media, mm)
-      mediaIDs[mm.ID] = true
-    }
-  }
-  for _, mm := range entities.Media {
-    if !mediaIDs[mm.ID] {
-      media = append(media, mm)
-      mediaIDs[mm.ID] = true
-    }
-  }
-  if msg.Media, err = encodeMedia(media); err != nil {
-    return nil, err
-  }
-
-  return &msg, nil
+  return &msg
 }
 
-func decodeTweet(msg *pb.Tweet) Tweet {
+func decodeTweetMessage(msg *pb.Tweet) Tweet {
   if msg == nil {
     return Tweet{}
   }
@@ -226,21 +279,21 @@ func decodeTweet(msg *pb.Tweet) Tweet {
     ID:                   msg.Id,
     CreatedAt:            time.Unix(msg.CreatedAt, 0),
     Text:                 msg.Text,
-    TextDisplayRange:     decodeIndices(msg.TextDisplayRange),
+    TextDisplayRange:     decodeIndicesMessage(msg.TextDisplayRange),
     Truncated:            msg.Truncated,
     Source:               msg.Source,
-    User:                 decodeUser(msg.User),
+    User:                 decodeUserMessage(msg.User),
     Quotes:               uint(msg.QuoteCount),
     Replies:              uint(msg.ReplyCount),
     Retweets:             uint(msg.RetweetCount),
     Likes:                uint(msg.FavoriteCount),
     CurrentUserLiked:     msg.Favorited,
     CurrentUserRetweeted: msg.Retweeted,
-    Hashtags:             decodeSymbols(msg.Hashtags),
-    URLs:                 decodeURLs(msg.Urls),
-    Mentions:             decodeMentions(msg.Mentions),
-    Symbols:              decodeSymbols(msg.Symbols),
-    Media:                decodeMedia(msg.Media),
+    Hashtags:             decodeSymbolMessages(msg.Hashtags),
+    URLs:                 decodeURLMessages(msg.Urls),
+    Mentions:             decodeMentionMessages(msg.Mentions),
+    Symbols:              decodeSymbolMessages(msg.Symbols),
+    Media:                decodeMediaMessages(msg.Media),
     Polls:                decodePolls(msg.Polls),
     PossiblySensitive:    msg.PossiblySensitive,
     FilterLevel:          msg.FilterLevel,
@@ -259,11 +312,11 @@ func decodeTweet(msg *pb.Tweet) Tweet {
     }
   }
   if quote, ok := msg.Quote.(*pb.Tweet_QuotedTweet); ok && quote != nil {
-    decodedQuote := decodeTweet(quote.QuotedTweet)
+    decodedQuote := decodeTweetMessage(quote.QuotedTweet)
     tweet.Quoted = &decodedQuote
   }
   if retweet, ok := msg.Retweet.(*pb.Tweet_RetweetedTweet); ok && retweet != nil {
-    decodedRetweet := decodeTweet(retweet.RetweetedTweet)
+    decodedRetweet := decodeTweetMessage(retweet.RetweetedTweet)
     tweet.Retweeted = &decodedRetweet
   }
   if msg.CurrentUserRetweetId != 0 {
@@ -273,70 +326,69 @@ func decodeTweet(msg *pb.Tweet) Tweet {
   return tweet
 }
 
-func encodeUser(mod model.User) (*pb.User, error) {
-  var err error
-  var msg pb.User
-
-  msg.Id = mod.ID
-
-  msg.Handle = mod.ScreenName
-
-  msg.DisplayName = mod.Name
-
-  msg.CreatedAt = time.Time(mod.CreatedAt).Unix()
-
-  if mod.Description != nil {
-    msg.Bio = *mod.Description
+func decodeUserModel(m model.User) User {
+  user := User{
+    ID:                m.ID,
+    Handle:            m.ScreenName,
+    DisplayName:       m.Name,
+    CreatedAt:         time.Time(m.CreatedAt),
+    Protected:         m.Protected,
+    Verified:          m.Verified,
+    FollowerCount:     m.FollowersCount,
+    FollowingCount:    m.FriendsCount,
+    ListedCount:       m.ListedCount,
+    FavouritesCount:   m.FavoritesCount,
+    StatusesCount:     m.StatusesCount,
+    ProfileBanner:     m.ProfileBanner,
+    ProfileImage:      m.ProfileImage,
+    DefaultProfile:    m.DefaultProfile,
+    WithheldCountries: m.WithheldCountries,
+    URLs:              decodeURLModels(m.Entities.URL.URLs),
+    BioURLs:           decodeURLModels(m.Entities.Description.URLs),
   }
-
-  if mod.URL != nil {
-    msg.Url = *mod.URL
+  if m.Description != nil {
+    user.Bio = *m.Description
   }
-
-  if mod.Location != nil {
-    msg.Location = *mod.Location
+  if m.URL != nil {
+    user.URL = *m.URL
   }
-
-  msg.Protected = mod.Protected
-
-  msg.Verified = mod.Verified
-
-  msg.FollowerCount = uint32(mod.FollowersCount)
-
-  msg.FollowingCount = uint32(mod.FriendsCount)
-
-  msg.ListedCount = uint32(mod.ListedCount)
-
-  msg.FavoritesCount = uint32(mod.FavoritesCount)
-
-  msg.StatusesCount = uint32(mod.StatusesCount)
-
-  msg.ProfileBanner = mod.ProfileBanner
-
-  msg.ProfileImage = mod.ProfileImage
-
-  msg.DefaultProfile = mod.DefaultProfile
-
-  msg.DefaultProfileImage = mod.DefaultProfileImage
-
-  msg.WithheldCountries = mod.WithheldCountries
-
-  if mod.WithheldScope != nil {
-    msg.WithheldScope = *mod.WithheldScope
+  if m.Location != nil {
+    user.Location = *m.Location
   }
-
-  if msg.UrlUrls, err = encodeURLs(mod.Entities.URL.URLs); err != nil {
-    return nil, err
+  if m.WithheldScope != nil {
+    user.WithheldScope = *m.WithheldScope
   }
-
-  if msg.BioUrls, err = encodeURLs(mod.Entities.Description.URLs); err != nil {
-    return nil, err
-  }
-
-  return &msg, nil
+  return user
 }
 
-func decodeUser(msg *pb.User) User {
+func encodeUserMessage(user User) *pb.User {
+  return &pb.User{
+    Id:                  user.ID,
+    Handle:              user.Handle,
+    DisplayName:         user.DisplayName,
+    CreatedAt:           user.CreatedAt.Unix(),
+    Bio:                 user.Bio,
+    Url:                 user.URL,
+    Location:            user.Location,
+    Protected:           user.Protected,
+    Verified:            user.Verified,
+    FollowerCount:       uint32(user.FollowerCount),
+    FollowingCount:      uint32(user.FollowerCount),
+    ListedCount:         uint32(user.ListedCount),
+    FavoritesCount:      uint32(user.FavouritesCount),
+    StatusesCount:       uint32(user.StatusesCount),
+    ProfileBanner:       user.ProfileBanner,
+    ProfileImage:        user.ProfileImage,
+    DefaultProfile:      user.DefaultProfile,
+    DefaultProfileImage: user.DefaultProfileImage,
+    WithheldCountries:   user.WithheldCountries,
+    WithheldScope:       user.WithheldScope,
+    UrlUrls:             encodeURLMessages(user.URLs),
+    BioUrls:             encodeURLMessages(user.BioURLs),
+  }
+}
+
+func decodeUserMessage(msg *pb.User) User {
   if msg == nil {
     return User{}
   }
@@ -361,90 +413,123 @@ func decodeUser(msg *pb.User) User {
     DefaultProfileImage: msg.DefaultProfileImage,
     WithheldCountries:   msg.WithheldCountries,
     WithheldScope:       msg.WithheldScope,
-    URLs:                decodeURLs(msg.UrlUrls),
-    BioURLs:             decodeURLs(msg.BioUrls),
+    URLs:                decodeURLMessages(msg.UrlUrls),
+    BioURLs:             decodeURLMessages(msg.BioUrls),
   }
 }
 
-func encodeIndices(indices []uint) (*pb.Indices, error) {
-  if len(indices) == 0 {
-    return &pb.Indices{Start: 0, End: 0}, nil
-  } else if len(indices) != 2 {
-    return nil, fmt.Errorf("expected [start,end] index values pair, got %v", indices)
+func decodeIndicesModel(m model.Indices) Indices {
+  var start, end uint
+  if len(m) > 0 {
+    start = m[0]
+    if len(m) > 1 {
+      end = m[1]
+    }
   }
-  return &pb.Indices{Start: uint32(indices[0]), End: uint32(indices[1])}, nil
+  return Indices{Start: start, End: end}
 }
 
-func decodeIndices(msg *pb.Indices) Indices {
+func encodeIndicesMessage(indices Indices) *pb.Indices {
+  return &pb.Indices{Start: uint32(indices.Start), End: uint32(indices.End)}
+}
+
+func decodeIndicesMessage(msg *pb.Indices) Indices {
   if msg == nil {
     return Indices{}
   }
   return Indices{Start: uint(msg.Start), End: uint(msg.End)}
 }
 
-func encodeURL(mod model.URL) (*pb.URL, error) {
-  var err error
-  msg := pb.URL{
-    TwitterUrl:  mod.URL,
-    DisplayUrl:  mod.DisplayURL,
-    ExpandedUrl: mod.ExpandedURL,
+func decodeURLModels(ms []model.URL) []URL {
+  urls := make([]URL, len(ms))
+  for i, m := range ms {
+    urls[i] = decodeURLModel(m)
   }
-  if msg.Indices, err = encodeIndices(mod.Indices); err != nil {
-    return nil, err
-  }
-  return &msg, nil
+  return urls
 }
 
-func encodeURLs(mods []model.URL) ([]*pb.URL, error) {
-  var err error
-  msgs := make([]*pb.URL, len(mods))
-  for i, mod := range mods {
-    if msgs[i], err = encodeURL(mod); err != nil {
-      return nil, err
-    }
+func decodeURLModel(m model.URL) URL {
+  return URL{
+    Indices:     decodeIndicesModel(m.Indices),
+    TwitterURL:  m.URL,
+    DisplayURL:  m.DisplayURL,
+    ExpandedURL: m.ExpandedURL,
   }
-  return msgs, nil
 }
 
-func decodeURL(msg *pb.URL) URL {
+func encodeURLMessages(urls []URL) []*pb.URL {
+  msgs := make([]*pb.URL, len(urls))
+  for i, url := range urls {
+    msgs[i] = encodeURLMessage(url)
+  }
+  return msgs
+}
+
+func encodeURLMessage(url URL) *pb.URL {
+  return &pb.URL{
+    Indices:     encodeIndicesMessage(url.Indices),
+    TwitterUrl:  url.TwitterURL,
+    DisplayUrl:  url.DisplayURL,
+    ExpandedUrl: url.ExpandedURL,
+  }
+}
+
+func decodeURLMessages(msgs []*pb.URL) []URL {
+  urls := make([]URL, len(msgs))
+  for i, msg := range msgs {
+    urls[i] = decodeURLMessage(msg)
+  }
+  return urls
+}
+
+func decodeURLMessage(msg *pb.URL) URL {
   if msg == nil {
     return URL{}
   }
   return URL{
-    Indices:     decodeIndices(msg.Indices),
+    Indices:     decodeIndicesMessage(msg.Indices),
     TwitterURL:  msg.TwitterUrl,
     DisplayURL:  msg.DisplayUrl,
     ExpandedURL: msg.ExpandedUrl,
   }
 }
 
-func decodeURLs(msgs []*pb.URL) []URL {
-  urls := make([]URL, len(msgs))
-  for i, msg := range msgs {
-    urls[i] = decodeURL(msg)
+func decodeSymbolModels(ms []model.Symbol) []Symbol {
+  symbols := make([]Symbol, len(ms))
+  for i, m := range ms {
+    symbols[i] = decodeSymbolModel(m)
   }
-  return urls
+  return symbols
 }
 
-func encodeSymbols(mods []model.Symbol) ([]*pb.Symbol, error) {
-  var err error
-  msgs := make([]*pb.Symbol, len(mods))
-  for i, mod := range mods {
-    msg := pb.Symbol{Text: mod.Text}
-    if msg.Indices, err = encodeIndices(mod.Indices); err != nil {
-      return nil, err
-    }
-    msgs[i] = &msg
+func decodeSymbolModel(m model.Symbol) Symbol {
+  return Symbol{
+    Indices: decodeIndicesModel(m.Indices),
+    Text:    m.Text,
   }
-  return msgs, nil
 }
 
-func decodeSymbols(msgs []*pb.Symbol) []Symbol {
+func encodeSymbolMessages(symbols []Symbol) []*pb.Symbol {
+  msgs := make([]*pb.Symbol, len(symbols))
+  for i, symbol := range symbols {
+    msgs[i] = encodeSymbolMessage(symbol)
+  }
+  return msgs
+}
+
+func encodeSymbolMessage(symbol Symbol) *pb.Symbol {
+  return &pb.Symbol{
+    Indices: encodeIndicesMessage(symbol.Indices),
+    Text:    symbol.Text,
+  }
+}
+
+func decodeSymbolMessages(msgs []*pb.Symbol) []Symbol {
   symbols := make([]Symbol, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
       symbols[i] = Symbol{
-        Indices: decodeIndices(msg.Indices),
+        Indices: decodeIndicesMessage(msg.Indices),
         Text:    msg.Text,
       }
     }
@@ -452,29 +537,46 @@ func decodeSymbols(msgs []*pb.Symbol) []Symbol {
   return symbols
 }
 
-func encodeMentions(mods []model.Mention) ([]*pb.Mention, error) {
-  var err error
-  msgs := make([]*pb.Mention, len(mods))
-  for i, mod := range mods {
-    msg := pb.Mention{
-      UserId:      mod.ID,
-      Handle:      mod.ScreenName,
-      DisplayName: mod.Name,
-    }
-    if msg.Indices, err = encodeIndices(mod.Indices); err != nil {
-      return nil, err
-    }
-    msgs[i] = &msg
+func decodeMentionModels(ms []model.Mention) []Mention {
+  mentions := make([]Mention, len(ms))
+  for i, m := range ms {
+    mentions[i] = decodeMentionModel(m)
   }
-  return msgs, nil
+  return mentions
 }
 
-func decodeMentions(msgs []*pb.Mention) []Mention {
+func decodeMentionModel(m model.Mention) Mention {
+  return Mention{
+    Indices:         decodeIndicesModel(m.Indices),
+    UserID:          m.ID,
+    UserHandle:      m.ScreenName,
+    UserDisplayName: m.Name,
+  }
+}
+
+func encodeMentionMessages(mentions []Mention) []*pb.Mention {
+  msgs := make([]*pb.Mention, len(mentions))
+  for i, mention := range mentions {
+    msgs[i] = encodeMentionMessage(mention)
+  }
+  return msgs
+}
+
+func encodeMentionMessage(mention Mention) *pb.Mention {
+  return &pb.Mention{
+    Indices:     encodeIndicesMessage(mention.Indices),
+    UserId:      mention.UserID,
+    Handle:      mention.UserHandle,
+    DisplayName: mention.UserDisplayName,
+  }
+}
+
+func decodeMentionMessages(msgs []*pb.Mention) []Mention {
   mentions := make([]Mention, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
       mentions[i] = Mention{
-        Indices:         decodeIndices(msg.Indices),
+        Indices:         decodeIndicesMessage(msg.Indices),
         UserID:          msg.UserId,
         UserHandle:      msg.Handle,
         UserDisplayName: msg.DisplayName,
@@ -484,75 +586,92 @@ func decodeMentions(msgs []*pb.Mention) []Mention {
   return mentions
 }
 
-func encodeMedia(mods []model.Media) ([]*pb.Media, error) {
-  var err error
-  msgs := make([]*pb.Media, len(mods))
-  for i, mod := range mods {
-    msg := pb.Media{
-      Id:   mod.ID,
-      Type: mod.Type,
-      Alt:  mod.AltText,
-      Thumb: &pb.Media_Size{
-        Width:  uint32(mod.Sizes.Thumb.W),
-        Height: uint32(mod.Sizes.Thumb.H),
-        Resize: mod.Sizes.Thumb.Resize,
-      },
-      Small: &pb.Media_Size{
-        Width:  uint32(mod.Sizes.Small.W),
-        Height: uint32(mod.Sizes.Small.H),
-        Resize: mod.Sizes.Small.Resize,
-      },
-      Medium: &pb.Media_Size{
-        Width:  uint32(mod.Sizes.Medium.W),
-        Height: uint32(mod.Sizes.Medium.H),
-        Resize: mod.Sizes.Medium.Resize,
-      },
-      Large: &pb.Media_Size{
-        Width:  uint32(mod.Sizes.Large.W),
-        Height: uint32(mod.Sizes.Large.H),
-        Resize: mod.Sizes.Large.Resize,
-      },
-    }
-    if msg.Url, err = encodeURL(mod.URL); err != nil {
-      return nil, err
-    }
-    if mod.MediaURLHttps != "" {
-      msg.MediaUrl = mod.MediaURLHttps
-    } else {
-      msg.MediaUrl = mod.MediaURL
-    }
-    if mod.SourceStatusID != nil {
-      msg.Source = &pb.Media_SourceTweetId{SourceTweetId: *mod.SourceStatusID}
-    } else {
-      msg.Source = &pb.Media_NoSource{NoSource: true}
-    }
-    msgs[i] = &msg
+func decodeMediaModels(ms []model.Media) []Media {
+  medias := make([]Media, len(ms))
+  for i, m := range ms {
+    medias[i] = decodeMediaModel(m)
   }
-  return msgs, nil
+  return medias
 }
 
-func decodeMedia(msgs []*pb.Media) []Media {
+func decodeMediaModel(m model.Media) Media {
+  media := Media{
+    URL:           decodeURLModel(m.URL),
+    ID:            m.ID,
+    Type:          m.Type,
+    Alt:           m.AltText,
+    SourceTweetID: m.SourceStatusID,
+    Thumb:         decodeMediaSizeModel(m.Sizes.Thumb),
+    Small:         decodeMediaSizeModel(m.Sizes.Small),
+    Medium:        decodeMediaSizeModel(m.Sizes.Medium),
+    Large:         decodeMediaSizeModel(m.Sizes.Large),
+  }
+  if m.MediaURLHttps != "" {
+    media.MediaURL = m.MediaURLHttps
+  } else {
+    media.MediaURL = m.MediaURL
+  }
+  return media
+}
+
+func encodeMediaMessages(medias []Media) []*pb.Media {
+  msgs := make([]*pb.Media, len(medias))
+  for i, media := range medias {
+    msgs[i] = encodeMediaMessage(media)
+  }
+  return msgs
+}
+
+func encodeMediaMessage(media Media) *pb.Media {
+  msg := pb.Media{
+    Url:      encodeURLMessage(media.URL),
+    Id:       media.ID,
+    Type:     media.Type,
+    MediaUrl: media.MediaURL,
+    Alt:      media.Alt,
+    Thumb:    encodeMediaSizeMessage(media.Thumb),
+    Small:    encodeMediaSizeMessage(media.Small),
+    Medium:   encodeMediaSizeMessage(media.Medium),
+    Large:    encodeMediaSizeMessage(media.Large),
+  }
+  if media.SourceTweetID != nil {
+    msg.Source = &pb.Media_SourceTweetId{SourceTweetId: *media.SourceTweetID}
+  } else {
+    msg.Source = &pb.Media_NoSource{NoSource: true}
+  }
+  return &msg
+}
+
+func encodeMediaSizeMessage(mediaSize MediaSize) *pb.Media_Size {
+  return &pb.Media_Size{
+    Width:  uint32(mediaSize.Width),
+    Height: uint32(mediaSize.Height),
+    Resize: mediaSize.Resize,
+  }
+}
+
+func decodeMediaMessages(msgs []*pb.Media) []Media {
   media := make([]Media, len(msgs))
   for i, msg := range msgs {
     if msg != nil {
       media[i] = Media{
-        URL:           decodeURL(msg.Url),
+        URL:           decodeURLMessage(msg.Url),
         ID:            msg.Id,
         Type:          msg.Type,
         MediaURL:      msg.MediaUrl,
         Alt:           msg.Alt,
-        SourceTweetID: decodeMediaSource(msg),
-        Thumb:         decodeMediaSize(msg.Thumb),
-        Small:         decodeMediaSize(msg.Small),
-        Medium:        decodeMediaSize(msg.Medium),
-        Large:         decodeMediaSize(msg.Large),
+        SourceTweetID: decodeMediaSourceMessage(msg),
+        Thumb:         decodeMediaSizeMessage(msg.Thumb),
+        Small:         decodeMediaSizeMessage(msg.Small),
+        Medium:        decodeMediaSizeMessage(msg.Medium),
+        Large:         decodeMediaSizeMessage(msg.Large),
       }
     }
   }
   return media
 }
 
-func decodeMediaSource(msg *pb.Media) *uint64 {
+func decodeMediaSourceMessage(msg *pb.Media) *uint64 {
   if source, ok := msg.Source.(*pb.Media_SourceTweetId); ok && source != nil {
     sourceID := source.SourceTweetId
     return &sourceID
@@ -560,30 +679,61 @@ func decodeMediaSource(msg *pb.Media) *uint64 {
   return nil
 }
 
-func decodeMediaSize(msg *pb.Media_Size) MediaSize {
+func decodeMediaSizeModel(m model.MediaSize) MediaSize {
+  return MediaSize{Width: m.W, Height: m.H, Resize: m.Resize}
+}
+
+func decodeMediaSizeMessage(msg *pb.Media_Size) MediaSize {
   if msg == nil {
     return MediaSize{}
   }
   return MediaSize{Width: uint(msg.Width), Height: uint(msg.Height), Resize: msg.Resize}
 }
 
-func encodePolls(mods []model.Poll) ([]*pb.Poll, error) {
-  msgs := make([]*pb.Poll, len(mods))
-  for i, mod := range mods {
-    msg := pb.Poll{
-      DurationMinutes: uint32(mod.DurationMinutes),
-      EndTime:         time.Time(mod.EndTime).Unix(),
-    }
-    msg.Options = make([]*pb.Poll_Option, len(mod.Options))
-    for j, optionMod := range mod.Options {
-      msg.Options[j] = &pb.Poll_Option{
-        Position: uint32(optionMod.Position),
-        Text:     optionMod.Text,
-      }
-    }
-    msgs[i] = &msg
+func decodePollModels(ms []model.Poll) []Poll {
+  polls := make([]Poll, len(ms))
+  for i, m := range ms {
+    polls[i] = decodePollModel(m)
   }
-  return msgs, nil
+  return polls
+}
+
+func decodePollModel(m model.Poll) Poll {
+  poll := Poll{
+    EndTime:  time.Time(m.EndTime),
+    Duration: time.Minute * time.Duration(m.DurationMinutes),
+    Options:  make([]PollOption, len(m.Options)),
+  }
+  for i, optM := range m.Options {
+    poll.Options[i] = PollOption{
+      Position: optM.Position,
+      Text:     optM.Text,
+    }
+  }
+  return poll
+}
+
+func encodePollMessages(polls []Poll) []*pb.Poll {
+  msgs := make([]*pb.Poll, len(polls))
+  for i, poll := range polls {
+    msgs[i] = encodePollMessage(poll)
+  }
+  return msgs
+}
+
+func encodePollMessage(poll Poll) *pb.Poll {
+  msg := pb.Poll{
+    DurationMinutes: uint32(math.Floor(poll.Duration.Minutes())),
+    EndTime:         poll.EndTime.Unix(),
+    Options:         make([]*pb.Poll_Option, len(poll.Options)),
+  }
+  for i, option := range poll.Options {
+    msg.Options[i] = &pb.Poll_Option{
+      Position: uint32(option.Position),
+      Text:     option.Text,
+    }
+  }
+  return &msg
 }
 
 func decodePolls(msgs []*pb.Poll) []Poll {

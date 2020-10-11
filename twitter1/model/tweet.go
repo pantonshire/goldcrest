@@ -12,7 +12,7 @@ type Tweet struct {
   //Extended mode text, 280 character limit
   FullText string `json:"full_text"`
 
-  DisplayTextRange []uint `json:"display_text_range"`
+  DisplayTextRange Indices `json:"display_text_range"`
 
   Source    string `json:"source"`
   Truncated bool   `json:"truncated"`
@@ -88,7 +88,7 @@ type Tweet struct {
   //Included in streamed tweets
   ExtendedTweet *struct {
     FullText         string                `json:"full_text"`
-    DisplayTextRange []uint                `json:"display_text_range"`
+    DisplayTextRange Indices               `json:"display_text_range"`
     Entities         TweetEntities         `json:"entities"`
     ExtendedEntities TweetExtendedEntities `json:"extended_entities"`
   } `json:"extended_tweet"`

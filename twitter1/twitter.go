@@ -43,8 +43,8 @@ type TweetOptions struct {
 }
 
 type TimelineOptions struct {
-  Count        uint
-  MinID, MaxID uint64
+  Count        *uint
+  MinID, MaxID *uint64
 }
 
 type StatusUpdateOptions struct {
@@ -160,7 +160,7 @@ func (t Twitter) requestRaw(ctx context.Context, req *http.Request) (status int,
   return status, headers, body, nil
 }
 
-func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, twOpts TweetOptions) (model.Tweet, error) {
+func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, twOpts TweetOptions) (Tweet, error) {
   or := OAuthRequest{
     Method:   "GET",
     Protocol: protocol,
@@ -170,25 +170,25 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, tw
       "id": fmt.Sprint(id),
     }, twOpts.encode()),
   }
-  var tweet model.Tweet
-  if err := t.standardRequest(ctx, limitStatusShow, or, auth, &tweet); err != nil {
-    return model.Tweet{}, err
+  var m model.Tweet
+  if err := t.standardRequest(ctx, limitStatusShow, or, auth, &m); err != nil {
+    return Tweet{}, err
   }
-  return tweet, nil
+  return decodeTweetModel(m), nil
 }
 
-func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, count *uint, minID, maxID *uint64, includeReplies bool) ([]model.Tweet, error) {
+func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, tlOpts TimelineOptions, includeReplies bool) ([]Tweet, error) {
   query := joinParamMaps(map[string]string{
     "exclude_replies": fmt.Sprint(!includeReplies),
   }, twOpts.encode())
-  if count != nil {
-    query["count"] = fmt.Sprint(*count)
+  if tlOpts.Count != nil {
+    query["count"] = fmt.Sprint(*tlOpts.Count)
   }
-  if minID != nil {
-    query["since_id"] = fmt.Sprint(*minID)
+  if tlOpts.MinID != nil {
+    query["since_id"] = fmt.Sprint(*tlOpts.MinID)
   }
-  if maxID != nil {
-    query["max_id"] = fmt.Sprint(*maxID)
+  if tlOpts.MaxID != nil {
+    query["max_id"] = fmt.Sprint(*tlOpts.MaxID)
   }
   or := OAuthRequest{
     Method:   "GET",
@@ -197,23 +197,23 @@ func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twOpts Twee
     Path:     path.Join(version, "statuses/home_timeline.json"),
     Query:    query,
   }
-  var tweets []model.Tweet
-  if err := t.standardRequest(ctx, limitHomeTimeline, or, auth, &tweets); err != nil {
+  var ms []model.Tweet
+  if err := t.standardRequest(ctx, limitHomeTimeline, or, auth, &ms); err != nil {
     return nil, err
   }
-  return tweets, nil
+  return decodeTweetModels(ms), nil
 }
 
-func (t Twitter) GetMentionTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, count *uint, minID, maxID *uint64) ([]model.Tweet, error) {
+func (t Twitter) GetMentionTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error) {
   query := twOpts.encode()
-  if count != nil {
-    query["count"] = fmt.Sprint(*count)
+  if tlOpts.Count != nil {
+    query["count"] = fmt.Sprint(*tlOpts.Count)
   }
-  if minID != nil {
-    query["since_id"] = fmt.Sprint(*minID)
+  if tlOpts.MinID != nil {
+    query["since_id"] = fmt.Sprint(*tlOpts.MinID)
   }
-  if maxID != nil {
-    query["max_id"] = fmt.Sprint(*maxID)
+  if tlOpts.MaxID != nil {
+    query["max_id"] = fmt.Sprint(*tlOpts.MaxID)
   }
   or := OAuthRequest{
     Method:   "GET",
@@ -222,14 +222,14 @@ func (t Twitter) GetMentionTimeline(ctx context.Context, auth AuthPair, twOpts T
     Path:     path.Join(version, "statuses/mentions_timeline.json"),
     Query:    query,
   }
-  var tweets []model.Tweet
-  if err := t.standardRequest(ctx, limitMentionTimeline, or, auth, &tweets); err != nil {
+  var ms []model.Tweet
+  if err := t.standardRequest(ctx, limitMentionTimeline, or, auth, &ms); err != nil {
     return nil, err
   }
-  return tweets, nil
+  return decodeTweetModels(ms), nil
 }
 
-func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, id *uint64, handle *string, count *uint, minID, maxID *uint64, includeReplies, includeRetweets bool) ([]model.Tweet, error) {
+func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, id *uint64, handle *string, tlOpts TimelineOptions, includeReplies, includeRetweets bool) ([]Tweet, error) {
   query := joinParamMaps(map[string]string{
     "exclude_replies": fmt.Sprint(!includeReplies),
     "include_rts":     fmt.Sprint(includeRetweets),
@@ -240,14 +240,14 @@ func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts Twee
   if handle != nil {
     query["screen_name"] = fmt.Sprint(*handle)
   }
-  if count != nil {
-    query["count"] = fmt.Sprint(*count)
+  if tlOpts.Count != nil {
+    query["count"] = fmt.Sprint(*tlOpts.Count)
   }
-  if minID != nil {
-    query["since_id"] = fmt.Sprint(*minID)
+  if tlOpts.MinID != nil {
+    query["since_id"] = fmt.Sprint(*tlOpts.MinID)
   }
-  if maxID != nil {
-    query["max_id"] = fmt.Sprint(*maxID)
+  if tlOpts.MaxID != nil {
+    query["max_id"] = fmt.Sprint(*tlOpts.MaxID)
   }
   or := OAuthRequest{
     Method:   "GET",
@@ -256,14 +256,14 @@ func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts Twee
     Path:     path.Join(version, "statuses/user_timeline.json"),
     Query:    query,
   }
-  var tweets []model.Tweet
-  if err := t.standardRequest(ctx, limitUserTimeline, or, auth, &tweets); err != nil {
+  var ms []model.Tweet
+  if err := t.standardRequest(ctx, limitUserTimeline, or, auth, &ms); err != nil {
     return nil, err
   }
-  return tweets, nil
+  return decodeTweetModels(ms), nil
 }
 
-func (t Twitter) UpdateStatus(ctx context.Context, auth AuthPair, text string, replyID *uint64, autoReply bool, excludeReplyUserIDs []uint64, attachmentURL *string, mediaIDs []uint64, sensitive, trimUser, enableDMCommands, failDMCommands bool) (model.Tweet, error) {
+func (t Twitter) UpdateStatus(ctx context.Context, auth AuthPair, text string, replyID *uint64, autoReply bool, excludeReplyUserIDs []uint64, attachmentURL *string, mediaIDs []uint64, sensitive, trimUser, enableDMCommands, failDMCommands bool) (Tweet, error) {
   query := map[string]string{
     "status":                       text,
     "auto_populate_reply_metadata": fmt.Sprint(autoReply),
@@ -299,14 +299,14 @@ func (t Twitter) UpdateStatus(ctx context.Context, auth AuthPair, text string, r
     Path:     path.Join(version, "statuses/update.json"),
     Query:    query,
   }
-  var tweet model.Tweet
-  if err := t.standardRequest(ctx, limitStatusUpdate, or, auth, &tweet); err != nil {
-    return model.Tweet{}, err
+  var m model.Tweet
+  if err := t.standardRequest(ctx, limitStatusUpdate, or, auth, &m); err != nil {
+    return Tweet{}, err
   }
-  return tweet, nil
+  return decodeTweetModel(m), nil
 }
 
-func (t Twitter) UpdateProfile(ctx context.Context, auth AuthPair, name, url, location, bio, linkColor *string, includeEntities, includeStatuses bool) (model.User, error) {
+func (t Twitter) UpdateProfile(ctx context.Context, auth AuthPair, name, url, location, bio, linkColor *string, includeEntities, includeStatuses bool) (User, error) {
   query := map[string]string{
     "include_entities": fmt.Sprint(includeEntities),
     "skip_status":      fmt.Sprint(!includeStatuses),
@@ -333,11 +333,11 @@ func (t Twitter) UpdateProfile(ctx context.Context, auth AuthPair, name, url, lo
     Path:     path.Join(version, "account/update_profile.json"),
     Query:    query,
   }
-  var user model.User
-  if err := t.standardRequest(ctx, limitUpdateProfile, or, auth, &user); err != nil {
-    return model.User{}, err
+  var m model.User
+  if err := t.standardRequest(ctx, limitUpdateProfile, or, auth, &m); err != nil {
+    return User{}, err
   }
-  return user, nil
+  return decodeUserModel(m), nil
 }
 
 func joinParamMaps(ms ...map[string]string) map[string]string {

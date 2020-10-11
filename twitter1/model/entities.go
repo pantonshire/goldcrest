@@ -1,5 +1,7 @@
 package model
 
+type Indices []uint
+
 type TweetEntities struct {
   Hashtags []Symbol  `json:"hashtags"`
   Media    []Media   `json:"media"`
@@ -14,7 +16,7 @@ type TweetExtendedEntities struct {
 }
 
 type InlineEntity struct {
-  Indices []uint `json:"indices"`
+  Indices Indices `json:"indices"`
 }
 
 type Symbol struct {
