@@ -43,8 +43,8 @@ type TweetOptions struct {
 }
 
 type TimelineOptions struct {
-  Count        uint
-  MinID, MaxID uint64
+  Count        *uint
+  MinID, MaxID *uint64
 }
 
 type StatusUpdateOptions struct {
@@ -177,18 +177,18 @@ func (t Twitter) GetTweet(ctx context.Context, auth AuthPair, id interface{}, tw
   return decodeTweetModel(m), nil
 }
 
-func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, count *uint, minID, maxID *uint64, includeReplies bool) ([]Tweet, error) {
+func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, tlOpts TimelineOptions, includeReplies bool) ([]Tweet, error) {
   query := joinParamMaps(map[string]string{
     "exclude_replies": fmt.Sprint(!includeReplies),
   }, twOpts.encode())
-  if count != nil {
-    query["count"] = fmt.Sprint(*count)
+  if tlOpts.Count != nil {
+    query["count"] = fmt.Sprint(*tlOpts.Count)
   }
-  if minID != nil {
-    query["since_id"] = fmt.Sprint(*minID)
+  if tlOpts.MinID != nil {
+    query["since_id"] = fmt.Sprint(*tlOpts.MinID)
   }
-  if maxID != nil {
-    query["max_id"] = fmt.Sprint(*maxID)
+  if tlOpts.MaxID != nil {
+    query["max_id"] = fmt.Sprint(*tlOpts.MaxID)
   }
   or := OAuthRequest{
     Method:   "GET",
@@ -204,16 +204,16 @@ func (t Twitter) GetHomeTimeline(ctx context.Context, auth AuthPair, twOpts Twee
   return decodeTweetModels(ms), nil
 }
 
-func (t Twitter) GetMentionTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, count *uint, minID, maxID *uint64) ([]Tweet, error) {
+func (t Twitter) GetMentionTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error) {
   query := twOpts.encode()
-  if count != nil {
-    query["count"] = fmt.Sprint(*count)
+  if tlOpts.Count != nil {
+    query["count"] = fmt.Sprint(*tlOpts.Count)
   }
-  if minID != nil {
-    query["since_id"] = fmt.Sprint(*minID)
+  if tlOpts.MinID != nil {
+    query["since_id"] = fmt.Sprint(*tlOpts.MinID)
   }
-  if maxID != nil {
-    query["max_id"] = fmt.Sprint(*maxID)
+  if tlOpts.MaxID != nil {
+    query["max_id"] = fmt.Sprint(*tlOpts.MaxID)
   }
   or := OAuthRequest{
     Method:   "GET",
@@ -229,7 +229,7 @@ func (t Twitter) GetMentionTimeline(ctx context.Context, auth AuthPair, twOpts T
   return decodeTweetModels(ms), nil
 }
 
-func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, id *uint64, handle *string, count *uint, minID, maxID *uint64, includeReplies, includeRetweets bool) ([]Tweet, error) {
+func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts TweetOptions, id *uint64, handle *string, tlOpts TimelineOptions, includeReplies, includeRetweets bool) ([]Tweet, error) {
   query := joinParamMaps(map[string]string{
     "exclude_replies": fmt.Sprint(!includeReplies),
     "include_rts":     fmt.Sprint(includeRetweets),
@@ -240,14 +240,14 @@ func (t Twitter) GetUserTimeline(ctx context.Context, auth AuthPair, twOpts Twee
   if handle != nil {
     query["screen_name"] = fmt.Sprint(*handle)
   }
-  if count != nil {
-    query["count"] = fmt.Sprint(*count)
+  if tlOpts.Count != nil {
+    query["count"] = fmt.Sprint(*tlOpts.Count)
   }
-  if minID != nil {
-    query["since_id"] = fmt.Sprint(*minID)
+  if tlOpts.MinID != nil {
+    query["since_id"] = fmt.Sprint(*tlOpts.MinID)
   }
-  if maxID != nil {
-    query["max_id"] = fmt.Sprint(*maxID)
+  if tlOpts.MaxID != nil {
+    query["max_id"] = fmt.Sprint(*tlOpts.MaxID)
   }
   or := OAuthRequest{
     Method:   "GET",

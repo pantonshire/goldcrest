@@ -51,6 +51,37 @@ func decodeTweetOptionsMessage(msg *pb.TweetOptions) TweetOptions {
   }
 }
 
+func encodeTimelineOptionsMessage(tlOpts TimelineOptions) *pb.TimelineOptions {
+  msg := pb.TimelineOptions{}
+  if tlOpts.Count != nil {
+    msg.Count = uint32(*tlOpts.Count)
+  }
+  if tlOpts.MinID != nil {
+    msg.MinId = *tlOpts.MinID
+  }
+  if tlOpts.MaxID != nil {
+    msg.MaxId = *tlOpts.MaxID
+  }
+  return &msg
+}
+
+func decodeTimelineOptionsMessage(msg *pb.TimelineOptions) TimelineOptions {
+  tlOpts := TimelineOptions{}
+  if msg.Count != 0 {
+    count := uint(msg.Count)
+    tlOpts.Count = &count
+  }
+  if msg.MinId != 0 {
+    minID := msg.MinId
+    tlOpts.MinID = &minID
+  }
+  if msg.MaxId != 0 {
+    maxID := msg.MaxId
+    tlOpts.MaxID = &maxID
+  }
+  return tlOpts
+}
+
 func encodeTweetModeMessage(mode TweetMode) pb.TweetOptions_Mode {
   if mode == ExtendedMode {
     return pb.TweetOptions_EXTENDED

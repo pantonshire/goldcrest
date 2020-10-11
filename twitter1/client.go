@@ -77,18 +77,7 @@ func (lc local) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, rep
   var tweets []Tweet
   err := handleRequest(lc, func(ctx context.Context) error {
     var err error
-    var count *uint
-    var minID, maxID *uint64
-    if tlOpts.Count > 0 {
-      count = &tlOpts.Count
-    }
-    if tlOpts.MinID > 0 {
-      minID = &tlOpts.MinID
-    }
-    if tlOpts.MaxID > 0 {
-      maxID = &tlOpts.MaxID
-    }
-    tweets, err = lc.twitter.GetHomeTimeline(ctx, lc.auth, twOpts, count, minID, maxID, replies)
+    tweets, err = lc.twitter.GetHomeTimeline(ctx, lc.auth, twOpts, tlOpts, replies)
     if err != nil {
       return err
     }
@@ -104,18 +93,7 @@ func (lc local) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) 
   var tweets []Tweet
   err := handleRequest(lc, func(ctx context.Context) error {
     var err error
-    var count *uint
-    var minID, maxID *uint64
-    if tlOpts.Count > 0 {
-      count = &tlOpts.Count
-    }
-    if tlOpts.MinID > 0 {
-      minID = &tlOpts.MinID
-    }
-    if tlOpts.MaxID > 0 {
-      maxID = &tlOpts.MaxID
-    }
-    tweets, err = lc.twitter.GetMentionTimeline(ctx, lc.auth, twOpts, count, minID, maxID)
+    tweets, err = lc.twitter.GetMentionTimeline(ctx, lc.auth, twOpts, tlOpts)
     if err != nil {
       return err
     }
@@ -131,18 +109,7 @@ func (lc local) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts Timelin
   var tweets []Tweet
   err := handleRequest(lc, func(ctx context.Context) error {
     var err error
-    var count *uint
-    var minID, maxID *uint64
-    if tlOpts.Count > 0 {
-      count = &tlOpts.Count
-    }
-    if tlOpts.MinID > 0 {
-      minID = &tlOpts.MinID
-    }
-    if tlOpts.MaxID > 0 {
-      maxID = &tlOpts.MaxID
-    }
-    tweets, err = lc.twitter.GetUserTimeline(ctx, lc.auth, twOpts, &id, nil, count, minID, maxID, replies, retweets)
+    tweets, err = lc.twitter.GetUserTimeline(ctx, lc.auth, twOpts, &id, nil, tlOpts, replies, retweets)
     if err != nil {
       return err
     }
@@ -158,18 +125,7 @@ func (lc local) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpts
   var tweets []Tweet
   err := handleRequest(lc, func(ctx context.Context) error {
     var err error
-    var count *uint
-    var minID, maxID *uint64
-    if tlOpts.Count > 0 {
-      count = &tlOpts.Count
-    }
-    if tlOpts.MinID > 0 {
-      minID = &tlOpts.MinID
-    }
-    if tlOpts.MaxID > 0 {
-      maxID = &tlOpts.MaxID
-    }
-    tweets, err = lc.twitter.GetUserTimeline(ctx, lc.auth, twOpts, nil, &handle, count, minID, maxID, replies, retweets)
+    tweets, err = lc.twitter.GetUserTimeline(ctx, lc.auth, twOpts, nil, &handle, tlOpts, replies, retweets)
     if err != nil {
       return err
     }
@@ -289,12 +245,10 @@ func (rc remote) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, re
   var tweets []Tweet
   err := handleRequest(rc, func(ctx context.Context) error {
     msg, err := rc.client.GetHomeTimeline(ctx, &pb.HomeTimelineRequest{
-      Auth:           encodeAuthPairMessage(rc.auth),
-      Count:          uint32(tlOpts.Count),
-      MinId:          tlOpts.MinID,
-      MaxId:          tlOpts.MaxID,
-      IncludeReplies: replies,
-      TweetOptions:   encodeTweetOptionsMessage(twOpts),
+      Auth:            encodeAuthPairMessage(rc.auth),
+      TimelineOptions: encodeTimelineOptionsMessage(tlOpts),
+      TweetOptions:    encodeTweetOptionsMessage(twOpts),
+      IncludeReplies:  replies,
     })
     if err != nil {
       return err
@@ -312,11 +266,9 @@ func (rc remote) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions)
   var tweets []Tweet
   err := handleRequest(rc, func(ctx context.Context) error {
     msg, err := rc.client.GetMentionTimeline(ctx, &pb.MentionTimelineRequest{
-      Auth:         encodeAuthPairMessage(rc.auth),
-      Count:        uint32(tlOpts.Count),
-      MinId:        tlOpts.MinID,
-      MaxId:        tlOpts.MaxID,
-      TweetOptions: encodeTweetOptionsMessage(twOpts),
+      Auth:            encodeAuthPairMessage(rc.auth),
+      TimelineOptions: encodeTimelineOptionsMessage(tlOpts),
+      TweetOptions:    encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -336,12 +288,10 @@ func (rc remote) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts Timeli
     msg, err := rc.client.GetUserTimeline(ctx, &pb.UserTimelineRequest{
       Auth:            encodeAuthPairMessage(rc.auth),
       User:            &pb.UserTimelineRequest_UserId{UserId: id},
-      CountLimit:      uint32(tlOpts.Count),
-      MinId:           tlOpts.MinID,
-      MaxId:           tlOpts.MaxID,
+      TimelineOptions: encodeTimelineOptionsMessage(tlOpts),
+      TweetOptions:    encodeTweetOptionsMessage(twOpts),
       IncludeReplies:  replies,
       IncludeRetweets: retweets,
-      TweetOptions:    encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -361,12 +311,10 @@ func (rc remote) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpt
     msg, err := rc.client.GetUserTimeline(ctx, &pb.UserTimelineRequest{
       Auth:            encodeAuthPairMessage(rc.auth),
       User:            &pb.UserTimelineRequest_UserHandle{UserHandle: handle},
-      CountLimit:      uint32(tlOpts.Count),
-      MinId:           tlOpts.MinID,
-      MaxId:           tlOpts.MaxID,
+      TimelineOptions: encodeTimelineOptionsMessage(tlOpts),
+      TweetOptions:    encodeTweetOptionsMessage(twOpts),
       IncludeReplies:  replies,
       IncludeRetweets: retweets,
-      TweetOptions:    encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err

@@ -34,19 +34,8 @@ func (s *twitterServer) GetTweets(req *pb.TweetsRequest, srv pb.Twitter1_GetTwee
 func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.Timeline, error) {
   auth := decodeAuthPairMessage(req.Auth)
   twOpts := decodeTweetOptionsMessage(req.TweetOptions)
-  var count *uint
-  var minID, maxID *uint64
-  if req.Count > 0 {
-    countVal := uint(req.Count)
-    count = &countVal
-  }
-  if req.MinId > 0 {
-    minID = &req.MinId
-  }
-  if req.MaxId > 0 {
-    maxID = &req.MaxId
-  }
-  tweets, err := s.twitter.GetHomeTimeline(ctx, auth, twOpts, count, minID, maxID, req.IncludeReplies)
+  tlOpts := decodeTimelineOptionsMessage(req.TimelineOptions)
+  tweets, err := s.twitter.GetHomeTimeline(ctx, auth, twOpts, tlOpts, req.IncludeReplies)
   if err != nil {
     return nil, err
   }
@@ -56,19 +45,8 @@ func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelin
 func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.Timeline, error) {
   auth := decodeAuthPairMessage(req.Auth)
   twOpts := decodeTweetOptionsMessage(req.TweetOptions)
-  var count *uint
-  var minID, maxID *uint64
-  if req.Count > 0 {
-    countVal := uint(req.Count)
-    count = &countVal
-  }
-  if req.MinId > 0 {
-    minID = &req.MinId
-  }
-  if req.MaxId > 0 {
-    maxID = &req.MaxId
-  }
-  tweets, err := s.twitter.GetMentionTimeline(ctx, auth, twOpts, count, minID, maxID)
+  tlOpts := decodeTimelineOptionsMessage(req.TimelineOptions)
+  tweets, err := s.twitter.GetMentionTimeline(ctx, auth, twOpts, tlOpts)
   if err != nil {
     return nil, err
   }
@@ -78,27 +56,16 @@ func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionT
 func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.Timeline, error) {
   auth := decodeAuthPairMessage(req.Auth)
   twOpts := decodeTweetOptionsMessage(req.TweetOptions)
+  tlOpts := decodeTimelineOptionsMessage(req.TimelineOptions)
   var userID *uint64
   var userHandle *string
-  var count *uint
-  var minID, maxID *uint64
   switch req.User.(type) {
   case *pb.UserTimelineRequest_UserId:
     userID = &req.User.(*pb.UserTimelineRequest_UserId).UserId
   case *pb.UserTimelineRequest_UserHandle:
     userHandle = &req.User.(*pb.UserTimelineRequest_UserHandle).UserHandle
   }
-  if req.CountLimit > 0 {
-    countVal := uint(req.CountLimit)
-    count = &countVal
-  }
-  if req.MinId > 0 {
-    minID = &req.MinId
-  }
-  if req.MaxId > 0 {
-    maxID = &req.MaxId
-  }
-  tweets, err := s.twitter.GetUserTimeline(ctx, auth, twOpts, userID, userHandle, count, minID, maxID, req.IncludeReplies, req.IncludeRetweets)
+  tweets, err := s.twitter.GetUserTimeline(ctx, auth, twOpts, userID, userHandle, tlOpts, req.IncludeReplies, req.IncludeRetweets)
   if err != nil {
     return nil, err
   }
