@@ -7,7 +7,7 @@ import (
   "time"
 )
 
-func authPairToMsg(auth AuthPair) *pb.Authentication {
+func encodeAuthPairMessage(auth AuthPair) *pb.Authentication {
   return &pb.Authentication{
     ConsumerKey: auth.Public.Key,
     AccessToken: auth.Public.Token,
@@ -16,50 +16,50 @@ func authPairToMsg(auth AuthPair) *pb.Authentication {
   }
 }
 
-func authPairFromMsg(authMessage *pb.Authentication) AuthPair {
-  if authMessage == nil {
+func decodeAuthPairMessage(msg *pb.Authentication) AuthPair {
+  if msg == nil {
     return AuthPair{}
   }
   return AuthPair{
-    Auth{Key: authMessage.SecretKey, Token: authMessage.SecretToken},
-    Auth{Key: authMessage.ConsumerKey, Token: authMessage.AccessToken},
+    Auth{Key: msg.SecretKey, Token: msg.SecretToken},
+    Auth{Key: msg.ConsumerKey, Token: msg.AccessToken},
   }
 }
 
-func tweetOptionsToMsg(params TweetOptions) *pb.TweetOptions {
+func encodeTweetOptionsMessage(twopts TweetOptions) *pb.TweetOptions {
   return &pb.TweetOptions{
-    TrimUser:          params.TrimUser,
-    IncludeMyRetweet:  params.IncludeMyRetweet,
-    IncludeEntities:   params.IncludeEntities,
-    IncludeExtAltText: params.IncludeExtAltText,
-    IncludeCardUri:    params.TrimUser,
-    Mode:              tweetModeToMsg(params.Mode),
+    TrimUser:          twopts.TrimUser,
+    IncludeMyRetweet:  twopts.IncludeMyRetweet,
+    IncludeEntities:   twopts.IncludeEntities,
+    IncludeExtAltText: twopts.IncludeExtAltText,
+    IncludeCardUri:    twopts.TrimUser,
+    Mode:              encodeTweetModeMessage(twopts.Mode),
   }
 }
 
-func tweetOptionsFromMsg(optsMessage *pb.TweetOptions) TweetOptions {
-  if optsMessage == nil {
+func decodeTweetOptionsMessage(msg *pb.TweetOptions) TweetOptions {
+  if msg == nil {
     return TweetOptions{}
   }
   return TweetOptions{
-    TrimUser:          optsMessage.TrimUser,
-    IncludeMyRetweet:  optsMessage.IncludeMyRetweet,
-    IncludeEntities:   optsMessage.IncludeEntities,
-    IncludeExtAltText: optsMessage.IncludeExtAltText,
-    IncludeCardURI:    optsMessage.TrimUser,
-    Mode:              tweetModeFromMsg(optsMessage.Mode),
+    TrimUser:          msg.TrimUser,
+    IncludeMyRetweet:  msg.IncludeMyRetweet,
+    IncludeEntities:   msg.IncludeEntities,
+    IncludeExtAltText: msg.IncludeExtAltText,
+    IncludeCardURI:    msg.TrimUser,
+    Mode:              decodeTweetModeMessage(msg.Mode),
   }
 }
 
-func tweetModeToMsg(mode TweetMode) pb.TweetOptions_Mode {
+func encodeTweetModeMessage(mode TweetMode) pb.TweetOptions_Mode {
   if mode == ExtendedMode {
     return pb.TweetOptions_EXTENDED
   }
   return pb.TweetOptions_COMPAT
 }
 
-func tweetModeFromMsg(mode pb.TweetOptions_Mode) TweetMode {
-  if mode == pb.TweetOptions_EXTENDED {
+func decodeTweetModeMessage(msg pb.TweetOptions_Mode) TweetMode {
+  if msg == pb.TweetOptions_EXTENDED {
     return ExtendedMode
   }
   return CompatibilityMode
@@ -187,9 +187,9 @@ func decodeTimelineMessage(msg *pb.Timeline) []Tweet {
 
 func encodeTweetMessage(tweet Tweet) *pb.Tweet {
   msg := pb.Tweet{
-    Id:               tweet.ID,
-    CreatedAt:        tweet.CreatedAt.Unix(),
-    Text:             tweet.Text,
+    Id:                tweet.ID,
+    CreatedAt:         tweet.CreatedAt.Unix(),
+    Text:              tweet.Text,
     TextDisplayRange:  encodeIndicesMessage(tweet.TextDisplayRange),
     Truncated:         tweet.Truncated,
     Source:            tweet.Source,

@@ -18,8 +18,8 @@ func (t *Twitter) Server(server *grpc.Server) error {
 }
 
 func (s *twitterServer) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tweet, error) {
-  auth := authPairFromMsg(req.Auth)
-  opts := tweetOptionsFromMsg(req.Options)
+  auth := decodeAuthPairMessage(req.Auth)
+  opts := decodeTweetOptionsMessage(req.Options)
   tweet, err := s.twitter.GetTweet(ctx, auth, req.Id, opts)
   if err != nil {
     return nil, err
@@ -32,8 +32,8 @@ func (s *twitterServer) GetTweets(req *pb.TweetsRequest, srv pb.Twitter1_GetTwee
 }
 
 func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.Timeline, error) {
-  auth := authPairFromMsg(req.Auth)
-  twOpts := tweetOptionsFromMsg(req.TweetOptions)
+  auth := decodeAuthPairMessage(req.Auth)
+  twOpts := decodeTweetOptionsMessage(req.TweetOptions)
   var count *uint
   var minID, maxID *uint64
   if req.Count > 0 {
@@ -54,8 +54,8 @@ func (s *twitterServer) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelin
 }
 
 func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.Timeline, error) {
-  auth := authPairFromMsg(req.Auth)
-  twOpts := tweetOptionsFromMsg(req.TweetOptions)
+  auth := decodeAuthPairMessage(req.Auth)
+  twOpts := decodeTweetOptionsMessage(req.TweetOptions)
   var count *uint
   var minID, maxID *uint64
   if req.Count > 0 {
@@ -76,8 +76,8 @@ func (s *twitterServer) GetMentionTimeline(ctx context.Context, req *pb.MentionT
 }
 
 func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.Timeline, error) {
-  auth := authPairFromMsg(req.Auth)
-  twOpts := tweetOptionsFromMsg(req.TweetOptions)
+  auth := decodeAuthPairMessage(req.Auth)
+  twOpts := decodeTweetOptionsMessage(req.TweetOptions)
   var userID *uint64
   var userHandle *string
   var count *uint
@@ -106,7 +106,7 @@ func (s *twitterServer) GetUserTimeline(ctx context.Context, req *pb.UserTimelin
 }
 
 func (s *twitterServer) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRequest) (*pb.Tweet, error) {
-  auth := authPairFromMsg(req.Auth)
+  auth := decodeAuthPairMessage(req.Auth)
   var replyID *uint64
   if id, ok := req.Reply.(*pb.UpdateStatusRequest_ReplyId); ok {
     replyID = &id.ReplyId
@@ -123,7 +123,7 @@ func (s *twitterServer) UpdateStatus(ctx context.Context, req *pb.UpdateStatusRe
 }
 
 func (s *twitterServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.User, error) {
-  auth := authPairFromMsg(req.Auth)
+  auth := decodeAuthPairMessage(req.Auth)
   var name *string
   if val, ok := req.UpdateName.(*pb.UpdateProfileRequest_Name); ok {
     name = &val.Name
@@ -152,7 +152,7 @@ func (s *twitterServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfile
 }
 
 func (s *twitterServer) GetRaw(ctx context.Context, rr *pb.RawAPIRequest) (*pb.RawAPIResult, error) {
-  auth := authPairFromMsg(rr.Auth)
+  auth := decodeAuthPairMessage(rr.Auth)
   or := OAuthRequest{
     Method:   rr.Method,
     Protocol: rr.Protocol,

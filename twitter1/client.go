@@ -7,10 +7,13 @@ import (
   "google.golang.org/grpc"
   "google.golang.org/grpc/codes"
   "google.golang.org/grpc/status"
+  "net/http"
+  "path"
   "time"
 )
 
 type Client interface {
+  newContext() (context.Context, context.CancelFunc)
   GetTweet(twOpts TweetOptions, id uint64) (Tweet, error)
   GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, replies bool) ([]Tweet, error)
   GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error)
@@ -21,48 +24,223 @@ type Client interface {
   GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error)
 }
 
+func handleRequest(c Client, handler func(ctx context.Context) error) error {
+  ctx, cancel := c.newContext()
+  if cancel != nil {
+    defer cancel()
+  }
+  err := handler(ctx)
+  if httpErr, ok := err.(*goldcrest.HttpError); ok {
+    return status.Errorf(codes.Internal, "twitter error %s", httpErr.Error())
+  }
+  return err
+}
+
 type local struct {
   auth    AuthPair
   twitter *Twitter
+  timeout time.Duration
 }
 
-func Local(auth AuthPair, twitterConfig TwitterConfig) Client {
+func Local(auth AuthPair, twitterConfig TwitterConfig, timeout time.Duration) Client {
   return local{
     auth:    auth,
     twitter: NewTwitter(twitterConfig),
+    timeout: timeout,
   }
 }
 
+func (lc local) newContext() (context.Context, context.CancelFunc) {
+  if lc.timeout == 0 {
+    return context.Background(), nil
+  }
+  return context.WithTimeout(context.Background(), lc.timeout)
+}
+
 func (lc local) GetTweet(twOpts TweetOptions, id uint64) (Tweet, error) {
-  panic("implement me")
+  var tweet Tweet
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    tweet, err = lc.twitter.GetTweet(ctx, lc.auth, id, twOpts)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return Tweet{}, err
+  }
+  return tweet, nil
 }
 
 func (lc local) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, replies bool) ([]Tweet, error) {
-  panic("implement me")
+  var tweets []Tweet
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    var count *uint
+    var minID, maxID *uint64
+    if tlOpts.Count > 0 {
+      count = &tlOpts.Count
+    }
+    if tlOpts.MinID > 0 {
+      minID = &tlOpts.MinID
+    }
+    if tlOpts.MaxID > 0 {
+      maxID = &tlOpts.MaxID
+    }
+    tweets, err = lc.twitter.GetHomeTimeline(ctx, lc.auth, twOpts, count, minID, maxID, replies)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  return tweets, nil
 }
 
 func (lc local) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error) {
-  panic("implement me")
+  var tweets []Tweet
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    var count *uint
+    var minID, maxID *uint64
+    if tlOpts.Count > 0 {
+      count = &tlOpts.Count
+    }
+    if tlOpts.MinID > 0 {
+      minID = &tlOpts.MinID
+    }
+    if tlOpts.MaxID > 0 {
+      maxID = &tlOpts.MaxID
+    }
+    tweets, err = lc.twitter.GetMentionTimeline(ctx, lc.auth, twOpts, count, minID, maxID)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  return tweets, nil
 }
 
 func (lc local) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
-  panic("implement me")
+  var tweets []Tweet
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    var count *uint
+    var minID, maxID *uint64
+    if tlOpts.Count > 0 {
+      count = &tlOpts.Count
+    }
+    if tlOpts.MinID > 0 {
+      minID = &tlOpts.MinID
+    }
+    if tlOpts.MaxID > 0 {
+      maxID = &tlOpts.MaxID
+    }
+    tweets, err = lc.twitter.GetUserTimeline(ctx, lc.auth, twOpts, &id, nil, count, minID, maxID, replies, retweets)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  return tweets, nil
 }
 
 func (lc local) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
-  panic("implement me")
+  var tweets []Tweet
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    var count *uint
+    var minID, maxID *uint64
+    if tlOpts.Count > 0 {
+      count = &tlOpts.Count
+    }
+    if tlOpts.MinID > 0 {
+      minID = &tlOpts.MinID
+    }
+    if tlOpts.MaxID > 0 {
+      maxID = &tlOpts.MaxID
+    }
+    tweets, err = lc.twitter.GetUserTimeline(ctx, lc.auth, twOpts, nil, &handle, count, minID, maxID, replies, retweets)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  return tweets, nil
 }
 
 func (lc local) UpdateStatus(text string, stOpts StatusUpdateOptions, trimUser bool) (Tweet, error) {
-  panic("implement me")
+  var tweet Tweet
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    tweet, err = lc.twitter.UpdateStatus(ctx, lc.auth, text, stOpts.ReplyID, stOpts.AutoReply, stOpts.ExcludeReplyUserIDs, stOpts.AttachmentURL, stOpts.MediaIDs, stOpts.Sensitive, trimUser, stOpts.EnableDMCommands, stOpts.FailDMCommands)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return Tweet{}, err
+  }
+  return tweet, nil
 }
 
 func (lc local) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses bool) (User, error) {
-  panic("implement me")
+  var user User
+  err := handleRequest(lc, func(ctx context.Context) error {
+    var err error
+    user, err = lc.twitter.UpdateProfile(ctx, lc.auth, pfOpts.Name, pfOpts.Url, pfOpts.Location, pfOpts.Bio, pfOpts.LinkColor, entities, statuses)
+    if err != nil {
+      return err
+    }
+    return nil
+  })
+  if err != nil {
+    return User{}, err
+  }
+  return user, nil
 }
 
-func (lc local) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
-  panic("implement me")
+func (lc local) GetRaw(method, protocol, version, reqPath string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
+  err = handleRequest(lc, func(ctx context.Context) error {
+    or := OAuthRequest{
+      Method:   method,
+      Protocol: protocol,
+      Domain:   domain,
+      Path:     path.Join(version, reqPath),
+      Query:    queryParams,
+      Body:     bodyParams,
+    }
+    var req *http.Request
+    var err error
+    req, err = or.MakeRequest(ctx, lc.auth.Secret, lc.auth.Public)
+    if err != nil {
+      return err
+    }
+    var statusInt int
+    statusInt, headers, body, err = lc.twitter.requestRaw(ctx, req)
+    if err != nil {
+      return err
+    }
+    status = uint(statusInt)
+    return nil
+  })
+  if err != nil {
+    return nil, 0, nil, err
+  }
+  return headers, status, body, nil
 }
 
 type remote struct {
@@ -88,24 +266,12 @@ func (rc remote) newContext() (context.Context, context.CancelFunc) {
   return context.WithTimeout(context.Background(), rc.callTimeout)
 }
 
-func (rc remote) handleRequest(handler func(ctx context.Context) error) error {
-  ctx, cancel := rc.newContext()
-  if cancel != nil {
-    defer cancel()
-  }
-  err := handler(ctx)
-  if httpErr, ok := err.(*goldcrest.HttpError); ok {
-    return status.Errorf(codes.Internal, "twitter error %s", httpErr.Error())
-  }
-  return err
-}
-
 func (rc remote) GetTweet(twOpts TweetOptions, id uint64) (tweet Tweet, err error) {
-  err = rc.handleRequest(func(ctx context.Context) error {
+  err = handleRequest(rc, func(ctx context.Context) error {
     tweetMsg, err := rc.client.GetTweet(ctx, &pb.TweetRequest{
-      Auth:    authPairToMsg(rc.auth),
+      Auth:    encodeAuthPairMessage(rc.auth),
       Id:      id,
-      Options: tweetOptionsToMsg(twOpts),
+      Options: encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -121,14 +287,14 @@ func (rc remote) GetTweet(twOpts TweetOptions, id uint64) (tweet Tweet, err erro
 
 func (rc remote) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, replies bool) ([]Tweet, error) {
   var tweets []Tweet
-  err := rc.handleRequest(func(ctx context.Context) error {
+  err := handleRequest(rc, func(ctx context.Context) error {
     msg, err := rc.client.GetHomeTimeline(ctx, &pb.HomeTimelineRequest{
-      Auth:           authPairToMsg(rc.auth),
+      Auth:           encodeAuthPairMessage(rc.auth),
       Count:          uint32(tlOpts.Count),
       MinId:          tlOpts.MinID,
       MaxId:          tlOpts.MaxID,
       IncludeReplies: replies,
-      TweetOptions:   tweetOptionsToMsg(twOpts),
+      TweetOptions:   encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -144,13 +310,13 @@ func (rc remote) GetHomeTimeline(twOpts TweetOptions, tlOpts TimelineOptions, re
 
 func (rc remote) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions) ([]Tweet, error) {
   var tweets []Tweet
-  err := rc.handleRequest(func(ctx context.Context) error {
+  err := handleRequest(rc, func(ctx context.Context) error {
     msg, err := rc.client.GetMentionTimeline(ctx, &pb.MentionTimelineRequest{
-      Auth:         authPairToMsg(rc.auth),
+      Auth:         encodeAuthPairMessage(rc.auth),
       Count:        uint32(tlOpts.Count),
       MinId:        tlOpts.MinID,
       MaxId:        tlOpts.MaxID,
-      TweetOptions: tweetOptionsToMsg(twOpts),
+      TweetOptions: encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -166,16 +332,16 @@ func (rc remote) GetMentionTimeline(twOpts TweetOptions, tlOpts TimelineOptions)
 
 func (rc remote) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
   var tweets []Tweet
-  err := rc.handleRequest(func(ctx context.Context) error {
+  err := handleRequest(rc, func(ctx context.Context) error {
     msg, err := rc.client.GetUserTimeline(ctx, &pb.UserTimelineRequest{
-      Auth:            authPairToMsg(rc.auth),
+      Auth:            encodeAuthPairMessage(rc.auth),
       User:            &pb.UserTimelineRequest_UserId{UserId: id},
       CountLimit:      uint32(tlOpts.Count),
       MinId:           tlOpts.MinID,
       MaxId:           tlOpts.MaxID,
       IncludeReplies:  replies,
       IncludeRetweets: retweets,
-      TweetOptions:    tweetOptionsToMsg(twOpts),
+      TweetOptions:    encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -191,16 +357,16 @@ func (rc remote) GetUserIDTimeline(twOpts TweetOptions, id uint64, tlOpts Timeli
 
 func (rc remote) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
   var tweets []Tweet
-  err := rc.handleRequest(func(ctx context.Context) error {
+  err := handleRequest(rc, func(ctx context.Context) error {
     msg, err := rc.client.GetUserTimeline(ctx, &pb.UserTimelineRequest{
-      Auth:            authPairToMsg(rc.auth),
+      Auth:            encodeAuthPairMessage(rc.auth),
       User:            &pb.UserTimelineRequest_UserHandle{UserHandle: handle},
       CountLimit:      uint32(tlOpts.Count),
       MinId:           tlOpts.MinID,
       MaxId:           tlOpts.MaxID,
       IncludeReplies:  replies,
       IncludeRetweets: retweets,
-      TweetOptions:    tweetOptionsToMsg(twOpts),
+      TweetOptions:    encodeTweetOptionsMessage(twOpts),
     })
     if err != nil {
       return err
@@ -216,9 +382,9 @@ func (rc remote) GetUserHandleTimeline(twOpts TweetOptions, handle string, tlOpt
 
 func (rc remote) UpdateStatus(text string, stOpts StatusUpdateOptions, trimUser bool) (Tweet, error) {
   var tweet Tweet
-  err := rc.handleRequest(func(ctx context.Context) error {
+  err := handleRequest(rc, func(ctx context.Context) error {
     req := pb.UpdateStatusRequest{
-      Auth:                      authPairToMsg(rc.auth),
+      Auth:                      encodeAuthPairMessage(rc.auth),
       Text:                      text,
       AutoPopulateReplyMetadata: stOpts.AutoReply,
       ExcludeReplyUserIds:       stOpts.ExcludeReplyUserIDs,
@@ -253,9 +419,9 @@ func (rc remote) UpdateStatus(text string, stOpts StatusUpdateOptions, trimUser 
 
 func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses bool) (User, error) {
   var user User
-  err := rc.handleRequest(func(ctx context.Context) error {
+  err := handleRequest(rc, func(ctx context.Context) error {
     req := pb.UpdateProfileRequest{
-      Auth:            authPairToMsg(rc.auth),
+      Auth:            encodeAuthPairMessage(rc.auth),
       IncludeEntities: entities,
       IncludeStatuses: statuses,
     }
@@ -298,9 +464,9 @@ func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses b
 }
 
 func (rc remote) GetRaw(method, protocol, version, path string, queryParams, bodyParams map[string]string) (headers map[string]string, status uint, body []byte, err error) {
-  err = rc.handleRequest(func(ctx context.Context) error {
+  err = handleRequest(rc, func(ctx context.Context) error {
     resp, err := rc.client.GetRaw(ctx, &pb.RawAPIRequest{
-      Auth:        authPairToMsg(rc.auth),
+      Auth:        encodeAuthPairMessage(rc.auth),
       Method:      method,
       Protocol:    protocol,
       Version:     version,
