@@ -1,4 +1,4 @@
-module goldcrest
+module github.com/pantonshire/goldcrest
 
 go 1.15
 
