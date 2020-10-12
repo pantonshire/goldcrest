@@ -2,8 +2,8 @@ package main
 
 import (
   "fmt"
-  "goldcrest/proxy"
-  "goldcrest/twitter1"
+  "github.com/pantonshire/goldcrest/proxy"
+  "github.com/pantonshire/goldcrest/twitter1"
   "os"
   "os/signal"
   "syscall"

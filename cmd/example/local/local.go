@@ -4,7 +4,7 @@ import (
   "encoding/json"
   "fmt"
   "github.com/davecgh/go-spew/spew"
-  "goldcrest/twitter1"
+  "github.com/pantonshire/goldcrest/twitter1"
   "io/ioutil"
   "time"
 )

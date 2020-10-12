@@ -2,8 +2,8 @@ package twitter1
 
 import (
   "context"
-  "goldcrest"
-  pb "goldcrest/proto"
+  "github.com/pantonshire/goldcrest"
+  pb "github.com/pantonshire/goldcrest/proto"
   "google.golang.org/grpc"
   "google.golang.org/grpc/codes"
   "google.golang.org/grpc/status"

@@ -1,8 +1,8 @@
 package twitter1
 
 import (
-  pb "goldcrest/proto"
-  "goldcrest/twitter1/model"
+  pb "github.com/pantonshire/goldcrest/proto"
+  "github.com/pantonshire/goldcrest/twitter1/model"
   "math"
   "time"
 )

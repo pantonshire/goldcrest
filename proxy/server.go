@@ -2,7 +2,7 @@ package proxy
 
 import (
   "fmt"
-  "goldcrest/twitter1"
+  "github.com/pantonshire/goldcrest/twitter1"
   "google.golang.org/grpc"
   "google.golang.org/grpc/credentials"
   "net"

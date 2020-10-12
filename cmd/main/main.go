@@ -4,7 +4,7 @@ import (
   "encoding/json"
   "fmt"
   "github.com/jessevdk/go-flags"
-  "goldcrest/proxy"
+  "github.com/pantonshire/goldcrest/proxy"
   "io/ioutil"
   "os"
   "os/signal"
