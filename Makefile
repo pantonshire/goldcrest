@@ -1,7 +1,9 @@
 GO := go
 GO_BUILD := $(GO) build
+GO_TEST := $(GO) test
 PROTOC := protoc
 
+PACKAGE := github.com/pantonshire/goldcrest/twitter1
 MAIN := cmd/main/main.go
 BUILD := build
 EXEC := goldcrest
@@ -16,6 +18,9 @@ PROTO_BUILD := $(PROTO_SOURCE:.proto=.pb.go)
 build: buildpath
 	$(GO_BUILD) -v -o $(BUILD)/$(EXEC) $(MAIN)
 	cp $(BUILD)/$(EXEC) $(EXEC)
+
+test:
+	$(GO_TEST) -v $(PACKAGE)
 
 dist: $(FULL_BUILD_TARGETS)
 
@@ -36,4 +41,4 @@ $(PROTO_PATH)/%.pb.go: $(PROTO_PATH)/%.proto
 clean-proto:
 	rm $(wildcard $(PROTO_PATH)/*.pb.go)
 
-.PHONY: buildpath build dist build-% clean proto clean-proto
+.PHONY: buildpath build test dist build-% clean proto clean-proto
