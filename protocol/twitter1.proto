@@ -172,7 +172,7 @@ message Timeline {
 
 message Tweet {
   fixed64 id = 1;
-  int64 created_at = 2;
+  uint64 created_at = 2;
   string text = 3;
   Indices text_display_range = 4;
   bool truncated = 5;
@@ -201,26 +201,29 @@ message Tweet {
   uint32 favorite_count = 17;
   bool favorited = 18;
   bool retweeted = 19;
-  uint64 current_user_retweet_id = 20;
-  repeated Symbol hashtags = 21;
-  repeated URL urls = 22;
-  repeated Mention mentions = 23;
-  repeated Symbol symbols = 24;
-  repeated Media media = 25;
-  repeated Poll polls = 26;
-  bool possibly_sensitive = 27;
-  string filter_level = 28;
-  string lang = 29;
-  bool withheld_copyright = 30;
-  repeated string withheld_countries = 31;
-  string withheld_scope = 32;
+  oneof current_user_retweet {
+    Marker no_current_user_retweet = 20;
+    fixed64 current_user_retweet_id = 21;
+  }
+  repeated Symbol hashtags = 22;
+  repeated URL urls = 23;
+  repeated Mention mentions = 24;
+  repeated Symbol symbols = 25;
+  repeated Media media = 26;
+  repeated Poll polls = 27;
+  bool possibly_sensitive = 28;
+  string filter_level = 29;
+  string lang = 30;
+  bool withheld_copyright = 31;
+  repeated string withheld_countries = 32;
+  string withheld_scope = 33;
 }
 
 message User {
   fixed64 id = 1;
   string handle = 2;
   string display_name = 3;
-  int64 created_at = 4;
+  uint64 created_at = 4;
   string bio = 5;
   string url = 6;
   string location = 7;
@@ -282,7 +285,7 @@ message Media {
 }
 
 message Poll {
-  int64 end_time = 1;
+  uint64 end_time = 1;
   uint32 duration_minutes = 2;
   message Option {
     uint32 position = 1;

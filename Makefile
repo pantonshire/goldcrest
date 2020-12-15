@@ -11,7 +11,7 @@ EXEC := goldcrest
 BUILD_TARGETS := linux-amd64 linux-arm linux-arm64 darwin-amd64 windows-amd64 windows-arm
 FULL_BUILD_TARGETS := $(addprefix build-,$(BUILD_TARGETS))
 
-PROTO_PATH := proto
+PROTO_PATH := protocol
 PROTO_SOURCE := $(wildcard $(PROTO_PATH)/*.proto)
 PROTO_BUILD := $(PROTO_SOURCE:.proto=.pb.go)
 
