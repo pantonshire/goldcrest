@@ -345,12 +345,12 @@ func (rc remote) UpdateStatus(text string, stOpts StatusUpdateOptions, trimUser 
     if stOpts.ReplyID != nil {
       req.Reply = &pb.UpdateStatusRequest_ReplyId{ReplyId: *stOpts.ReplyID}
     } else {
-      req.Reply = &pb.UpdateStatusRequest_NoReply{NoReply: true}
+      req.Reply = &pb.UpdateStatusRequest_NoReply{}
     }
     if stOpts.AttachmentURL != nil {
       req.Attachment = &pb.UpdateStatusRequest_AttachmentUrl{AttachmentUrl: *stOpts.AttachmentURL}
     } else {
-      req.Attachment = &pb.UpdateStatusRequest_NoAttachment{NoAttachment: true}
+      req.Attachment = &pb.UpdateStatusRequest_NoAttachment{}
     }
     msg, err := rc.client.UpdateStatus(ctx, &req)
     if err != nil {
@@ -376,27 +376,27 @@ func (rc remote) UpdateProfile(pfOpts ProfileUpdateOptions, entities, statuses b
     if pfOpts.Name != nil {
       req.UpdateName = &pb.UpdateProfileRequest_Name{Name: *pfOpts.Name}
     } else {
-      req.UpdateName = &pb.UpdateProfileRequest_NoUpdateName{NoUpdateName: true}
+      req.UpdateName = &pb.UpdateProfileRequest_NoUpdateName{}
     }
     if pfOpts.Url != nil {
       req.UpdateUrl = &pb.UpdateProfileRequest_Url{Url: *pfOpts.Url}
     } else {
-      req.UpdateUrl = &pb.UpdateProfileRequest_NoUpdateUrl{NoUpdateUrl: true}
+      req.UpdateUrl = &pb.UpdateProfileRequest_NoUpdateUrl{}
     }
     if pfOpts.Location != nil {
       req.UpdateLocation = &pb.UpdateProfileRequest_Location{Location: *pfOpts.Location}
     } else {
-      req.UpdateLocation = &pb.UpdateProfileRequest_NoUpdateLocation{NoUpdateLocation: true}
+      req.UpdateLocation = &pb.UpdateProfileRequest_NoUpdateLocation{}
     }
     if pfOpts.Bio != nil {
       req.UpdateBio = &pb.UpdateProfileRequest_Bio{Bio: *pfOpts.Bio}
     } else {
-      req.UpdateBio = &pb.UpdateProfileRequest_NoUpdateBio{NoUpdateBio: true}
+      req.UpdateBio = &pb.UpdateProfileRequest_NoUpdateBio{}
     }
     if pfOpts.LinkColor != nil {
       req.UpdateProfileLinkColor = &pb.UpdateProfileRequest_ProfileLinkColor{ProfileLinkColor: *pfOpts.LinkColor}
     } else {
-      req.UpdateProfileLinkColor = &pb.UpdateProfileRequest_NoUpdateProfileLinkColor{NoUpdateProfileLinkColor: true}
+      req.UpdateProfileLinkColor = &pb.UpdateProfileRequest_NoUpdateProfileLinkColor{}
     }
     msg, err := rc.client.UpdateProfile(ctx, &req)
     if err != nil {

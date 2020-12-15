@@ -1,18 +1,36 @@
 syntax = "proto3";
 
-option go_package = "github.com/pantonshire/goldcrest/proto";
+option go_package = "github.com/pantonshire/goldcrest/protocol";
 
 package twitter1;
 
 service Twitter1 {
-  rpc GetTweet(TweetRequest) returns (Tweet);
-  rpc GetTweets(TweetsRequest) returns (stream Tweet);
-  rpc GetHomeTimeline(HomeTimelineRequest) returns (Timeline);
-  rpc GetMentionTimeline(MentionTimelineRequest) returns (Timeline);
-  rpc GetUserTimeline(UserTimelineRequest) returns (Timeline);
-  rpc UpdateStatus(UpdateStatusRequest) returns (Tweet);
-  rpc UpdateProfile(UpdateProfileRequest) returns (User);
-  rpc GetRaw(RawAPIRequest) returns (RawAPIResult);
+  rpc GetTweet           (TweetRequest)           returns (TweetResponse);
+  rpc GetHomeTimeline    (HomeTimelineRequest)    returns (TimelineResponse);
+  rpc GetMentionTimeline (MentionTimelineRequest) returns (TimelineResponse);
+  rpc GetUserTimeline    (UserTimelineRequest)    returns (TimelineResponse);
+  rpc UpdateStatus       (UpdateStatusRequest)    returns (TweetResponse);
+  rpc UpdateProfile      (UpdateProfileRequest)   returns (UserResponse);
+  rpc GetRaw             (RawAPIRequest)          returns (RawAPIResult);
+
+  // rpc StreamTweets(???) returns (stream Tweet);
+}
+
+message Marker {}
+
+message Error {
+  enum Code {
+    RATE_LIMIT = 0;
+    TWITTER_CONNECTION = 1;
+    BAD_REQUEST = 2;
+    BAD_RESPONSE = 3;
+  }
+  Code code = 1;
+  string message = 2;
+  oneof retry {
+    bool can_retry = 3;
+    uint64 retry_when = 4;
+  }
 }
 
 message Authentication {
@@ -43,32 +61,31 @@ message TweetOptions {
 message TweetRequest {
   Authentication auth = 1;
   fixed64 id = 2;
-  TweetOptions options = 3;
-}
-
-message TweetsRequest {
-  Authentication auth = 1;
-  repeated fixed64 id = 2;
-  TweetOptions options = 3;
+  oneof content {
+    Marker default = 3;
+    TweetOptions custom = 4;
+  }
 }
 
 message TimelineOptions {
   uint32 count = 1;
   uint64 min_id = 2;
   uint64 max_id = 3;
+  oneof content {
+    Marker default = 4;
+    TweetOptions custom = 5;
+  }
 }
 
 message HomeTimelineRequest {
   Authentication auth = 1;
   TimelineOptions timeline_options = 2;
-  TweetOptions tweet_options = 3;
-  bool include_replies = 4;
+  bool include_replies = 3;
 }
 
 message MentionTimelineRequest {
   Authentication auth = 1;
-  TimelineOptions timeline_options = 2;
-  TweetOptions tweet_options = 3;
+  TweetOptions tweet_options = 2;
 }
 
 message UserTimelineRequest {
@@ -78,22 +95,21 @@ message UserTimelineRequest {
     string user_handle = 3;
   }
   TimelineOptions timeline_options = 4;
-  TweetOptions tweet_options = 5;
-  bool include_replies = 6;
-  bool include_retweets = 7;
+  bool include_replies = 5;
+  bool include_retweets = 6;
 }
 
 message UpdateStatusRequest {
   Authentication auth = 1;
   string text = 2;
   oneof reply {
-    bool no_reply = 3;
+    Marker no_reply = 3;
     fixed64 reply_id = 4;
   }
   bool auto_populate_reply_metadata = 5;
   repeated fixed64 exclude_reply_user_ids = 6;
   oneof attachment {
-    bool no_attachment = 7;
+    Marker no_attachment = 7;
     string attachment_url = 8;
   }
   repeated fixed64 media_ids = 9;
@@ -106,27 +122,48 @@ message UpdateStatusRequest {
 message UpdateProfileRequest {
   Authentication auth = 1;
   oneof update_name {
-    bool no_update_name = 2;
+    Marker no_update_name = 2;
     string name = 3;
   }
   oneof update_url {
-    bool no_update_url = 4;
+    Marker no_update_url = 4;
     string url = 5;
   }
   oneof update_location {
-    bool no_update_location = 6;
+    Marker no_update_location = 6;
     string location = 7;
   }
   oneof update_bio {
-    bool no_update_bio = 8;
+    Marker no_update_bio = 8;
     string bio = 9;
   }
   oneof update_profile_link_color {
-    bool no_update_profile_link_color = 10;
+    Marker no_update_profile_link_color = 10;
     string profile_link_color = 11;
   }
   bool include_entities = 12;
   bool include_statuses = 13;
+}
+
+message TweetResponse {
+  oneof response {
+    Tweet tweet = 1;
+    Error error = 2;
+  }
+}
+
+message TimelineResponse {
+  oneof response {
+    Timeline timeline = 1;
+    Error error = 2;
+  }
+}
+
+message UserResponse {
+  oneof response {
+    User user = 1;
+    Error error = 2;
+  }
 }
 
 message Timeline {
@@ -147,15 +184,15 @@ message Tweet {
     string reply_to_user_handle = 3;
   }
   oneof reply {
-    bool no_reply = 8;
+    Marker no_reply = 8;
     Reply replied_tweet = 9;
   }
   oneof quote {
-    bool no_quote = 10;
+    Marker no_quote = 10;
     Tweet quoted_tweet = 11;
   }
   oneof retweet {
-    bool no_retweet = 12;
+    Marker no_retweet = 12;
     Tweet retweeted_tweet = 13;
   }
   uint32 quote_count = 14;
@@ -230,7 +267,7 @@ message Media {
   string media_url = 4;
   string alt = 5;
   oneof source {
-    bool no_source = 6;
+    Marker no_source = 6;
     fixed64 source_tweet_id = 7;
   }
   message Size {

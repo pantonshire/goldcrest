@@ -65,6 +65,15 @@ type ProfileUpdateOptions struct {
   LinkColor *string
 }
 
+var defaultTweetOptions = TweetOptions{
+  TrimUser:          false,
+  IncludeMyRetweet:  true,
+  IncludeEntities:   true,
+  IncludeExtAltText: true,
+  IncludeCardURI:    true,
+  Mode:              ExtendedMode,
+}
+
 func NewTwitter(config TwitterConfig) *Twitter {
   client := &http.Client{
     Timeout: time.Second * time.Duration(config.ClientTimeoutSeconds),
@@ -76,14 +85,7 @@ func NewTwitter(config TwitterConfig) *Twitter {
 }
 
 func DefaultTweetOptions() TweetOptions {
-  return TweetOptions{
-    TrimUser:          false,
-    IncludeMyRetweet:  true,
-    IncludeEntities:   true,
-    IncludeExtAltText: true,
-    IncludeCardURI:    true,
-    Mode:              ExtendedMode,
-  }
+  return defaultTweetOptions
 }
 
 func (twOpts TweetOptions) encode() map[string]string {
