@@ -23,14 +23,16 @@ type session struct {
   limits map[string]*rateLimit //Use endpoint.limitKey() as map key
 }
 
+//TODO: rl can get stuck on "stopped" if it never receives a response from Twitter, so remember to unblock
 type rateLimit struct {
-  mxData  sync.Mutex
-  mxNext  sync.Mutex
-  mxLow   sync.Mutex
-  current *uint
-  next    *uint
-  stop    bool
-  resets  time.Time
+  mxData        sync.Mutex
+  mxNext        sync.Mutex
+  mxLow         sync.Mutex
+  current       *uint
+  next          *uint
+  stopped       bool
+  unknownUsages uint
+  resets        time.Time
 }
 
 func newSession() *session {
@@ -65,7 +67,7 @@ func (se *session) getLimit(key string) *rateLimit {
   return rl
 }
 
-func (rl *rateLimit) use() error {
+func (rl *rateLimit) use() (bool, error) {
   //Lock with low priority
   rl.mxLow.Lock()
   defer rl.mxLow.Unlock()
@@ -82,7 +84,7 @@ func (rl *rateLimit) use() error {
       rl.current = new(uint)
     }
     *rl.current = *rl.next
-    rl.stop = false
+    rl.stopped = false
     if !assumeNextLimit {
       rl.next = nil
     }
@@ -90,17 +92,19 @@ func (rl *rateLimit) use() error {
 
   if rl.current != nil && *rl.current > 0 {
     *rl.current--
-    return nil
+    return false, nil
   }
 
   if rl.current == nil || rl.next == nil {
     if stopOnLimitUnknown {
-      if !rl.stop {
-        rl.stop = true
-        return nil
+      if !rl.stopped {
+        rl.stopped = true
+        rl.unknownUsages++
+        return true, nil
       }
     } else {
-      return nil
+      rl.unknownUsages++
+      return false, nil
     }
   }
 
@@ -110,7 +114,7 @@ func (rl *rateLimit) use() error {
   } else {
     retry = rl.resets
   }
-  return newRateLimitError(retry)
+  return false, newRateLimitError(retry)
 }
 
 // forceSync should be used when a rate limit error occurred (a rate limit error occurring indicates that
@@ -137,5 +141,14 @@ func (rl *rateLimit) update(current, next uint, resets time.Time, forceSync bool
   if resets.After(rl.resets) {
     rl.resets = resets
   }
+}
 
+func (rl *rateLimit) unblock() {
+  //Lock with high priority
+  rl.mxNext.Lock()
+  rl.mxData.Lock()
+  defer rl.mxData.Unlock()
+  rl.mxNext.Unlock()
+
+  rl.stopped = false
 }
