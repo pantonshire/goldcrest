@@ -1,14 +1,13 @@
 package main
 
 import (
-  "bufio"
+  "context"
   "encoding/json"
-  "fmt"
   "github.com/davecgh/go-spew/spew"
-  "github.com/pantonshire/goldcrest/twitter1"
+  pb "github.com/pantonshire/goldcrest/protocol"
+  "github.com/pantonshire/goldcrest/proxy/oauth"
   "google.golang.org/grpc"
   "io/ioutil"
-  "strings"
   "time"
 )
 
@@ -17,9 +16,16 @@ func main() {
   if err != nil {
     panic(err)
   }
-  var auth twitter1.AuthPair
+  var auth oauth.AuthPair
   if err := json.Unmarshal(authData, &auth); err != nil {
     panic(err)
+  }
+
+  authMsg := pb.Authentication{
+    ConsumerKey: auth.Public.Key,
+    AccessToken: auth.Public.Token,
+    SecretKey:   auth.Secret.Key,
+    SecretToken: auth.Secret.Token,
   }
 
   conn, err := grpc.Dial("localhost:7400", grpc.WithBlock(), grpc.WithInsecure())
@@ -28,59 +34,18 @@ func main() {
   }
   defer conn.Close()
 
-  client := twitter1.Remote(conn, auth, time.Second*5)
+  client := pb.NewTwitter1Client(conn)
 
-  //tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
+  ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+  defer cancel()
 
-  //var replyID uint64 = 1309875852180705282
-  //tweet, err := client.UpdateStatus("@SmolbotbotT Reply test", twitter1.StatusUpdateOptions{ReplyID: &replyID}, false)
-
-  var timelineLimit uint = 3
-
-  timeline, err := client.GetUserHandleTimeline(
-   twitter1.TweetOptions{
-     TrimUser:          true,
-     IncludeMyRetweet:  true,
-     IncludeEntities:   true,
-     IncludeExtAltText: true,
-     IncludeCardURI:    true,
-     Mode:              twitter1.ExtendedMode,
-   },
-   "smolrobots",
-   twitter1.TimelineOptions{Count: &timelineLimit},
-   true,
-   true,
-  )
-
-  //url := "github.com/pantonshire/smolbotbot"
-  //location := "Test"
-  //
-  //user, err := client.UpdateProfile(twitter1.ProfileUpdateOptions{
-  //  Url:      &url,
-  //  Location: &location,
-  //}, true, true)
-
+  tweet, err := client.GetTweet(ctx, &pb.TweetRequest{
+    Auth: &authMsg,
+    Id:   1339937761126658049,
+  })
   if err != nil {
     panic(err)
   }
 
-  //spew.Dump(tweet)
-  //
-  //fmt.Println(tweet.TextOnly())
-  //if tweet.Quoted != nil {
-  //  fmt.Println(tweet.Quoted.TextOnly())
-  //}
-
-  spew.Dump(timeline)
-
-  //spew.Dump(user)
-}
-
-func readLn(reader *bufio.Reader, prompt string) string {
-  fmt.Print(fmt.Sprintf("%s :> ", prompt))
-  str, err := reader.ReadString('\n')
-  if err != nil {
-    panic(err)
-  }
-  return strings.TrimSpace(str)
+  spew.Dump(tweet)
 }

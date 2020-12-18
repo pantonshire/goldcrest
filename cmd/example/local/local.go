@@ -14,14 +14,14 @@ func main() {
   if err != nil {
     panic(err)
   }
-  var auth twitter1.AuthPair
+  var auth proxy.AuthPair
   if err := json.Unmarshal(authData, &auth); err != nil {
     panic(err)
   }
 
-  client := twitter1.Local(auth, twitter1.TwitterConfig{ClientTimeoutSeconds: 5}, time.Second*5)
+  client := proxy.Local(auth, proxy.TwitterConfig{ClientTimeoutSeconds: 5}, time.Second*5)
 
-  tweet, err := client.GetTweet(twitter1.DefaultTweetOptions(), 1305748179338629120)
+  tweet, err := client.GetTweet(proxy.DefaultTweetOptions(), 1305748179338629120)
 
   if err != nil {
     panic(err)

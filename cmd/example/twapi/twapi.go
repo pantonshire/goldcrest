@@ -26,16 +26,16 @@ func v1() {
     readLn(reader, "access token"),
     readLn(reader, "token secret")
 
-  twitter := twitter1.NewTwitter(twitter1.TwitterConfig{ClientTimeoutSeconds: 5})
+  twitter := proxy.NewTwitter(proxy.TwitterConfig{ClientTimeoutSeconds: 5})
 
   tweet, err := twitter.GetTweet(
     context.Background(),
-    twitter1.AuthPair{
-      Secret: twitter1.Auth{Key: secretKey, Token: tokenSecret},
-      Public: twitter1.Auth{Key: consumerKey, Token: token},
+    proxy.AuthPair{
+      Secret: proxy.Auth{Key: secretKey, Token: tokenSecret},
+      Public: proxy.Auth{Key: consumerKey, Token: token},
     },
     1305385801723916289,
-    twitter1.DefaultTweetOptions(),
+    proxy.DefaultTweetOptions(),
   )
 
   if err != nil {
