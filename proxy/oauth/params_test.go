@@ -1,11 +1,11 @@
-package proxy
+package oauth
 
 import (
   "fmt"
   "testing"
 )
 
-func TestPercentEncode(t *testing.T) {
+func TestPercentEncodedParams(t *testing.T) {
   var tests = []struct {
     input  string
     expect string
