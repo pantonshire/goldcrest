@@ -25,27 +25,31 @@ func (err rateLimitError) Error() string {
 }
 
 func (err rateLimitError) ser() (*pb.Error, metadata.MD) {
+  var meta metadata.MD
+  if !err.retry.IsZero() {
+    meta = metadata.Pairs("retry", fmt.Sprint(err.retry.Unix()))
+  }
   return &pb.Error{
     Code:    pb.Error_RATE_LIMIT,
     Message: err.Error(),
-  }, metadata.Pairs("retry", fmt.Sprint(err.retry.Unix()))
+  }, meta
 }
 
-type twitterConnectionError struct {
+type twitterError struct {
   message string
 }
 
-func newTwitterConnectionError(message string) twitterConnectionError {
-  return twitterConnectionError{message: message}
+func newTwitterError(message string) twitterError {
+  return twitterError{message: message}
 }
 
-func (err twitterConnectionError) Error() string {
+func (err twitterError) Error() string {
   return fmt.Sprintf("twitter connection error: %s", err.message)
 }
 
-func (err twitterConnectionError) ser() (*pb.Error, metadata.MD) {
+func (err twitterError) ser() (*pb.Error, metadata.MD) {
   return &pb.Error{
-    Code:    pb.Error_TWITTER_CONNECTION,
+    Code:    pb.Error_TWITTER_ERROR,
     Message: err.Error(),
   }, nil
 }
@@ -75,6 +79,10 @@ type badResponseError struct {
 
 func newBadResponseError(message string) badResponseError {
   return badResponseError{message: message}
+}
+
+func newBadResponseHeaderError(header, value string) badResponseError {
+  return newBadResponseError(fmt.Sprintf("bad header value for %s: \"%s\"", header, value))
 }
 
 func (err badResponseError) Error() string {
