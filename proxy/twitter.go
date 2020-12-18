@@ -93,7 +93,9 @@ func (tc twitterClient) request(ctx context.Context, req *http.Request, ep endpo
       return nil, err
     }
 
-    defer func() { rl.finish(limitCurrent, limitNext, limitResets, rateLimitHit) }()
+    defer func() {
+      rl.finish(limitCurrent, limitNext, limitResets, rateLimitHit)
+    }()
 
     resp, err := tc.client.Do(req)
     if err != nil {

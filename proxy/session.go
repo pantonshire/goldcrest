@@ -110,7 +110,8 @@ func (rl *rateLimit) use() error {
         rl.current = new(uint)
       }
       *rl.current = *rl.next
-      rl.next = nil
+      //Uncomment if not assuming next rate limit
+      //rl.next = nil
     }
     rl.resets = time.Time{}
   }
@@ -118,6 +119,7 @@ func (rl *rateLimit) use() error {
   if rl.current == nil {
     rl.mxResolving.Lock()
     rl.resolving = true
+    return nil
   } else if *rl.current > 0 {
     *rl.current--
     return nil
@@ -126,6 +128,7 @@ func (rl *rateLimit) use() error {
   return newRateLimitError(rl.resets)
 }
 
+//TODO: This should be deferred to ensure that mxResolving is always unlocked when resolving
 func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bool) {
   rl.lockHigh()
   defer rl.unlockHigh()
