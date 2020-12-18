@@ -123,9 +123,9 @@ func (rl *rateLimit) use() error {
   } else if *rl.current > 0 {
     *rl.current--
     return nil
+  } else {
+    return newRateLimitError(rl.resets)
   }
-
-  return newRateLimitError(rl.resets)
 }
 
 //TODO: This should be deferred to ensure that mxResolving is always unlocked when resolving
