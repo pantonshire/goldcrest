@@ -1,9 +1,13 @@
 package proxy
 
 import (
+  "context"
+  "encoding/json"
   "fmt"
+  "github.com/pantonshire/goldcrest/proxy/oauth"
   "math/bits"
   "net/http"
+  "path"
   "strconv"
   "time"
 )
@@ -76,6 +80,21 @@ func (ep endpoint) limitKey() string {
 type twitterClient struct {
   client *http.Client
   ses    *sessions
+}
+
+func (tc twitterClient) standardRequest(ctx context.Context, ep endpoint, auth oauth.AuthPair, query, body map[string]string, output interface{}) error {
+  return tc.oauthRequest(ctx, ep, auth, query, body, func(resp *http.Response) error {
+    return json.NewDecoder(resp.Body).Decode(output)
+  })
+}
+
+func (tc twitterClient) oauthRequest(ctx context.Context, ep endpoint, auth oauth.AuthPair, query, body map[string]string, handler func(resp *http.Response) error) error {
+  oauthReq := oauth.NewRequest(ep.method.String(), protocol, domain, path.Join(version, ep.path), query, body)
+  req, err := oauthReq.MakeRequest(ctx, auth.Secret, auth.Public)
+  if err != nil {
+    return err
+  }
+  return tc.request(req, ep, auth.Public.Token, handler)
 }
 
 func (tc twitterClient) request(req *http.Request, ep endpoint, token string, handler func(resp *http.Response) error) (err error) {
