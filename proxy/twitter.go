@@ -4,11 +4,13 @@ import (
   "context"
   "encoding/json"
   "fmt"
+  "github.com/pantonshire/goldcrest/proxy/model"
   "github.com/pantonshire/goldcrest/proxy/oauth"
   "math/bits"
   "net/http"
   "path"
   "strconv"
+  "strings"
   "time"
 )
 
@@ -80,6 +82,42 @@ func (ep endpoint) limitKey() string {
 type twitterClient struct {
   client *http.Client
   ses    *sessions
+}
+
+func newTwitterClient() twitterClient {
+  client := http.Client{
+    Timeout: time.Second * time.Duration(5 * time.Second), //TODO: put in config
+  }
+  return twitterClient{
+    client: &client,
+    ses:    newSessions(),
+  }
+}
+
+func (tc twitterClient) getTweet(ctx context.Context, auth oauth.AuthPair, id uint64, opts tweetOptions) (model.Tweet, error) {
+  query := opts.encode()
+  query["id"] = strconv.FormatUint(id, 10)
+  var tweet model.Tweet
+  if err := tc.standardRequest(ctx, showTweetEndpoint, auth, query, nil, &tweet); err != nil {
+    return model.Tweet{}, err
+  }
+  return tweet, nil
+}
+
+func (tc twitterClient) getTweets(ctx context.Context, auth oauth.AuthPair, ids []uint64, opts tweetOptions) (model.Timeline, error) {
+  query := opts.encode()
+  if len(ids) > 0 {
+    idStrs := make([]string, len(ids))
+    for i, id := range ids {
+      idStrs[i] = strconv.FormatUint(id, 10)
+    }
+    query["id"] = strings.Join(idStrs, ",")
+  }
+  var tweets model.Timeline
+  if err := tc.standardRequest(ctx, showTweetsEndpoint, auth, query, nil, &tweets); err != nil {
+    return nil, err
+  }
+  return tweets, nil
 }
 
 func (tc twitterClient) standardRequest(ctx context.Context, ep endpoint, auth oauth.AuthPair, query, body map[string]string, output interface{}) error {
@@ -184,4 +222,14 @@ func rateLimitHeaders(header http.Header) (current, next *uint, resets *time.Tim
     }
   }
   return current, next, resets, err
+}
+
+func joinParamMaps(ms ...map[string]string) map[string]string {
+  master := make(map[string]string)
+  for _, m := range ms {
+    for key, val := range m {
+      master[key] = val
+    }
+  }
+  return master
 }

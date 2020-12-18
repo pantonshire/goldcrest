@@ -4,6 +4,7 @@ import (
   "fmt"
   pb "github.com/pantonshire/goldcrest/protocol"
   "google.golang.org/grpc/metadata"
+  "strconv"
   "time"
 )
 
@@ -27,7 +28,7 @@ func (err rateLimitError) Error() string {
 func (err rateLimitError) ser() (*pb.Error, metadata.MD) {
   var meta metadata.MD
   if !err.retry.IsZero() {
-    meta = metadata.Pairs("retry", fmt.Sprint(err.retry.Unix()))
+    meta = metadata.Pairs("retry", strconv.FormatInt(err.retry.Unix(), 10))
   }
   return &pb.Error{
     Code:    pb.Error_RATE_LIMIT,

@@ -5,12 +5,12 @@ import (
   "github.com/pantonshire/goldcrest/proxy/model"
 )
 
-func serTimeline(mods model.Timeline) *pb.Timeline {
-  tweets := make([]*pb.Tweet, len(mods))
+func serTimeline(mods model.Timeline) *pb.Tweets {
+  msgs := make([]*pb.Tweet, len(mods))
   for i, mod := range mods {
-    tweets[i] = serTweet(mod)
+    msgs[i] = serTweet(mod)
   }
-  return &pb.Timeline{Tweets: tweets}
+  return &pb.Tweets{Tweets: msgs}
 }
 
 func serTweet(mod model.Tweet) *pb.Tweet {
@@ -49,23 +49,15 @@ func serTweet(mod model.Tweet) *pb.Tweet {
       ReplyToUserId:     *mod.ReplyUserID,
       ReplyToUserHandle: strSafeDeref(mod.ReplyUserScreenName),
     }}
-  } else {
-    msg.Reply = &pb.Tweet_NoReply{}
   }
   if mod.QuotedStatus != nil {
     msg.Quote = &pb.Tweet_QuotedTweet{QuotedTweet: serTweet(*mod.QuotedStatus)}
-  } else {
-    msg.Quote = &pb.Tweet_NoQuote{}
   }
   if mod.RetweetedStatus != nil {
     msg.Retweet = &pb.Tweet_RetweetedTweet{RetweetedTweet: serTweet(*mod.RetweetedStatus)}
-  } else {
-    msg.Retweet = &pb.Tweet_NoRetweet{}
   }
   if mod.CurrentUserRetweet != nil {
     msg.CurrentUserRetweet = &pb.Tweet_CurrentUserRetweetId{CurrentUserRetweetId: mod.CurrentUserRetweet.ID}
-  } else {
-    msg.CurrentUserRetweet = &pb.Tweet_NoCurrentUserRetweet{}
   }
   return &msg
 }
@@ -182,8 +174,6 @@ func serMediaItem(mod model.Media) *pb.Media {
   }
   if mod.SourceStatusID != nil {
     msg.Source = &pb.Media_SourceTweetId{SourceTweetId: *mod.SourceStatusID}
-  } else {
-    msg.Source = &pb.Media_NoSource{}
   }
   return &msg
 }

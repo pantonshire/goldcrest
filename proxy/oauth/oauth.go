@@ -36,6 +36,17 @@ type Request struct {
   Query, Body                    map[string]string
 }
 
+func NewRequest(method, protocol, domain, path string, query, body map[string]string) Request {
+  return Request{
+    Method:   method,
+    Protocol: protocol,
+    Domain:   domain,
+    Path:     path,
+    Query:    query,
+    Body:     body,
+  }
+}
+
 // Creates a new http.Request containing an authentication header as described at
 // https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
 func (or Request) MakeRequest(ctx context.Context, secret, auth Auth) (*http.Request, error) {

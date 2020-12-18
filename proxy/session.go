@@ -30,6 +30,12 @@ type rateLimit struct {
   resets      time.Time
 }
 
+func newSessions() *sessions {
+  return &sessions{
+    cache: make(map[string]*session),
+  }
+}
+
 func newSession() *session {
   return &session{
     limits: make(map[string]*rateLimit),
