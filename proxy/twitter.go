@@ -1,7 +1,6 @@
 package proxy
 
 import (
-  "context"
   "fmt"
   "math/bits"
   "net/http"
@@ -79,7 +78,7 @@ type twitterClient struct {
   ses    *sessions
 }
 
-func (tc twitterClient) request(ctx context.Context, req *http.Request, ep endpoint, token string, handler func(resp *http.Response) error) (err error) {
+func (tc twitterClient) request(req *http.Request, ep endpoint, token string, handler func(resp *http.Response) error) (err error) {
   resp, err := func() (*http.Response, error) {
     rl := tc.ses.get(token).getLimit(ep.limitKey())
 
