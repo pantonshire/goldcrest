@@ -5,13 +5,9 @@ import (
   "time"
 )
 
-//TODO: put in config
-var (
-  stopOnLimitUnknown = true
-  assumeNextLimit    = true
+const (
+  stuckResetTime = time.Minute * 20
 )
-
-const shortWait = time.Millisecond * 50
 
 type sessions struct {
   mx    sync.Mutex
@@ -23,16 +19,15 @@ type session struct {
   limits map[string]*rateLimit //Use endpoint.limitKey() as map key
 }
 
-//TODO: rl can get stuck on "stopped" if it never receives a response from Twitter, so remember to unblock
 type rateLimit struct {
-  mxData        sync.Mutex
-  mxNext        sync.Mutex
-  mxLow         sync.Mutex
-  current       *uint
-  next          *uint
-  stopped       bool
-  unknownUsages uint
-  resets        time.Time
+  mxData      sync.Mutex
+  mxNext      sync.Mutex
+  mxLow       sync.Mutex
+  resolving   bool
+  mxResolving sync.Mutex
+  current     *uint
+  next        *uint
+  resets      time.Time
 }
 
 func newSession() *session {
@@ -67,88 +62,93 @@ func (se *session) getLimit(key string) *rateLimit {
   return rl
 }
 
-func (rl *rateLimit) use() (bool, error) {
-  //Lock with low priority
+func (rl *rateLimit) lockLow() {
   rl.mxLow.Lock()
-  defer rl.mxLow.Unlock()
   rl.mxNext.Lock()
   rl.mxData.Lock()
-  defer rl.mxData.Unlock()
   rl.mxNext.Unlock()
+}
+
+func (rl *rateLimit) unlockLow() {
+  rl.mxData.Unlock()
+  rl.mxLow.Unlock()
+}
+
+func (rl *rateLimit) lockHigh() {
+  rl.mxNext.Lock()
+  rl.mxData.Lock()
+  rl.mxNext.Unlock()
+}
+
+func (rl *rateLimit) unlockHigh() {
+  rl.mxData.Unlock()
+}
+
+func (rl *rateLimit) use() error {
+  rl.lockLow()
+  defer rl.unlockLow()
+
+  for rl.resolving {
+    rl.unlockLow()
+    rl.mxResolving.Lock()
+    rl.mxResolving.Unlock()
+    rl.lockLow()
+  }
 
   now := time.Now()
-  reset := now.After(rl.resets)
+  resetsKnown := !rl.resets.IsZero()
 
-  if reset && rl.next != nil {
-    if rl.current == nil {
-      rl.current = new(uint)
-    }
-    *rl.current = *rl.next
-    rl.stopped = false
-    if !assumeNextLimit {
-      rl.next = nil
-    }
-  }
-
-  if rl.current != nil && *rl.current > 0 {
-    *rl.current--
-    return false, nil
-  }
-
-  if rl.current == nil || rl.next == nil {
-    if stopOnLimitUnknown {
-      if !rl.stopped {
-        rl.stopped = true
-        rl.unknownUsages++
-        return true, nil
+  if !resetsKnown && rl.current != nil && *rl.current == 0 {
+    rl.resets = now.Add(stuckResetTime) //Could be stuck forever otherwise!
+  } else if resetsKnown && now.After(rl.resets) {
+    if rl.next == nil {
+      if rl.current != nil && *rl.current == 0 {
+        rl.current = nil
       }
     } else {
-      rl.unknownUsages++
-      return false, nil
+      if rl.current == nil {
+        rl.current = new(uint)
+      }
+      *rl.current = *rl.next
+      rl.next = nil
     }
+    rl.resets = time.Time{}
   }
 
-  var retry time.Time
-  if reset {
-    retry = now.Add(shortWait)
-  } else {
-    retry = rl.resets
+  if rl.current == nil {
+    rl.mxResolving.Lock()
+    rl.resolving = true
+  } else if *rl.current > 0 {
+    *rl.current--
+    return nil
   }
-  return false, newRateLimitError(retry)
+
+  return newRateLimitError(rl.resets)
 }
 
-// forceSync should be used when a rate limit error occurred (a rate limit error occurring indicates that
-// the proxy's rate limit tracker is wrong!), forcing the rateLimit to set all of its tracking fields.
-func (rl *rateLimit) update(current, next uint, resets time.Time, forceSync bool) {
-  //Lock with high priority
-  rl.mxNext.Lock()
-  rl.mxData.Lock()
-  defer rl.mxData.Unlock()
-  rl.mxNext.Unlock()
+func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bool) {
+  rl.lockHigh()
+  defer rl.unlockHigh()
 
-  if forceSync || rl.current == nil {
+  if rl.resolving {
+    rl.mxResolving.Unlock()
+  }
+
+  if current != nil && forceSync || rl.current == nil {
     if rl.current == nil {
       rl.current = new(uint)
     }
-    *rl.current = current
+    *rl.current = *current
   }
 
-  if rl.next == nil {
-    rl.next = new(uint)
+  if next != nil {
+    if rl.next == nil {
+      rl.next = new(uint)
+    }
+    *rl.next = *next
   }
 
-  *rl.next = next
-  if resets.After(rl.resets) {
-    rl.resets = resets
+  if resets != nil && resets.After(rl.resets) {
+    rl.resets = *resets
   }
-}
-
-func (rl *rateLimit) unblock() {
-  //Lock with high priority
-  rl.mxNext.Lock()
-  rl.mxData.Lock()
-  defer rl.mxData.Unlock()
-  rl.mxNext.Unlock()
-
-  rl.stopped = false
 }
