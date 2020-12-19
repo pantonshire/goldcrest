@@ -6,31 +6,31 @@ package twitter1;
 
 service Twitter1 {
   rpc GetTweet           (TweetRequest)           returns (TweetResponse);
-  rpc GetHomeTimeline    (HomeTimelineRequest)    returns (TimelineResponse);
-  rpc GetMentionTimeline (MentionTimelineRequest) returns (TimelineResponse);
-  rpc GetUserTimeline    (UserTimelineRequest)    returns (TimelineResponse);
-  rpc UpdateStatus       (UpdateStatusRequest)    returns (TweetResponse);
+  rpc GetTweets          (TweetsRequest)          returns (TweetsResponse);
+  rpc LikeTweet          (TweetRequest)           returns (TweetResponse);
+  rpc UnlikeTweet        (TweetRequest)           returns (TweetResponse);
+  rpc RetweetTweet       (TweetRequest)           returns (TweetResponse);
+  rpc UnretweetTweet     (TweetRequest)           returns (TweetResponse);
+  rpc DeleteTweet        (TweetRequest)           returns (TweetResponse);
+  rpc GetHomeTimeline    (HomeTimelineRequest)    returns (TweetsResponse);
+  rpc GetMentionTimeline (MentionTimelineRequest) returns (TweetsResponse);
+  rpc GetUserTimeline    (UserTimelineRequest)    returns (TweetsResponse);
+  rpc PublishTweet       (PublishTweetRequest)    returns (TweetResponse);
   rpc UpdateProfile      (UpdateProfileRequest)   returns (UserResponse);
   rpc GetRaw             (RawAPIRequest)          returns (RawAPIResult);
 
   // rpc StreamTweets(???) returns (stream Tweet);
 }
 
-message Marker {}
-
 message Error {
   enum Code {
     RATE_LIMIT = 0;
-    TWITTER_CONNECTION = 1;
+    TWITTER_ERROR = 1;
     BAD_REQUEST = 2;
     BAD_RESPONSE = 3;
   }
   Code code = 1;
   string message = 2;
-  oneof retry {
-    bool can_retry = 3;
-    uint64 retry_when = 4;
-  }
 }
 
 message Authentication {
@@ -58,23 +58,34 @@ message TweetOptions {
   Mode mode = 6;
 }
 
-message TweetRequest {
-  Authentication auth = 1;
-  fixed64 id = 2;
+message TimelineOptions {
+  uint32 count = 1;
+  oneof min {
+    fixed64 min_id = 2;
+  }
+  oneof max {
+    fixed64 max_id = 3;
+  }
   oneof content {
-    Marker default = 3;
     TweetOptions custom = 4;
   }
 }
 
-message TimelineOptions {
-  uint32 count = 1;
-  uint64 min_id = 2;
-  uint64 max_id = 3;
+message TweetRequest {
+  Authentication auth = 1;
+  fixed64 id = 2;
   oneof content {
-    Marker default = 4;
-    TweetOptions custom = 5;
+    TweetOptions custom = 3;
   }
+}
+
+message TweetsRequest {
+  Authentication auth = 1;
+  repeated fixed64 ids = 2;
+  oneof content {
+    TweetOptions custom = 3;
+  }
+  bool map = 4;
 }
 
 message HomeTimelineRequest {
@@ -99,50 +110,43 @@ message UserTimelineRequest {
   bool include_retweets = 6;
 }
 
-message UpdateStatusRequest {
+message PublishTweetRequest {
   Authentication auth = 1;
   string text = 2;
   oneof reply {
-    Marker no_reply = 3;
-    fixed64 reply_id = 4;
+    fixed64 reply_id = 3;
   }
-  bool auto_populate_reply_metadata = 5;
-  repeated fixed64 exclude_reply_user_ids = 6;
+  bool auto_populate_reply_metadata = 4;
+  repeated fixed64 exclude_reply_user_ids = 5;
   oneof attachment {
-    Marker no_attachment = 7;
-    string attachment_url = 8;
+    string attachment_url = 6;
   }
-  repeated fixed64 media_ids = 9;
-  bool possibly_sensitive = 10;
-  bool trim_user = 11;
-  bool enable_dm_commands = 12;
-  bool fail_dm_commands = 13;
+  repeated fixed64 media_ids = 7;
+  bool possibly_sensitive = 8;
+  bool trim_user = 9;
+  bool enable_dm_commands = 10;
+  bool fail_dm_commands = 11;
 }
 
 message UpdateProfileRequest {
   Authentication auth = 1;
   oneof update_name {
-    Marker no_update_name = 2;
-    string name = 3;
+    string name = 2;
   }
   oneof update_url {
-    Marker no_update_url = 4;
-    string url = 5;
+    string url = 3;
   }
   oneof update_location {
-    Marker no_update_location = 6;
-    string location = 7;
+    string location = 4;
   }
   oneof update_bio {
-    Marker no_update_bio = 8;
-    string bio = 9;
+    string bio = 5;
   }
   oneof update_profile_link_color {
-    Marker no_update_profile_link_color = 10;
-    string profile_link_color = 11;
+    string profile_link_color = 6;
   }
-  bool include_entities = 12;
-  bool include_statuses = 13;
+  bool include_entities = 7;
+  bool include_statuses = 8;
 }
 
 message TweetResponse {
@@ -152,9 +156,9 @@ message TweetResponse {
   }
 }
 
-message TimelineResponse {
+message TweetsResponse {
   oneof response {
-    Timeline timeline = 1;
+    Tweets tweets = 1;
     Error error = 2;
   }
 }
@@ -166,7 +170,7 @@ message UserResponse {
   }
 }
 
-message Timeline {
+message Tweets {
   repeated Tweet tweets = 1;
 }
 
@@ -184,39 +188,35 @@ message Tweet {
     string reply_to_user_handle = 3;
   }
   oneof reply {
-    Marker no_reply = 8;
-    Reply replied_tweet = 9;
+    Reply replied_tweet = 8;
   }
   oneof quote {
-    Marker no_quote = 10;
-    Tweet quoted_tweet = 11;
+    Tweet quoted_tweet = 9;
   }
   oneof retweet {
-    Marker no_retweet = 12;
-    Tweet retweeted_tweet = 13;
+    Tweet retweeted_tweet = 10;
   }
-  uint32 quote_count = 14;
-  uint32 reply_count = 15;
-  uint32 retweet_count = 16;
-  uint32 favorite_count = 17;
-  bool favorited = 18;
-  bool retweeted = 19;
+  uint32 quote_count = 11;
+  uint32 reply_count = 12;
+  uint32 retweet_count = 13;
+  uint32 favorite_count = 14;
+  bool favorited = 15;
+  bool retweeted = 16;
   oneof current_user_retweet {
-    Marker no_current_user_retweet = 20;
-    fixed64 current_user_retweet_id = 21;
+    fixed64 current_user_retweet_id = 17;
   }
-  repeated Symbol hashtags = 22;
-  repeated URL urls = 23;
-  repeated Mention mentions = 24;
-  repeated Symbol symbols = 25;
-  repeated Media media = 26;
-  repeated Poll polls = 27;
-  bool possibly_sensitive = 28;
-  string filter_level = 29;
-  string lang = 30;
-  bool withheld_copyright = 31;
-  repeated string withheld_countries = 32;
-  string withheld_scope = 33;
+  repeated Symbol hashtags = 18;
+  repeated URL urls = 19;
+  repeated Mention mentions = 20;
+  repeated Symbol symbols = 21;
+  repeated Media media = 22;
+  repeated Poll polls = 23;
+  bool possibly_sensitive = 24;
+  string filter_level = 25;
+  string lang = 26;
+  bool withheld_copyright = 27;
+  repeated string withheld_countries = 28;
+  string withheld_scope = 29;
 }
 
 message User {
@@ -270,18 +270,17 @@ message Media {
   string media_url = 4;
   string alt = 5;
   oneof source {
-    Marker no_source = 6;
-    fixed64 source_tweet_id = 7;
+    fixed64 source_tweet_id = 6;
   }
   message Size {
     uint32 width = 1;
     uint32 height = 2;
     string resize = 3;
   }
-  Size thumb = 8;
-  Size small = 9;
-  Size medium = 10;
-  Size large = 11;
+  Size thumb = 7;
+  Size small = 8;
+  Size medium = 9;
+  Size large = 10;
 }
 
 message Poll {
