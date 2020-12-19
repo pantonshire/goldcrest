@@ -1,7 +1,6 @@
 package proxy
 
 import (
-  "context"
   "encoding/json"
   "fmt"
   "github.com/pantonshire/goldcrest/proxy/model"
@@ -94,17 +93,17 @@ func newTwitterClient() twitterClient {
   }
 }
 
-func (tc twitterClient) getTweet(ctx context.Context, auth oauth.AuthPair, id uint64, opts tweetOptions) (model.Tweet, error) {
+func (tc twitterClient) getTweet(auth oauth.AuthPair, id uint64, opts tweetOptions) (model.Tweet, error) {
   query := opts.encode()
   query["id"] = strconv.FormatUint(id, 10)
   var tweet model.Tweet
-  if err := tc.standardRequest(ctx, showTweetEndpoint, auth, query, nil, &tweet); err != nil {
+  if err := tc.standardRequest(showTweetEndpoint, auth, query, nil, &tweet); err != nil {
     return model.Tweet{}, err
   }
   return tweet, nil
 }
 
-func (tc twitterClient) getTweets(ctx context.Context, auth oauth.AuthPair, ids []uint64, opts tweetOptions) (model.Timeline, error) {
+func (tc twitterClient) getTweets(auth oauth.AuthPair, ids []uint64, opts tweetOptions) (model.Timeline, error) {
   query := opts.encode()
   if len(ids) > 0 {
     idStrs := make([]string, len(ids))
@@ -114,21 +113,21 @@ func (tc twitterClient) getTweets(ctx context.Context, auth oauth.AuthPair, ids 
     query["id"] = strings.Join(idStrs, ",")
   }
   var tweets model.Timeline
-  if err := tc.standardRequest(ctx, showTweetsEndpoint, auth, query, nil, &tweets); err != nil {
+  if err := tc.standardRequest(showTweetsEndpoint, auth, query, nil, &tweets); err != nil {
     return nil, err
   }
   return tweets, nil
 }
 
-func (tc twitterClient) standardRequest(ctx context.Context, ep endpoint, auth oauth.AuthPair, query, body map[string]string, output interface{}) error {
-  return tc.oauthRequest(ctx, ep, auth, query, body, func(resp *http.Response) error {
+func (tc twitterClient) standardRequest(ep endpoint, auth oauth.AuthPair, query, body map[string]string, output interface{}) error {
+  return tc.oauthRequest(ep, auth, query, body, func(resp *http.Response) error {
     return json.NewDecoder(resp.Body).Decode(output)
   })
 }
 
-func (tc twitterClient) oauthRequest(ctx context.Context, ep endpoint, auth oauth.AuthPair, query, body map[string]string, handler func(resp *http.Response) error) error {
+func (tc twitterClient) oauthRequest(ep endpoint, auth oauth.AuthPair, query, body map[string]string, handler func(resp *http.Response) error) error {
   oauthReq := oauth.NewRequest(ep.method.String(), protocol, domain, path.Join(version, ep.path), query, body)
-  req, err := oauthReq.MakeRequest(ctx, auth.Secret, auth.Public)
+  req, err := oauthReq.MakeRequest(auth)
   if err != nil {
     return err
   }

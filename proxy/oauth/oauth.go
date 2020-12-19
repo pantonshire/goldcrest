@@ -2,7 +2,6 @@ package oauth
 
 import (
   "bytes"
-  "context"
   "crypto/hmac"
   "crypto/rand"
   "crypto/sha1"
@@ -49,7 +48,7 @@ func NewRequest(method, protocol, domain, path string, query, body map[string]st
 
 // Creates a new http.Request containing an authentication header as described at
 // https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
-func (or Request) MakeRequest(ctx context.Context, secret, auth Auth) (*http.Request, error) {
+func (or Request) MakeRequest(auth AuthPair) (*http.Request, error) {
   nonce, err := randBase36(oauthNonceBytes)
   if err != nil {
     return nil, err
@@ -62,14 +61,14 @@ func (or Request) MakeRequest(ctx context.Context, secret, auth Auth) (*http.Req
   timestamp := fmt.Sprintf("%d", time.Now().Unix())
 
   oauthParams := PercentEncodedParams{}
-  oauthParams.Set("oauth_consumer_key", auth.Key)
-  oauthParams.Set("oauth_token", auth.Token)
+  oauthParams.Set("oauth_consumer_key", auth.Public.Key)
+  oauthParams.Set("oauth_token", auth.Public.Token)
   oauthParams.Set("oauth_signature_method", oauthSignatureMethod)
   oauthParams.Set("oauth_version", oauthVersion)
   oauthParams.Set("oauth_timestamp", timestamp)
   oauthParams.Set("oauth_nonce", nonce)
 
-  signature := signOAuth(secret, or.Method, baseURL, oauthParams, queryParams, bodyParams)
+  signature := signOAuth(auth.Secret, or.Method, baseURL, oauthParams, queryParams, bodyParams)
   oauthParams.Set("oauth_signature", signature)
 
   authorization := "OAuth " + oauthParams.Encode(", ", true)
@@ -77,7 +76,7 @@ func (or Request) MakeRequest(ctx context.Context, secret, auth Auth) (*http.Req
   fullURL := baseURL + "?" + queryParams.Encode("&", false)
   bodyStr := bodyParams.Encode("&", false)
 
-  req, err := http.NewRequestWithContext(ctx, or.Method, fullURL, bytes.NewBufferString(bodyStr))
+  req, err := http.NewRequest(or.Method, fullURL, bytes.NewBufferString(bodyStr))
   if err != nil {
     return nil, err
   }

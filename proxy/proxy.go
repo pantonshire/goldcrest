@@ -17,14 +17,18 @@ type proxy struct {
 
 func InitServer(server *grpc.Server) {
   log.SetLevel(logrus.DebugLevel)
-  pb.RegisterTwitter1Server(server, &proxy{tc: newTwitterClient()})
+
+  p := proxy{
+    tc: newTwitterClient(),
+  }
+
+  pb.RegisterTwitter1Server(server, &p)
 }
 
 func (p proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, id, opts := desTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
-    //TODO: potentially use a different context with a custom timeout?
-    tweet, err := p.tc.getTweet(ctx, auth, id, opts)
+    tweet, err := p.tc.getTweet(auth, id, opts)
     if err != nil {
       return model.Tweet{}, nil, err
     }
