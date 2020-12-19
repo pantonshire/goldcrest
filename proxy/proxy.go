@@ -44,7 +44,21 @@ func (p proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetRes
 }
 
 func (p proxy) GetTweets(ctx context.Context, req *pb.TweetsRequest) (*pb.TweetsResponse, error) {
-  panic("implement me")
+  auth, ids, opts := desTweetsRequest(req)
+  resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
+    tweets, err := p.tc.getTweets(auth, ids, opts)
+    if err != nil {
+      return nil, nil, err
+    }
+    return tweets, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
 }
 
 func (p proxy) LikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
