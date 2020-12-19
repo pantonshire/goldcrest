@@ -4,15 +4,19 @@ import (
   "context"
   pb "github.com/pantonshire/goldcrest/protocol"
   "github.com/pantonshire/goldcrest/proxy/model"
+  "github.com/sirupsen/logrus"
   "google.golang.org/grpc"
   "google.golang.org/grpc/metadata"
 )
+
+var log = logrus.New()
 
 type proxy struct {
   tc twitterClient
 }
 
 func InitServer(server *grpc.Server) {
+  log.SetLevel(logrus.DebugLevel)
   pb.RegisterTwitter1Server(server, &proxy{tc: newTwitterClient()})
 }
 

@@ -69,35 +69,47 @@ func (se *session) getLimit(key string) *rateLimit {
 }
 
 func (rl *rateLimit) lockLow() {
+  log.Debug("Wait for low lock")
   rl.mxLow.Lock()
   rl.mxNext.Lock()
   rl.mxData.Lock()
   rl.mxNext.Unlock()
+  log.Debug("Acquire low lock")
 }
 
 func (rl *rateLimit) unlockLow() {
   rl.mxData.Unlock()
   rl.mxLow.Unlock()
+  log.Debug("Release low lock")
 }
 
 func (rl *rateLimit) lockHigh() {
+  log.Debug("Wait for high lock")
   rl.mxNext.Lock()
   rl.mxData.Lock()
   rl.mxNext.Unlock()
+  log.Debug("Acquire high lock")
 }
 
 func (rl *rateLimit) unlockHigh() {
   rl.mxData.Unlock()
+  log.Debug("Release high lock")
 }
 
+//TODO: display rate limits for debugging
+//TODO: fix hang on second usage of an endpoint
 func (rl *rateLimit) use() error {
   rl.lockLow()
   defer rl.unlockLow()
 
   for rl.resolving {
+    log.Debug("Resolving! Must wait")
     rl.unlockLow()
+    log.Debug("Wait for resolving lock")
     rl.mxResolving.Lock()
+    log.Debug("Acquire resolving lock")
     rl.mxResolving.Unlock()
+    log.Debug("Release resolving lock")
     rl.lockLow()
   }
 
@@ -123,23 +135,28 @@ func (rl *rateLimit) use() error {
   }
 
   if rl.current == nil {
+    log.Debug("Start resolving, wait for resolving lock")
     rl.mxResolving.Lock()
+    log.Debug("Acquire resolving lock")
     rl.resolving = true
     return nil
   } else if *rl.current > 0 {
+    log.WithField("old", *rl.current).WithField("new", *rl.current-1).Info("Update limit")
     *rl.current--
     return nil
   } else {
+    log.Info("Rate limit error")
     return newRateLimitError(rl.resets)
   }
 }
 
-//TODO: This should be deferred to ensure that mxResolving is always unlocked when resolving
 func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bool) {
   rl.lockHigh()
   defer rl.unlockHigh()
 
   if rl.resolving {
+    log.Debug("Finished resolving, release resolving lock")
+    rl.resolving = false
     rl.mxResolving.Unlock()
   }
 
@@ -148,6 +165,7 @@ func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bo
       rl.current = new(uint)
     }
     *rl.current = *current
+    log.WithField("value", *current).Info("Get new current limit")
   }
 
   if next != nil {
@@ -155,9 +173,11 @@ func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bo
       rl.next = new(uint)
     }
     *rl.next = *next
+    log.WithField("value", *next).Info("Get new next limit")
   }
 
   if resets != nil && resets.After(rl.resets) {
     rl.resets = *resets
+    log.WithField("value", *resets).Info("Get new resets time")
   }
 }
