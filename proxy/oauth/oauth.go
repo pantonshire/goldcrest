@@ -32,7 +32,7 @@ type AuthPair struct {
 
 type Request struct {
   Method, Protocol, Domain, Path string
-  Query, Body                    map[string]string
+  Query, Body                    Params
 }
 
 func NewRequest(method, protocol, domain, path string, query, body Params) Request {
