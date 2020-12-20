@@ -123,9 +123,11 @@ message PublishTweetRequest {
   }
   repeated fixed64 media_ids = 7;
   bool possibly_sensitive = 8;
-  bool trim_user = 9;
-  bool enable_dm_commands = 10;
-  bool fail_dm_commands = 11;
+  bool enable_dm_commands = 9;
+  bool fail_dm_commands = 10;
+  oneof content {
+    TweetOptions custom = 11;
+  }
 }
 
 message UpdateProfileRequest {

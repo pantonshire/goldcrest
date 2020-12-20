@@ -942,9 +942,11 @@ type PublishTweetRequest struct {
 	Attachment        isPublishTweetRequest_Attachment `protobuf_oneof:"attachment"`
 	MediaIds          []uint64                         `protobuf:"fixed64,7,rep,packed,name=media_ids,json=mediaIds,proto3" json:"media_ids,omitempty"`
 	PossiblySensitive bool                             `protobuf:"varint,8,opt,name=possibly_sensitive,json=possiblySensitive,proto3" json:"possibly_sensitive,omitempty"`
-	TrimUser          bool                             `protobuf:"varint,9,opt,name=trim_user,json=trimUser,proto3" json:"trim_user,omitempty"`
-	EnableDmCommands  bool                             `protobuf:"varint,10,opt,name=enable_dm_commands,json=enableDmCommands,proto3" json:"enable_dm_commands,omitempty"`
-	FailDmCommands    bool                             `protobuf:"varint,11,opt,name=fail_dm_commands,json=failDmCommands,proto3" json:"fail_dm_commands,omitempty"`
+	EnableDmCommands  bool                             `protobuf:"varint,9,opt,name=enable_dm_commands,json=enableDmCommands,proto3" json:"enable_dm_commands,omitempty"`
+	FailDmCommands    bool                             `protobuf:"varint,10,opt,name=fail_dm_commands,json=failDmCommands,proto3" json:"fail_dm_commands,omitempty"`
+	// Types that are assignable to Content:
+	//	*PublishTweetRequest_Custom
+	Content isPublishTweetRequest_Content `protobuf_oneof:"content"`
 }
 
 func (x *PublishTweetRequest) Reset() {
@@ -1049,13 +1051,6 @@ func (x *PublishTweetRequest) GetPossiblySensitive() bool {
 	return false
 }
 
-func (x *PublishTweetRequest) GetTrimUser() bool {
-	if x != nil {
-		return x.TrimUser
-	}
-	return false
-}
-
 func (x *PublishTweetRequest) GetEnableDmCommands() bool {
 	if x != nil {
 		return x.EnableDmCommands
@@ -1068,6 +1063,20 @@ func (x *PublishTweetRequest) GetFailDmCommands() bool {
 		return x.FailDmCommands
 	}
 	return false
+}
+
+func (m *PublishTweetRequest) GetContent() isPublishTweetRequest_Content {
+	if m != nil {
+		return m.Content
+	}
+	return nil
+}
+
+func (x *PublishTweetRequest) GetCustom() *TweetOptions {
+	if x, ok := x.GetContent().(*PublishTweetRequest_Custom); ok {
+		return x.Custom
+	}
+	return nil
 }
 
 type isPublishTweetRequest_Reply interface {
@@ -1089,6 +1098,16 @@ type PublishTweetRequest_AttachmentUrl struct {
 }
 
 func (*PublishTweetRequest_AttachmentUrl) isPublishTweetRequest_Attachment() {}
+
+type isPublishTweetRequest_Content interface {
+	isPublishTweetRequest_Content()
+}
+
+type PublishTweetRequest_Custom struct {
+	Custom *TweetOptions `protobuf:"bytes,11,opt,name=custom,proto3,oneof"`
+}
+
+func (*PublishTweetRequest_Custom) isPublishTweetRequest_Content() {}
 
 type UpdateProfileRequest struct {
 	state         protoimpl.MessageState
@@ -2987,8 +3006,8 @@ var file_twitter1_proto_rawDesc = []byte{
 	0x6c, 0x75, 0x64, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x69, 0x65, 0x73, 0x12, 0x29, 0x0a, 0x10, 0x69,
 	0x6e, 0x63, 0x6c, 0x75, 0x64, 0x65, 0x5f, 0x72, 0x65, 0x74, 0x77, 0x65, 0x65, 0x74, 0x73, 0x18,
 	0x06, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0f, 0x69, 0x6e, 0x63, 0x6c, 0x75, 0x64, 0x65, 0x52, 0x65,
-	0x74, 0x77, 0x65, 0x65, 0x74, 0x73, 0x42, 0x06, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0xeb,
-	0x03, 0x0a, 0x13, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52,
+	0x74, 0x77, 0x65, 0x65, 0x74, 0x73, 0x42, 0x06, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x8b,
+	0x04, 0x0a, 0x13, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2c, 0x0a, 0x04, 0x61, 0x75, 0x74, 0x68, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e,
 	0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x04,
@@ -3010,15 +3029,17 @@ var file_twitter1_proto_rawDesc = []byte{
 	0x73, 0x12, 0x2d, 0x0a, 0x12, 0x70, 0x6f, 0x73, 0x73, 0x69, 0x62, 0x6c, 0x79, 0x5f, 0x73, 0x65,
 	0x6e, 0x73, 0x69, 0x74, 0x69, 0x76, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x08, 0x52, 0x11, 0x70,
 	0x6f, 0x73, 0x73, 0x69, 0x62, 0x6c, 0x79, 0x53, 0x65, 0x6e, 0x73, 0x69, 0x74, 0x69, 0x76, 0x65,
-	0x12, 0x1b, 0x0a, 0x09, 0x74, 0x72, 0x69, 0x6d, 0x5f, 0x75, 0x73, 0x65, 0x72, 0x18, 0x09, 0x20,
-	0x01, 0x28, 0x08, 0x52, 0x08, 0x74, 0x72, 0x69, 0x6d, 0x55, 0x73, 0x65, 0x72, 0x12, 0x2c, 0x0a,
-	0x12, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x5f, 0x64, 0x6d, 0x5f, 0x63, 0x6f, 0x6d, 0x6d, 0x61,
-	0x6e, 0x64, 0x73, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x08, 0x52, 0x10, 0x65, 0x6e, 0x61, 0x62, 0x6c,
-	0x65, 0x44, 0x6d, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x12, 0x28, 0x0a, 0x10, 0x66,
-	0x61, 0x69, 0x6c, 0x5f, 0x64, 0x6d, 0x5f, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x18,
-	0x0b, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0e, 0x66, 0x61, 0x69, 0x6c, 0x44, 0x6d, 0x43, 0x6f, 0x6d,
-	0x6d, 0x61, 0x6e, 0x64, 0x73, 0x42, 0x07, 0x0a, 0x05, 0x72, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x0c,
-	0x0a, 0x0a, 0x61, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x22, 0x81, 0x03, 0x0a,
+	0x12, 0x2c, 0x0a, 0x12, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x5f, 0x64, 0x6d, 0x5f, 0x63, 0x6f,
+	0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x18, 0x09, 0x20, 0x01, 0x28, 0x08, 0x52, 0x10, 0x65, 0x6e,
+	0x61, 0x62, 0x6c, 0x65, 0x44, 0x6d, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x12, 0x28,
+	0x0a, 0x10, 0x66, 0x61, 0x69, 0x6c, 0x5f, 0x64, 0x6d, 0x5f, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e,
+	0x64, 0x73, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0e, 0x66, 0x61, 0x69, 0x6c, 0x44, 0x6d,
+	0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x12, 0x30, 0x0a, 0x06, 0x63, 0x75, 0x73, 0x74,
+	0x6f, 0x6d, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74,
+	0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73,
+	0x48, 0x02, 0x52, 0x06, 0x63, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x42, 0x07, 0x0a, 0x05, 0x72, 0x65,
+	0x70, 0x6c, 0x79, 0x42, 0x0c, 0x0a, 0x0a, 0x61, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e,
+	0x74, 0x42, 0x09, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x81, 0x03, 0x0a,
 	0x14, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2c, 0x0a, 0x04, 0x61, 0x75, 0x74, 0x68, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x41,
@@ -3426,71 +3447,72 @@ var file_twitter1_proto_depIdxs = []int32{
 	3,  // 11: twitter1.UserTimelineRequest.auth:type_name -> twitter1.Authentication
 	6,  // 12: twitter1.UserTimelineRequest.timeline_options:type_name -> twitter1.TimelineOptions
 	3,  // 13: twitter1.PublishTweetRequest.auth:type_name -> twitter1.Authentication
-	3,  // 14: twitter1.UpdateProfileRequest.auth:type_name -> twitter1.Authentication
-	18, // 15: twitter1.TweetResponse.tweet:type_name -> twitter1.Tweet
-	2,  // 16: twitter1.TweetResponse.error:type_name -> twitter1.Error
-	17, // 17: twitter1.TweetsResponse.tweets:type_name -> twitter1.Tweets
-	2,  // 18: twitter1.TweetsResponse.error:type_name -> twitter1.Error
-	19, // 19: twitter1.UserResponse.user:type_name -> twitter1.User
-	2,  // 20: twitter1.UserResponse.error:type_name -> twitter1.Error
-	18, // 21: twitter1.Tweets.tweets:type_name -> twitter1.Tweet
-	4,  // 22: twitter1.Tweet.text_display_range:type_name -> twitter1.Indices
-	19, // 23: twitter1.Tweet.user:type_name -> twitter1.User
-	27, // 24: twitter1.Tweet.replied_tweet:type_name -> twitter1.Tweet.Reply
-	18, // 25: twitter1.Tweet.quoted_tweet:type_name -> twitter1.Tweet
-	18, // 26: twitter1.Tweet.retweeted_tweet:type_name -> twitter1.Tweet
-	21, // 27: twitter1.Tweet.hashtags:type_name -> twitter1.Symbol
-	20, // 28: twitter1.Tweet.urls:type_name -> twitter1.URL
-	22, // 29: twitter1.Tweet.mentions:type_name -> twitter1.Mention
-	21, // 30: twitter1.Tweet.symbols:type_name -> twitter1.Symbol
-	23, // 31: twitter1.Tweet.media:type_name -> twitter1.Media
-	24, // 32: twitter1.Tweet.polls:type_name -> twitter1.Poll
-	20, // 33: twitter1.User.url_urls:type_name -> twitter1.URL
-	20, // 34: twitter1.User.bio_urls:type_name -> twitter1.URL
-	4,  // 35: twitter1.URL.indices:type_name -> twitter1.Indices
-	4,  // 36: twitter1.Symbol.indices:type_name -> twitter1.Indices
-	4,  // 37: twitter1.Mention.indices:type_name -> twitter1.Indices
-	20, // 38: twitter1.Media.url:type_name -> twitter1.URL
-	28, // 39: twitter1.Media.thumb:type_name -> twitter1.Media.Size
-	28, // 40: twitter1.Media.small:type_name -> twitter1.Media.Size
-	28, // 41: twitter1.Media.medium:type_name -> twitter1.Media.Size
-	28, // 42: twitter1.Media.large:type_name -> twitter1.Media.Size
-	29, // 43: twitter1.Poll.options:type_name -> twitter1.Poll.Option
-	3,  // 44: twitter1.RawAPIRequest.auth:type_name -> twitter1.Authentication
-	30, // 45: twitter1.RawAPIRequest.query_params:type_name -> twitter1.RawAPIRequest.QueryParamsEntry
-	31, // 46: twitter1.RawAPIRequest.body_params:type_name -> twitter1.RawAPIRequest.BodyParamsEntry
-	32, // 47: twitter1.RawAPIResult.headers:type_name -> twitter1.RawAPIResult.HeadersEntry
-	7,  // 48: twitter1.Twitter1.GetTweet:input_type -> twitter1.TweetRequest
-	8,  // 49: twitter1.Twitter1.GetTweets:input_type -> twitter1.TweetsRequest
-	7,  // 50: twitter1.Twitter1.LikeTweet:input_type -> twitter1.TweetRequest
-	7,  // 51: twitter1.Twitter1.UnlikeTweet:input_type -> twitter1.TweetRequest
-	7,  // 52: twitter1.Twitter1.RetweetTweet:input_type -> twitter1.TweetRequest
-	7,  // 53: twitter1.Twitter1.UnretweetTweet:input_type -> twitter1.TweetRequest
-	7,  // 54: twitter1.Twitter1.DeleteTweet:input_type -> twitter1.TweetRequest
-	9,  // 55: twitter1.Twitter1.GetHomeTimeline:input_type -> twitter1.HomeTimelineRequest
-	10, // 56: twitter1.Twitter1.GetMentionTimeline:input_type -> twitter1.MentionTimelineRequest
-	11, // 57: twitter1.Twitter1.GetUserTimeline:input_type -> twitter1.UserTimelineRequest
-	12, // 58: twitter1.Twitter1.PublishTweet:input_type -> twitter1.PublishTweetRequest
-	13, // 59: twitter1.Twitter1.UpdateProfile:input_type -> twitter1.UpdateProfileRequest
-	25, // 60: twitter1.Twitter1.GetRaw:input_type -> twitter1.RawAPIRequest
-	14, // 61: twitter1.Twitter1.GetTweet:output_type -> twitter1.TweetResponse
-	15, // 62: twitter1.Twitter1.GetTweets:output_type -> twitter1.TweetsResponse
-	14, // 63: twitter1.Twitter1.LikeTweet:output_type -> twitter1.TweetResponse
-	14, // 64: twitter1.Twitter1.UnlikeTweet:output_type -> twitter1.TweetResponse
-	14, // 65: twitter1.Twitter1.RetweetTweet:output_type -> twitter1.TweetResponse
-	14, // 66: twitter1.Twitter1.UnretweetTweet:output_type -> twitter1.TweetResponse
-	14, // 67: twitter1.Twitter1.DeleteTweet:output_type -> twitter1.TweetResponse
-	15, // 68: twitter1.Twitter1.GetHomeTimeline:output_type -> twitter1.TweetsResponse
-	15, // 69: twitter1.Twitter1.GetMentionTimeline:output_type -> twitter1.TweetsResponse
-	15, // 70: twitter1.Twitter1.GetUserTimeline:output_type -> twitter1.TweetsResponse
-	14, // 71: twitter1.Twitter1.PublishTweet:output_type -> twitter1.TweetResponse
-	16, // 72: twitter1.Twitter1.UpdateProfile:output_type -> twitter1.UserResponse
-	26, // 73: twitter1.Twitter1.GetRaw:output_type -> twitter1.RawAPIResult
-	61, // [61:74] is the sub-list for method output_type
-	48, // [48:61] is the sub-list for method input_type
-	48, // [48:48] is the sub-list for extension type_name
-	48, // [48:48] is the sub-list for extension extendee
-	0,  // [0:48] is the sub-list for field type_name
+	5,  // 14: twitter1.PublishTweetRequest.custom:type_name -> twitter1.TweetOptions
+	3,  // 15: twitter1.UpdateProfileRequest.auth:type_name -> twitter1.Authentication
+	18, // 16: twitter1.TweetResponse.tweet:type_name -> twitter1.Tweet
+	2,  // 17: twitter1.TweetResponse.error:type_name -> twitter1.Error
+	17, // 18: twitter1.TweetsResponse.tweets:type_name -> twitter1.Tweets
+	2,  // 19: twitter1.TweetsResponse.error:type_name -> twitter1.Error
+	19, // 20: twitter1.UserResponse.user:type_name -> twitter1.User
+	2,  // 21: twitter1.UserResponse.error:type_name -> twitter1.Error
+	18, // 22: twitter1.Tweets.tweets:type_name -> twitter1.Tweet
+	4,  // 23: twitter1.Tweet.text_display_range:type_name -> twitter1.Indices
+	19, // 24: twitter1.Tweet.user:type_name -> twitter1.User
+	27, // 25: twitter1.Tweet.replied_tweet:type_name -> twitter1.Tweet.Reply
+	18, // 26: twitter1.Tweet.quoted_tweet:type_name -> twitter1.Tweet
+	18, // 27: twitter1.Tweet.retweeted_tweet:type_name -> twitter1.Tweet
+	21, // 28: twitter1.Tweet.hashtags:type_name -> twitter1.Symbol
+	20, // 29: twitter1.Tweet.urls:type_name -> twitter1.URL
+	22, // 30: twitter1.Tweet.mentions:type_name -> twitter1.Mention
+	21, // 31: twitter1.Tweet.symbols:type_name -> twitter1.Symbol
+	23, // 32: twitter1.Tweet.media:type_name -> twitter1.Media
+	24, // 33: twitter1.Tweet.polls:type_name -> twitter1.Poll
+	20, // 34: twitter1.User.url_urls:type_name -> twitter1.URL
+	20, // 35: twitter1.User.bio_urls:type_name -> twitter1.URL
+	4,  // 36: twitter1.URL.indices:type_name -> twitter1.Indices
+	4,  // 37: twitter1.Symbol.indices:type_name -> twitter1.Indices
+	4,  // 38: twitter1.Mention.indices:type_name -> twitter1.Indices
+	20, // 39: twitter1.Media.url:type_name -> twitter1.URL
+	28, // 40: twitter1.Media.thumb:type_name -> twitter1.Media.Size
+	28, // 41: twitter1.Media.small:type_name -> twitter1.Media.Size
+	28, // 42: twitter1.Media.medium:type_name -> twitter1.Media.Size
+	28, // 43: twitter1.Media.large:type_name -> twitter1.Media.Size
+	29, // 44: twitter1.Poll.options:type_name -> twitter1.Poll.Option
+	3,  // 45: twitter1.RawAPIRequest.auth:type_name -> twitter1.Authentication
+	30, // 46: twitter1.RawAPIRequest.query_params:type_name -> twitter1.RawAPIRequest.QueryParamsEntry
+	31, // 47: twitter1.RawAPIRequest.body_params:type_name -> twitter1.RawAPIRequest.BodyParamsEntry
+	32, // 48: twitter1.RawAPIResult.headers:type_name -> twitter1.RawAPIResult.HeadersEntry
+	7,  // 49: twitter1.Twitter1.GetTweet:input_type -> twitter1.TweetRequest
+	8,  // 50: twitter1.Twitter1.GetTweets:input_type -> twitter1.TweetsRequest
+	7,  // 51: twitter1.Twitter1.LikeTweet:input_type -> twitter1.TweetRequest
+	7,  // 52: twitter1.Twitter1.UnlikeTweet:input_type -> twitter1.TweetRequest
+	7,  // 53: twitter1.Twitter1.RetweetTweet:input_type -> twitter1.TweetRequest
+	7,  // 54: twitter1.Twitter1.UnretweetTweet:input_type -> twitter1.TweetRequest
+	7,  // 55: twitter1.Twitter1.DeleteTweet:input_type -> twitter1.TweetRequest
+	9,  // 56: twitter1.Twitter1.GetHomeTimeline:input_type -> twitter1.HomeTimelineRequest
+	10, // 57: twitter1.Twitter1.GetMentionTimeline:input_type -> twitter1.MentionTimelineRequest
+	11, // 58: twitter1.Twitter1.GetUserTimeline:input_type -> twitter1.UserTimelineRequest
+	12, // 59: twitter1.Twitter1.PublishTweet:input_type -> twitter1.PublishTweetRequest
+	13, // 60: twitter1.Twitter1.UpdateProfile:input_type -> twitter1.UpdateProfileRequest
+	25, // 61: twitter1.Twitter1.GetRaw:input_type -> twitter1.RawAPIRequest
+	14, // 62: twitter1.Twitter1.GetTweet:output_type -> twitter1.TweetResponse
+	15, // 63: twitter1.Twitter1.GetTweets:output_type -> twitter1.TweetsResponse
+	14, // 64: twitter1.Twitter1.LikeTweet:output_type -> twitter1.TweetResponse
+	14, // 65: twitter1.Twitter1.UnlikeTweet:output_type -> twitter1.TweetResponse
+	14, // 66: twitter1.Twitter1.RetweetTweet:output_type -> twitter1.TweetResponse
+	14, // 67: twitter1.Twitter1.UnretweetTweet:output_type -> twitter1.TweetResponse
+	14, // 68: twitter1.Twitter1.DeleteTweet:output_type -> twitter1.TweetResponse
+	15, // 69: twitter1.Twitter1.GetHomeTimeline:output_type -> twitter1.TweetsResponse
+	15, // 70: twitter1.Twitter1.GetMentionTimeline:output_type -> twitter1.TweetsResponse
+	15, // 71: twitter1.Twitter1.GetUserTimeline:output_type -> twitter1.TweetsResponse
+	14, // 72: twitter1.Twitter1.PublishTweet:output_type -> twitter1.TweetResponse
+	16, // 73: twitter1.Twitter1.UpdateProfile:output_type -> twitter1.UserResponse
+	26, // 74: twitter1.Twitter1.GetRaw:output_type -> twitter1.RawAPIResult
+	62, // [62:75] is the sub-list for method output_type
+	49, // [49:62] is the sub-list for method input_type
+	49, // [49:49] is the sub-list for extension type_name
+	49, // [49:49] is the sub-list for extension extendee
+	0,  // [0:49] is the sub-list for field type_name
 }
 
 func init() { file_twitter1_proto_init() }
@@ -3854,6 +3876,7 @@ func file_twitter1_proto_init() {
 	file_twitter1_proto_msgTypes[10].OneofWrappers = []interface{}{
 		(*PublishTweetRequest_ReplyId)(nil),
 		(*PublishTweetRequest_AttachmentUrl)(nil),
+		(*PublishTweetRequest_Custom)(nil),
 	}
 	file_twitter1_proto_msgTypes[11].OneofWrappers = []interface{}{
 		(*UpdateProfileRequest_Name)(nil),
