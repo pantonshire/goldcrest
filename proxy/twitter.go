@@ -3,13 +3,11 @@ package proxy
 import (
   "encoding/json"
   "fmt"
-  "github.com/pantonshire/goldcrest/proxy/model"
   "github.com/pantonshire/goldcrest/proxy/oauth"
   "math/bits"
   "net/http"
   "path"
   "strconv"
-  "strings"
   "time"
 )
 
@@ -93,39 +91,13 @@ func newTwitterClient() twitterClient {
   }
 }
 
-func (tc twitterClient) getTweet(auth oauth.AuthPair, id uint64, opts tweetOptions) (model.Tweet, error) {
-  query := opts.encode()
-  query["id"] = strconv.FormatUint(id, 10)
-  var tweet model.Tweet
-  if err := tc.standardRequest(showTweetEndpoint, auth, query, nil, &tweet); err != nil {
-    return model.Tweet{}, err
-  }
-  return tweet, nil
-}
-
-func (tc twitterClient) getTweets(auth oauth.AuthPair, ids []uint64, opts tweetOptions) (model.Timeline, error) {
-  query := opts.encode()
-  if len(ids) > 0 {
-    idStrs := make([]string, len(ids))
-    for i, id := range ids {
-      idStrs[i] = strconv.FormatUint(id, 10)
-    }
-    query["id"] = strings.Join(idStrs, ",")
-  }
-  var tweets model.Timeline
-  if err := tc.standardRequest(showTweetsEndpoint, auth, query, nil, &tweets); err != nil {
-    return nil, err
-  }
-  return tweets, nil
-}
-
-func (tc twitterClient) standardRequest(ep endpoint, auth oauth.AuthPair, query, body map[string]string, output interface{}) error {
+func (tc twitterClient) standardRequest(ep endpoint, auth oauth.AuthPair, query, body oauth.Params, output interface{}) error {
   return tc.oauthRequest(ep, auth, query, body, func(resp *http.Response) error {
     return json.NewDecoder(resp.Body).Decode(output)
   })
 }
 
-func (tc twitterClient) oauthRequest(ep endpoint, auth oauth.AuthPair, query, body map[string]string, handler func(resp *http.Response) error) error {
+func (tc twitterClient) oauthRequest(ep endpoint, auth oauth.AuthPair, query, body oauth.Params, handler func(resp *http.Response) error) error {
   oauthReq := oauth.NewRequest(ep.method.String(), protocol, domain, path.Join(version, ep.path), query, body)
   req, err := oauthReq.MakeRequest(auth)
   if err != nil {
@@ -189,6 +161,12 @@ func (tc twitterClient) request(req *http.Request, ep endpoint, token string, ha
   if 200 <= resp.StatusCode && resp.StatusCode < 300 {
     return handler(resp)
   } else if 400 <= resp.StatusCode && resp.StatusCode < 500 {
+    //var bs []byte
+    //bs, err := ioutil.ReadAll(resp.Body)
+    //if err != nil {
+    //  log.Error(err)
+    //}
+    //spew.Dump(string(bs))
     return newBadRequestError(fmt.Sprintf("Twitter responded with %s", resp.Status))
   } else {
     return newTwitterError(fmt.Sprintf("Twitter responded with %s", resp.Status))
@@ -196,6 +174,8 @@ func (tc twitterClient) request(req *http.Request, ep endpoint, token string, ha
 }
 
 func rateLimitHeaders(header http.Header) (current, next *uint, resets *time.Time, err error) {
+  log.Debug(header)
+
   if currentStr := header.Get(headerRateLimitRemaining); currentStr != "" {
     if currentVal, parseErr := strconv.ParseUint(currentStr, 10, bits.UintSize); parseErr != nil {
       err = newBadResponseHeaderError(headerRateLimitRemaining, currentStr)

@@ -26,10 +26,10 @@ func InitServer(server *grpc.Server) {
 }
 
 func (p proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
-  auth, id, opts := desTweetRequest(req)
+  auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
-    tweet, err := p.tc.getTweet(auth, id, opts)
-    if err != nil {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(showTweetEndpoint, auth, query, nil, &tweet); err != nil {
       return model.Tweet{}, nil, err
     }
     return tweet, nil, nil
@@ -44,10 +44,10 @@ func (p proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetRes
 }
 
 func (p proxy) GetTweets(ctx context.Context, req *pb.TweetsRequest) (*pb.TweetsResponse, error) {
-  auth, ids, opts := desTweetsRequest(req)
+  auth, query := reserTweetsRequest(req)
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
-    tweets, err := p.tc.getTweets(auth, ids, opts)
-    if err != nil {
+    var tweets model.Timeline
+    if err := p.tc.standardRequest(showTweetsEndpoint, auth, query, nil, &tweets); err != nil {
       return nil, nil, err
     }
     return tweets, nil, nil
@@ -62,23 +62,111 @@ func (p proxy) GetTweets(ctx context.Context, req *pb.TweetsRequest) (*pb.Tweets
 }
 
 func (p proxy) LikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
-  panic("implement me")
+  auth, query := reserTweetRequest(req)
+  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(likeEndpoint, auth, query, nil, &tweet); err != nil {
+      return model.Tweet{}, nil, err
+    }
+    return tweet, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
 }
 
 func (p proxy) UnlikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
-  panic("implement me")
+  auth, query := reserTweetRequest(req)
+  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(unlikeEndpoint, auth, query, nil, &tweet); err != nil {
+      return model.Tweet{}, nil, err
+    }
+    return tweet, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
 }
 
 func (p proxy) RetweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
-  panic("implement me")
+  auth, query := reserTweetRequest(req)
+  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(retweetEndpoint, auth, query, nil, &tweet); err != nil {
+      return model.Tweet{}, nil, err
+    }
+    return tweet, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
 }
 
 func (p proxy) UnretweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
-  panic("implement me")
+  auth, query := reserTweetRequest(req)
+  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(unretweetEndpoint, auth, query, nil, &tweet); err != nil {
+      return model.Tweet{}, nil, err
+    }
+    return tweet, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
+}
+
+func (p proxy) PublishTweet(ctx context.Context, req *pb.PublishTweetRequest) (*pb.TweetResponse, error) {
+  auth, query := reserPublishTweetRequest(req)
+  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(publishTweetEndpoint, auth, query, nil, &tweet); err != nil {
+      return model.Tweet{}, nil, err
+    }
+    return tweet, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
 }
 
 func (p proxy) DeleteTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
-  panic("implement me")
+  auth, query := reserTweetRequest(req)
+  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
+    var tweet model.Tweet
+    if err := p.tc.standardRequest(destroyTweetEndpoint, auth, query, nil, &tweet); err != nil {
+      return model.Tweet{}, nil, err
+    }
+    return tweet, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
 }
 
 func (p proxy) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.TweetsResponse, error) {
@@ -111,20 +199,6 @@ func (p proxy) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRe
 
 func (p proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.TweetsResponse, error) {
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
-    //TODO
-    panic("implement me")
-  })
-  if err != nil {
-    return nil, err
-  }
-  if err := sendHeader(ctx, meta); err != nil {
-    return nil, err
-  }
-  return resp, nil
-}
-
-func (p proxy) PublishTweet(ctx context.Context, req *pb.PublishTweetRequest) (*pb.TweetResponse, error) {
-  resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     //TODO
     panic("implement me")
   })

@@ -4,6 +4,7 @@ import (
   pb "github.com/pantonshire/goldcrest/protocol"
   "github.com/pantonshire/goldcrest/proxy/oauth"
   "strconv"
+  "strings"
 )
 
 type tweetOptions struct {
@@ -13,17 +14,6 @@ type tweetOptions struct {
   includeExtAltText bool
   includeCardURI    bool
   mode              tweetMode
-}
-
-func (opts tweetOptions) encode() map[string]string {
-  return map[string]string{
-    "trim_user":            strconv.FormatBool(opts.trimUser),
-    "include_my_retweet":   strconv.FormatBool(opts.includeMyRetweet),
-    "include_entities":     strconv.FormatBool(opts.includeEntities),
-    "include_ext_alt_text": strconv.FormatBool(opts.includeExtAltText),
-    "include_card_uri":     strconv.FormatBool(opts.includeCardURI),
-    "tweet_mode":           opts.mode.String(),
-  }
 }
 
 type timelineOptions struct {
@@ -42,37 +32,18 @@ var (
     includeCardURI:    true,
     mode:              extendedMode,
   }
+  defaultTweetOptionsParams = defaultTweetOptions.ser()
 )
 
-func desTweetRequest(msg *pb.TweetRequest) (oauth.AuthPair, uint64, tweetOptions) {
-  if msg == nil {
-    return oauth.AuthPair{}, 0, tweetOptions{}
+func (opts tweetOptions) ser() oauth.Params {
+  return map[string]string{
+    "trim_user":            strconv.FormatBool(opts.trimUser),
+    "include_my_retweet":   strconv.FormatBool(opts.includeMyRetweet),
+    "include_entities":     strconv.FormatBool(opts.includeEntities),
+    "include_ext_alt_text": strconv.FormatBool(opts.includeExtAltText),
+    "include_card_uri":     strconv.FormatBool(opts.includeCardURI),
+    "tweet_mode":           opts.mode.String(),
   }
-  auth := desAuth(msg.Auth)
-  id := msg.Id
-  var tweetOpts tweetOptions
-  if custom, ok := msg.Content.(*pb.TweetRequest_Custom); ok {
-    tweetOpts = desTweetOptions(custom.Custom)
-  } else {
-    tweetOpts = defaultTweetOptions
-  }
-  return auth, id, tweetOpts
-}
-
-func desTweetsRequest(msg *pb.TweetsRequest) (oauth.AuthPair, []uint64, tweetOptions) {
-  if msg == nil {
-    return oauth.AuthPair{}, nil, tweetOptions{}
-  }
-  auth := desAuth(msg.Auth)
-  ids := make([]uint64, len(msg.Ids))
-  copy(ids, msg.Ids)
-  var tweetOpts tweetOptions
-  if custom, ok := msg.Content.(*pb.TweetsRequest_Custom); ok {
-    tweetOpts = desTweetOptions(custom.Custom)
-  } else {
-    tweetOpts = defaultTweetOptions
-  }
-  return auth, ids, tweetOpts
 }
 
 func desAuth(msg *pb.Authentication) oauth.AuthPair {
@@ -133,4 +104,59 @@ func desTimelineOptions(msg *pb.TimelineOptions) timelineOptions {
     opts.tweetOpts = defaultTweetOptions
   }
   return opts
+}
+
+func reserTweetRequest(msg *pb.TweetRequest) (oauth.AuthPair, oauth.Params) {
+  if msg == nil {
+    return oauth.AuthPair{}, nil
+  }
+  auth := desAuth(msg.Auth)
+  params := oauth.NewParams()
+  params.Set("id", strconv.FormatUint(msg.Id, 10))
+  if custom, ok := msg.Content.(*pb.TweetRequest_Custom); ok {
+    params.Extend(desTweetOptions(custom.Custom).ser())
+  } else {
+    params.Extend(defaultTweetOptionsParams)
+  }
+  return auth, params
+}
+
+func reserTweetsRequest(msg *pb.TweetsRequest) (oauth.AuthPair, oauth.Params) {
+  if msg == nil {
+    return oauth.AuthPair{}, nil
+  }
+  auth := desAuth(msg.Auth)
+  params := oauth.NewParams()
+  if len(msg.Ids) > 0 {
+    ids := make([]string, len(msg.Ids))
+    for i, id := range msg.Ids {
+      ids[i] = strconv.FormatUint(id, 10)
+    }
+    params.Set("id", strings.Join(ids, ","))
+  }
+  if custom, ok := msg.Content.(*pb.TweetsRequest_Custom); ok {
+    params.Extend(desTweetOptions(custom.Custom).ser())
+  } else {
+    params.Extend(defaultTweetOptionsParams)
+  }
+  return auth, params
+}
+
+func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oauth.Params){
+  if msg == nil {
+    return oauth.AuthPair{}, nil
+  }
+  auth := desAuth(msg.Auth)
+  params := oauth.NewParams()
+  params.Set("status", msg.Text)
+  params.Set("auto_populate_reply_metadata", strconv.FormatBool(msg.AutoPopulateReplyMetadata))
+  params.Set("possibly_sensitive", strconv.FormatBool(msg.PossiblySensitive))
+  params.Set("enable_dmcommands", strconv.FormatBool(msg.EnableDmCommands))
+  params.Set("fail_dmcommands", strconv.FormatBool(msg.FailDmCommands))
+  if custom, ok := msg.Content.(*pb.PublishTweetRequest_Custom); ok {
+    params.Extend(desTweetOptions(custom.Custom).ser())
+  } else {
+    params.Extend(defaultTweetOptionsParams)
+  }
+  return auth, params
 }

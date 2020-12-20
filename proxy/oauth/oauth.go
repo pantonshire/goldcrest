@@ -61,15 +61,15 @@ func (or Request) MakeRequest(auth AuthPair) (*http.Request, error) {
   timestamp := fmt.Sprintf("%d", time.Now().Unix())
 
   oauthParams := percentEncodedParams{}
-  oauthParams.Set("oauth_consumer_key", auth.Public.Key)
-  oauthParams.Set("oauth_token", auth.Public.Token)
-  oauthParams.Set("oauth_signature_method", oauthSignatureMethod)
-  oauthParams.Set("oauth_version", oauthVersion)
-  oauthParams.Set("oauth_timestamp", timestamp)
-  oauthParams.Set("oauth_nonce", nonce)
+  oauthParams.set("oauth_consumer_key", auth.Public.Key)
+  oauthParams.set("oauth_token", auth.Public.Token)
+  oauthParams.set("oauth_signature_method", oauthSignatureMethod)
+  oauthParams.set("oauth_version", oauthVersion)
+  oauthParams.set("oauth_timestamp", timestamp)
+  oauthParams.set("oauth_nonce", nonce)
 
   signature := signOAuth(auth.Secret, or.Method, baseURL, oauthParams, queryParams, bodyParams)
-  oauthParams.Set("oauth_signature", signature)
+  oauthParams.set("oauth_signature", signature)
 
   authorization := "OAuth " + oauthParams.encode(", ", true)
 
@@ -94,13 +94,13 @@ func (or Request) MakeRequest(auth AuthPair) (*http.Request, error) {
 func signOAuth(secret Auth, method, baseURL string, oauthParams, queryParams, bodyParams percentEncodedParams) string {
   allParams := percentEncodedParams{}
   for key, value := range oauthParams {
-    allParams.Set(key, value)
+    allParams.set(key, value)
   }
   for key, value := range queryParams {
-    allParams.Set(key, value)
+    allParams.set(key, value)
   }
   for key, value := range bodyParams {
-    allParams.Set(key, value)
+    allParams.set(key, value)
   }
   paramStr := allParams.encode("&", false)
   sigBase := strings.ToUpper(method) + "&" + percentEncode(baseURL) + "&" + percentEncode(paramStr)

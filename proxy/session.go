@@ -160,7 +160,7 @@ func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bo
     rl.mxResolving.Unlock()
   }
 
-  if current != nil && forceSync || rl.current == nil {
+  if current != nil && (forceSync || rl.current == nil) {
     if rl.current == nil {
       rl.current = new(uint)
     }

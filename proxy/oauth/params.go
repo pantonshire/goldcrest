@@ -26,6 +26,10 @@ func (ps Params) Extend(other Params) {
   }
 }
 
+func (pp percentEncodedParams) set(key, val string) bool {
+  return Params(pp).Set(key, val)
+}
+
 func (pp percentEncodedParams) encode(sep string, quote bool) string {
   n := len(pp)
   if n == 0 {
