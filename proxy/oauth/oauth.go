@@ -35,7 +35,7 @@ type Request struct {
   Query, Body                    map[string]string
 }
 
-func NewRequest(method, protocol, domain, path string, query, body map[string]string) Request {
+func NewRequest(method, protocol, domain, path string, query, body Params) Request {
   return Request{
     Method:   method,
     Protocol: protocol,
@@ -56,11 +56,11 @@ func (or Request) MakeRequest(auth AuthPair) (*http.Request, error) {
 
   baseURL := or.Protocol + "://" + path.Join(or.Domain, or.Path)
 
-  queryParams, bodyParams := PercentEncodedParams(or.Query), PercentEncodedParams(or.Body)
+  queryParams, bodyParams := percentEncodedParams(or.Query), percentEncodedParams(or.Body)
 
   timestamp := fmt.Sprintf("%d", time.Now().Unix())
 
-  oauthParams := PercentEncodedParams{}
+  oauthParams := percentEncodedParams{}
   oauthParams.Set("oauth_consumer_key", auth.Public.Key)
   oauthParams.Set("oauth_token", auth.Public.Token)
   oauthParams.Set("oauth_signature_method", oauthSignatureMethod)
@@ -91,8 +91,8 @@ func (or Request) MakeRequest(auth AuthPair) (*http.Request, error) {
 
 // Creates an OAuth signature using the method described at
 // https://developer.twitter.com/en/docs/authentication/oauth-1-0a/creating-a-signature
-func signOAuth(secret Auth, method, baseURL string, oauthParams, queryParams, bodyParams PercentEncodedParams) string {
-  allParams := PercentEncodedParams{}
+func signOAuth(secret Auth, method, baseURL string, oauthParams, queryParams, bodyParams percentEncodedParams) string {
+  allParams := percentEncodedParams{}
   for key, value := range oauthParams {
     allParams.Set(key, value)
   }

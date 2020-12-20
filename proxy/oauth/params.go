@@ -5,9 +5,10 @@ import (
   "strings"
 )
 
-type PercentEncodedParams map[string]string
+type Params map[string]string
+type percentEncodedParams Params
 
-func (pp PercentEncodedParams) Set(key, val string) bool {
+func (pp percentEncodedParams) Set(key, val string) bool {
   if _, ok := pp[key]; ok {
     return false
   }
@@ -15,7 +16,7 @@ func (pp PercentEncodedParams) Set(key, val string) bool {
   return true
 }
 
-func (pp PercentEncodedParams) Encode(sep string, quote bool) string {
+func (pp percentEncodedParams) Encode(sep string, quote bool) string {
   n := len(pp)
   if n == 0 {
     return ""
