@@ -19,7 +19,7 @@ func TestPercentEncodedParams(t *testing.T) {
   for i, tt := range tests {
     name := fmt.Sprintf("Encode_%d", i)
     t.Run(name, func(t *testing.T) {
-      result := PercentEncode(tt.input)
+      result := percentEncode(tt.input)
       if result != tt.expect {
         t.Errorf("got \"%s\", expected \"%s\"", result, tt.expect)
       }

@@ -71,10 +71,10 @@ func (or Request) MakeRequest(auth AuthPair) (*http.Request, error) {
   signature := signOAuth(auth.Secret, or.Method, baseURL, oauthParams, queryParams, bodyParams)
   oauthParams.Set("oauth_signature", signature)
 
-  authorization := "OAuth " + oauthParams.Encode(", ", true)
+  authorization := "OAuth " + oauthParams.encode(", ", true)
 
-  fullURL := baseURL + "?" + queryParams.Encode("&", false)
-  bodyStr := bodyParams.Encode("&", false)
+  fullURL := baseURL + "?" + queryParams.encode("&", false)
+  bodyStr := bodyParams.encode("&", false)
 
   req, err := http.NewRequest(or.Method, fullURL, bytes.NewBufferString(bodyStr))
   if err != nil {
@@ -102,9 +102,9 @@ func signOAuth(secret Auth, method, baseURL string, oauthParams, queryParams, bo
   for key, value := range bodyParams {
     allParams.Set(key, value)
   }
-  paramStr := allParams.Encode("&", false)
-  sigBase := strings.ToUpper(method) + "&" + PercentEncode(baseURL) + "&" + PercentEncode(paramStr)
-  sigKey := PercentEncode(secret.Key) + "&" + PercentEncode(secret.Token)
+  paramStr := allParams.encode("&", false)
+  sigBase := strings.ToUpper(method) + "&" + percentEncode(baseURL) + "&" + percentEncode(paramStr)
+  sigKey := percentEncode(secret.Key) + "&" + percentEncode(secret.Token)
   hash := hmac.New(sha1.New, []byte(sigKey))
   hash.Write([]byte(sigBase))
   return base64.StdEncoding.EncodeToString(hash.Sum(nil))

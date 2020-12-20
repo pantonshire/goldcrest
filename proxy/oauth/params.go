@@ -8,15 +8,25 @@ import (
 type Params map[string]string
 type percentEncodedParams Params
 
-func (pp percentEncodedParams) Set(key, val string) bool {
-  if _, ok := pp[key]; ok {
+func NewParams() Params {
+  return make(Params)
+}
+
+func (ps Params) Set(key, val string) bool {
+  if _, ok := ps[key]; ok {
     return false
   }
-  pp[key] = val
+  ps[key] = val
   return true
 }
 
-func (pp percentEncodedParams) Encode(sep string, quote bool) string {
+func (ps Params) Extend(other Params) {
+  for k, v := range other {
+    ps.Set(k, v)
+  }
+}
+
+func (pp percentEncodedParams) encode(sep string, quote bool) string {
   n := len(pp)
   if n == 0 {
     return ""
@@ -29,32 +39,32 @@ func (pp percentEncodedParams) Encode(sep string, quote bool) string {
   }
   sort.Strings(keys)
   var dst strings.Builder
-  dst.WriteString(PercentEncode(keys[0]))
+  dst.WriteString(percentEncode(keys[0]))
   dst.WriteRune('=')
   if quote {
     dst.WriteRune('"')
-    dst.WriteString(PercentEncode(pp[keys[0]]))
+    dst.WriteString(percentEncode(pp[keys[0]]))
     dst.WriteRune('"')
   } else {
-    dst.WriteString(PercentEncode(pp[keys[0]]))
+    dst.WriteString(percentEncode(pp[keys[0]]))
   }
   for j := 1; j < n; j++ {
     dst.WriteString(sep)
-    dst.WriteString(PercentEncode(keys[j]))
+    dst.WriteString(percentEncode(keys[j]))
     dst.WriteRune('=')
     if quote {
       dst.WriteRune('"')
-      dst.WriteString(PercentEncode(pp[keys[j]]))
+      dst.WriteString(percentEncode(pp[keys[j]]))
       dst.WriteRune('"')
     } else {
-      dst.WriteString(PercentEncode(pp[keys[j]]))
+      dst.WriteString(percentEncode(pp[keys[j]]))
     }
   }
   return dst.String()
 }
 
 // Encodes the given string according to RFC 3986, Section 2.1.
-func PercentEncode(raw string) string {
+func percentEncode(raw string) string {
   var dst []byte
   for _, b := range []byte(raw) {
     if allowRawByte(b) {
