@@ -12,14 +12,14 @@ import (
   "time"
 )
 
-var log = logrus.New()
+var log *logrus.Logger
 
 type Proxy struct {
   tc twitterClient
-
 }
 
-func NewProxy(log *logrus.Logger, twitterTimeout time.Duration, twitterProtocol, twitterURL string, assumeNextLimit bool) *Proxy {
+func NewProxy(logger *logrus.Logger, twitterTimeout time.Duration, twitterProtocol, twitterURL string, assumeNextLimit bool) *Proxy {
+  log = logger
   return &Proxy{
     tc: newTwitterClient(twitterTimeout, twitterProtocol, twitterURL, assumeNextLimit),
   }
