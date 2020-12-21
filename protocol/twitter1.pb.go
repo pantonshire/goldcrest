@@ -3323,67 +3323,67 @@ var file_twitter1_proto_rawDesc = []byte{
 	0x79, 0x1a, 0x3a, 0x0a, 0x0c, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x73, 0x45, 0x6e, 0x74, 0x72,
 	0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
 	0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x32, 0xff, 0x06,
-	0x0a, 0x08, 0x54, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x12, 0x3b, 0x0a, 0x08, 0x47, 0x65,
-	0x74, 0x54, 0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72,
-	0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17,
-	0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x54, 0x77,
-	0x65, 0x65, 0x74, 0x73, 0x12, 0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e,
-	0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e,
-	0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x09, 0x4c, 0x69, 0x6b, 0x65, 0x54,
-	0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e,
-	0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x74,
-	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x0b, 0x55, 0x6e, 0x6c, 0x69, 0x6b, 0x65, 0x54,
-	0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e,
-	0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x74,
-	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3f, 0x0a, 0x0c, 0x52, 0x65, 0x74, 0x77, 0x65, 0x65, 0x74,
+	0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x32, 0xfe, 0x06,
+	0x0a, 0x07, 0x54, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x12, 0x3b, 0x0a, 0x08, 0x47, 0x65, 0x74,
 	0x54, 0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31,
 	0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e,
 	0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x41, 0x0a, 0x0e, 0x55, 0x6e, 0x72, 0x65, 0x74, 0x77,
-	0x65, 0x65, 0x74, 0x54, 0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74,
-	0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65,
-	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x0b, 0x44, 0x65, 0x6c,
-	0x65, 0x74, 0x65, 0x54, 0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74,
-	0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65,
-	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4a, 0x0a, 0x0f, 0x47, 0x65, 0x74,
-	0x48, 0x6f, 0x6d, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x1d, 0x2e, 0x74,
-	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x48, 0x6f, 0x6d, 0x65, 0x54, 0x69, 0x6d, 0x65,
-	0x6c, 0x69, 0x6e, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x74, 0x77,
-	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x50, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x6e, 0x74,
-	0x69, 0x6f, 0x6e, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x20, 0x2e, 0x74, 0x77,
-	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x4d, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x69,
-	0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e,
-	0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4a, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x55, 0x73,
-	0x65, 0x72, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x1d, 0x2e, 0x74, 0x77, 0x69,
-	0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69,
-	0x6e, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x74, 0x77, 0x69, 0x74,
-	0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x46, 0x0a, 0x0c, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x54, 0x77,
-	0x65, 0x65, 0x74, 0x12, 0x1d, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x50,
-	0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77,
-	0x65, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x47, 0x0a, 0x0d, 0x55,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x1e, 0x2e, 0x74,
-	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72,
-	0x6f, 0x66, 0x69, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x74,
-	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x39, 0x0a, 0x06, 0x47, 0x65, 0x74, 0x52, 0x61, 0x77, 0x12, 0x17,
-	0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x52, 0x61, 0x77, 0x41, 0x50, 0x49,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65,
-	0x72, 0x31, 0x2e, 0x52, 0x61, 0x77, 0x41, 0x50, 0x49, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x42,
-	0x2b, 0x5a, 0x29, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x61,
-	0x6e, 0x74, 0x6f, 0x6e, 0x73, 0x68, 0x69, 0x72, 0x65, 0x2f, 0x67, 0x6f, 0x6c, 0x64, 0x63, 0x72,
-	0x65, 0x73, 0x74, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x54, 0x77, 0x65,
+	0x65, 0x74, 0x73, 0x12, 0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54,
+	0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x74,
+	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x09, 0x4c, 0x69, 0x6b, 0x65, 0x54, 0x77,
+	0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54,
+	0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x74, 0x77,
+	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x0b, 0x55, 0x6e, 0x6c, 0x69, 0x6b, 0x65, 0x54, 0x77,
+	0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54,
+	0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x74, 0x77,
+	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3f, 0x0a, 0x0c, 0x52, 0x65, 0x74, 0x77, 0x65, 0x65, 0x74, 0x54,
+	0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e,
+	0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x74,
+	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x41, 0x0a, 0x0e, 0x55, 0x6e, 0x72, 0x65, 0x74, 0x77, 0x65,
+	0x65, 0x74, 0x54, 0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65,
+	0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x0b, 0x44, 0x65, 0x6c, 0x65,
+	0x74, 0x65, 0x54, 0x77, 0x65, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65,
+	0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4a, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x48,
+	0x6f, 0x6d, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x1d, 0x2e, 0x74, 0x77,
+	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x48, 0x6f, 0x6d, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x6c,
+	0x69, 0x6e, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x74, 0x77, 0x69,
+	0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x50, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x6e, 0x74, 0x69,
+	0x6f, 0x6e, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x20, 0x2e, 0x74, 0x77, 0x69,
+	0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x4d, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x69, 0x6d,
+	0x65, 0x6c, 0x69, 0x6e, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x74,
+	0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4a, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x1d, 0x2e, 0x74, 0x77, 0x69, 0x74,
+	0x74, 0x65, 0x72, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x54, 0x69, 0x6d, 0x65, 0x6c, 0x69, 0x6e,
+	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74,
+	0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65, 0x65, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x46, 0x0a, 0x0c, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x54, 0x77, 0x65,
+	0x65, 0x74, 0x12, 0x1d, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x50, 0x75,
+	0x62, 0x6c, 0x69, 0x73, 0x68, 0x54, 0x77, 0x65, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x17, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x54, 0x77, 0x65,
+	0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x47, 0x0a, 0x0d, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x1e, 0x2e, 0x74, 0x77,
+	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f,
+	0x66, 0x69, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x74, 0x77,
+	0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x39, 0x0a, 0x06, 0x47, 0x65, 0x74, 0x52, 0x61, 0x77, 0x12, 0x17, 0x2e,
+	0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x31, 0x2e, 0x52, 0x61, 0x77, 0x41, 0x50, 0x49, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72,
+	0x31, 0x2e, 0x52, 0x61, 0x77, 0x41, 0x50, 0x49, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x42, 0x2b,
+	0x5a, 0x29, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x61, 0x6e,
+	0x74, 0x6f, 0x6e, 0x73, 0x68, 0x69, 0x72, 0x65, 0x2f, 0x67, 0x6f, 0x6c, 0x64, 0x63, 0x72, 0x65,
+	0x73, 0x74, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3485,32 +3485,32 @@ var file_twitter1_proto_depIdxs = []int32{
 	30, // 46: twitter1.RawAPIRequest.query_params:type_name -> twitter1.RawAPIRequest.QueryParamsEntry
 	31, // 47: twitter1.RawAPIRequest.body_params:type_name -> twitter1.RawAPIRequest.BodyParamsEntry
 	32, // 48: twitter1.RawAPIResult.headers:type_name -> twitter1.RawAPIResult.HeadersEntry
-	7,  // 49: twitter1.Twitter1.GetTweet:input_type -> twitter1.TweetRequest
-	8,  // 50: twitter1.Twitter1.GetTweets:input_type -> twitter1.TweetsRequest
-	7,  // 51: twitter1.Twitter1.LikeTweet:input_type -> twitter1.TweetRequest
-	7,  // 52: twitter1.Twitter1.UnlikeTweet:input_type -> twitter1.TweetRequest
-	7,  // 53: twitter1.Twitter1.RetweetTweet:input_type -> twitter1.TweetRequest
-	7,  // 54: twitter1.Twitter1.UnretweetTweet:input_type -> twitter1.TweetRequest
-	7,  // 55: twitter1.Twitter1.DeleteTweet:input_type -> twitter1.TweetRequest
-	9,  // 56: twitter1.Twitter1.GetHomeTimeline:input_type -> twitter1.HomeTimelineRequest
-	10, // 57: twitter1.Twitter1.GetMentionTimeline:input_type -> twitter1.MentionTimelineRequest
-	11, // 58: twitter1.Twitter1.GetUserTimeline:input_type -> twitter1.UserTimelineRequest
-	12, // 59: twitter1.Twitter1.PublishTweet:input_type -> twitter1.PublishTweetRequest
-	13, // 60: twitter1.Twitter1.UpdateProfile:input_type -> twitter1.UpdateProfileRequest
-	25, // 61: twitter1.Twitter1.GetRaw:input_type -> twitter1.RawAPIRequest
-	14, // 62: twitter1.Twitter1.GetTweet:output_type -> twitter1.TweetResponse
-	15, // 63: twitter1.Twitter1.GetTweets:output_type -> twitter1.TweetsResponse
-	14, // 64: twitter1.Twitter1.LikeTweet:output_type -> twitter1.TweetResponse
-	14, // 65: twitter1.Twitter1.UnlikeTweet:output_type -> twitter1.TweetResponse
-	14, // 66: twitter1.Twitter1.RetweetTweet:output_type -> twitter1.TweetResponse
-	14, // 67: twitter1.Twitter1.UnretweetTweet:output_type -> twitter1.TweetResponse
-	14, // 68: twitter1.Twitter1.DeleteTweet:output_type -> twitter1.TweetResponse
-	15, // 69: twitter1.Twitter1.GetHomeTimeline:output_type -> twitter1.TweetsResponse
-	15, // 70: twitter1.Twitter1.GetMentionTimeline:output_type -> twitter1.TweetsResponse
-	15, // 71: twitter1.Twitter1.GetUserTimeline:output_type -> twitter1.TweetsResponse
-	14, // 72: twitter1.Twitter1.PublishTweet:output_type -> twitter1.TweetResponse
-	16, // 73: twitter1.Twitter1.UpdateProfile:output_type -> twitter1.UserResponse
-	26, // 74: twitter1.Twitter1.GetRaw:output_type -> twitter1.RawAPIResult
+	7,  // 49: twitter1.Twitter.GetTweet:input_type -> twitter1.TweetRequest
+	8,  // 50: twitter1.Twitter.GetTweets:input_type -> twitter1.TweetsRequest
+	7,  // 51: twitter1.Twitter.LikeTweet:input_type -> twitter1.TweetRequest
+	7,  // 52: twitter1.Twitter.UnlikeTweet:input_type -> twitter1.TweetRequest
+	7,  // 53: twitter1.Twitter.RetweetTweet:input_type -> twitter1.TweetRequest
+	7,  // 54: twitter1.Twitter.UnretweetTweet:input_type -> twitter1.TweetRequest
+	7,  // 55: twitter1.Twitter.DeleteTweet:input_type -> twitter1.TweetRequest
+	9,  // 56: twitter1.Twitter.GetHomeTimeline:input_type -> twitter1.HomeTimelineRequest
+	10, // 57: twitter1.Twitter.GetMentionTimeline:input_type -> twitter1.MentionTimelineRequest
+	11, // 58: twitter1.Twitter.GetUserTimeline:input_type -> twitter1.UserTimelineRequest
+	12, // 59: twitter1.Twitter.PublishTweet:input_type -> twitter1.PublishTweetRequest
+	13, // 60: twitter1.Twitter.UpdateProfile:input_type -> twitter1.UpdateProfileRequest
+	25, // 61: twitter1.Twitter.GetRaw:input_type -> twitter1.RawAPIRequest
+	14, // 62: twitter1.Twitter.GetTweet:output_type -> twitter1.TweetResponse
+	15, // 63: twitter1.Twitter.GetTweets:output_type -> twitter1.TweetsResponse
+	14, // 64: twitter1.Twitter.LikeTweet:output_type -> twitter1.TweetResponse
+	14, // 65: twitter1.Twitter.UnlikeTweet:output_type -> twitter1.TweetResponse
+	14, // 66: twitter1.Twitter.RetweetTweet:output_type -> twitter1.TweetResponse
+	14, // 67: twitter1.Twitter.UnretweetTweet:output_type -> twitter1.TweetResponse
+	14, // 68: twitter1.Twitter.DeleteTweet:output_type -> twitter1.TweetResponse
+	15, // 69: twitter1.Twitter.GetHomeTimeline:output_type -> twitter1.TweetsResponse
+	15, // 70: twitter1.Twitter.GetMentionTimeline:output_type -> twitter1.TweetsResponse
+	15, // 71: twitter1.Twitter.GetUserTimeline:output_type -> twitter1.TweetsResponse
+	14, // 72: twitter1.Twitter.PublishTweet:output_type -> twitter1.TweetResponse
+	16, // 73: twitter1.Twitter.UpdateProfile:output_type -> twitter1.UserResponse
+	26, // 74: twitter1.Twitter.GetRaw:output_type -> twitter1.RawAPIResult
 	62, // [62:75] is the sub-list for method output_type
 	49, // [49:62] is the sub-list for method input_type
 	49, // [49:49] is the sub-list for extension type_name
@@ -3938,10 +3938,10 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// Twitter1Client is the client API for Twitter1 service.
+// TwitterClient is the client API for Twitter service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type Twitter1Client interface {
+type TwitterClient interface {
 	GetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error)
 	GetTweets(ctx context.Context, in *TweetsRequest, opts ...grpc.CallOption) (*TweetsResponse, error)
 	LikeTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error)
@@ -3957,133 +3957,133 @@ type Twitter1Client interface {
 	GetRaw(ctx context.Context, in *RawAPIRequest, opts ...grpc.CallOption) (*RawAPIResult, error)
 }
 
-type twitter1Client struct {
+type twitterClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTwitter1Client(cc grpc.ClientConnInterface) Twitter1Client {
-	return &twitter1Client{cc}
+func NewTwitterClient(cc grpc.ClientConnInterface) TwitterClient {
+	return &twitterClient{cc}
 }
 
-func (c *twitter1Client) GetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) GetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/GetTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/GetTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) GetTweets(ctx context.Context, in *TweetsRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
+func (c *twitterClient) GetTweets(ctx context.Context, in *TweetsRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
 	out := new(TweetsResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/GetTweets", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/GetTweets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) LikeTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) LikeTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/LikeTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/LikeTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) UnlikeTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) UnlikeTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/UnlikeTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/UnlikeTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) RetweetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) RetweetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/RetweetTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/RetweetTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) UnretweetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) UnretweetTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/UnretweetTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/UnretweetTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) DeleteTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) DeleteTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/DeleteTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/DeleteTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) GetHomeTimeline(ctx context.Context, in *HomeTimelineRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
+func (c *twitterClient) GetHomeTimeline(ctx context.Context, in *HomeTimelineRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
 	out := new(TweetsResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/GetHomeTimeline", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/GetHomeTimeline", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) GetMentionTimeline(ctx context.Context, in *MentionTimelineRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
+func (c *twitterClient) GetMentionTimeline(ctx context.Context, in *MentionTimelineRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
 	out := new(TweetsResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/GetMentionTimeline", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/GetMentionTimeline", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) GetUserTimeline(ctx context.Context, in *UserTimelineRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
+func (c *twitterClient) GetUserTimeline(ctx context.Context, in *UserTimelineRequest, opts ...grpc.CallOption) (*TweetsResponse, error) {
 	out := new(TweetsResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/GetUserTimeline", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/GetUserTimeline", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) PublishTweet(ctx context.Context, in *PublishTweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
+func (c *twitterClient) PublishTweet(ctx context.Context, in *PublishTweetRequest, opts ...grpc.CallOption) (*TweetResponse, error) {
 	out := new(TweetResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/PublishTweet", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/PublishTweet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *twitterClient) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/UpdateProfile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/UpdateProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *twitter1Client) GetRaw(ctx context.Context, in *RawAPIRequest, opts ...grpc.CallOption) (*RawAPIResult, error) {
+func (c *twitterClient) GetRaw(ctx context.Context, in *RawAPIRequest, opts ...grpc.CallOption) (*RawAPIResult, error) {
 	out := new(RawAPIResult)
-	err := c.cc.Invoke(ctx, "/twitter1.Twitter1/GetRaw", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/twitter1.Twitter/GetRaw", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Twitter1Server is the server API for Twitter1 service.
-type Twitter1Server interface {
+// TwitterServer is the server API for Twitter service.
+type TwitterServer interface {
 	GetTweet(context.Context, *TweetRequest) (*TweetResponse, error)
 	GetTweets(context.Context, *TweetsRequest) (*TweetsResponse, error)
 	LikeTweet(context.Context, *TweetRequest) (*TweetResponse, error)
@@ -4099,343 +4099,343 @@ type Twitter1Server interface {
 	GetRaw(context.Context, *RawAPIRequest) (*RawAPIResult, error)
 }
 
-// UnimplementedTwitter1Server can be embedded to have forward compatible implementations.
-type UnimplementedTwitter1Server struct {
+// UnimplementedTwitterServer can be embedded to have forward compatible implementations.
+type UnimplementedTwitterServer struct {
 }
 
-func (*UnimplementedTwitter1Server) GetTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) GetTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) GetTweets(context.Context, *TweetsRequest) (*TweetsResponse, error) {
+func (*UnimplementedTwitterServer) GetTweets(context.Context, *TweetsRequest) (*TweetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTweets not implemented")
 }
-func (*UnimplementedTwitter1Server) LikeTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) LikeTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LikeTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) UnlikeTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) UnlikeTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnlikeTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) RetweetTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) RetweetTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RetweetTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) UnretweetTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) UnretweetTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnretweetTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) DeleteTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) DeleteTweet(context.Context, *TweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) GetHomeTimeline(context.Context, *HomeTimelineRequest) (*TweetsResponse, error) {
+func (*UnimplementedTwitterServer) GetHomeTimeline(context.Context, *HomeTimelineRequest) (*TweetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHomeTimeline not implemented")
 }
-func (*UnimplementedTwitter1Server) GetMentionTimeline(context.Context, *MentionTimelineRequest) (*TweetsResponse, error) {
+func (*UnimplementedTwitterServer) GetMentionTimeline(context.Context, *MentionTimelineRequest) (*TweetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMentionTimeline not implemented")
 }
-func (*UnimplementedTwitter1Server) GetUserTimeline(context.Context, *UserTimelineRequest) (*TweetsResponse, error) {
+func (*UnimplementedTwitterServer) GetUserTimeline(context.Context, *UserTimelineRequest) (*TweetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserTimeline not implemented")
 }
-func (*UnimplementedTwitter1Server) PublishTweet(context.Context, *PublishTweetRequest) (*TweetResponse, error) {
+func (*UnimplementedTwitterServer) PublishTweet(context.Context, *PublishTweetRequest) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishTweet not implemented")
 }
-func (*UnimplementedTwitter1Server) UpdateProfile(context.Context, *UpdateProfileRequest) (*UserResponse, error) {
+func (*UnimplementedTwitterServer) UpdateProfile(context.Context, *UpdateProfileRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfile not implemented")
 }
-func (*UnimplementedTwitter1Server) GetRaw(context.Context, *RawAPIRequest) (*RawAPIResult, error) {
+func (*UnimplementedTwitterServer) GetRaw(context.Context, *RawAPIRequest) (*RawAPIResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRaw not implemented")
 }
 
-func RegisterTwitter1Server(s *grpc.Server, srv Twitter1Server) {
-	s.RegisterService(&_Twitter1_serviceDesc, srv)
+func RegisterTwitterServer(s *grpc.Server, srv TwitterServer) {
+	s.RegisterService(&_Twitter_serviceDesc, srv)
 }
 
-func _Twitter1_GetTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_GetTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).GetTweet(ctx, in)
+		return srv.(TwitterServer).GetTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/GetTweet",
+		FullMethod: "/twitter1.Twitter/GetTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).GetTweet(ctx, req.(*TweetRequest))
+		return srv.(TwitterServer).GetTweet(ctx, req.(*TweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_GetTweets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_GetTweets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).GetTweets(ctx, in)
+		return srv.(TwitterServer).GetTweets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/GetTweets",
+		FullMethod: "/twitter1.Twitter/GetTweets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).GetTweets(ctx, req.(*TweetsRequest))
+		return srv.(TwitterServer).GetTweets(ctx, req.(*TweetsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_LikeTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_LikeTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).LikeTweet(ctx, in)
+		return srv.(TwitterServer).LikeTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/LikeTweet",
+		FullMethod: "/twitter1.Twitter/LikeTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).LikeTweet(ctx, req.(*TweetRequest))
+		return srv.(TwitterServer).LikeTweet(ctx, req.(*TweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_UnlikeTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_UnlikeTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).UnlikeTweet(ctx, in)
+		return srv.(TwitterServer).UnlikeTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/UnlikeTweet",
+		FullMethod: "/twitter1.Twitter/UnlikeTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).UnlikeTweet(ctx, req.(*TweetRequest))
+		return srv.(TwitterServer).UnlikeTweet(ctx, req.(*TweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_RetweetTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_RetweetTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).RetweetTweet(ctx, in)
+		return srv.(TwitterServer).RetweetTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/RetweetTweet",
+		FullMethod: "/twitter1.Twitter/RetweetTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).RetweetTweet(ctx, req.(*TweetRequest))
+		return srv.(TwitterServer).RetweetTweet(ctx, req.(*TweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_UnretweetTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_UnretweetTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).UnretweetTweet(ctx, in)
+		return srv.(TwitterServer).UnretweetTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/UnretweetTweet",
+		FullMethod: "/twitter1.Twitter/UnretweetTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).UnretweetTweet(ctx, req.(*TweetRequest))
+		return srv.(TwitterServer).UnretweetTweet(ctx, req.(*TweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_DeleteTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_DeleteTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).DeleteTweet(ctx, in)
+		return srv.(TwitterServer).DeleteTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/DeleteTweet",
+		FullMethod: "/twitter1.Twitter/DeleteTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).DeleteTweet(ctx, req.(*TweetRequest))
+		return srv.(TwitterServer).DeleteTweet(ctx, req.(*TweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_GetHomeTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_GetHomeTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HomeTimelineRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).GetHomeTimeline(ctx, in)
+		return srv.(TwitterServer).GetHomeTimeline(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/GetHomeTimeline",
+		FullMethod: "/twitter1.Twitter/GetHomeTimeline",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).GetHomeTimeline(ctx, req.(*HomeTimelineRequest))
+		return srv.(TwitterServer).GetHomeTimeline(ctx, req.(*HomeTimelineRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_GetMentionTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_GetMentionTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MentionTimelineRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).GetMentionTimeline(ctx, in)
+		return srv.(TwitterServer).GetMentionTimeline(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/GetMentionTimeline",
+		FullMethod: "/twitter1.Twitter/GetMentionTimeline",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).GetMentionTimeline(ctx, req.(*MentionTimelineRequest))
+		return srv.(TwitterServer).GetMentionTimeline(ctx, req.(*MentionTimelineRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_GetUserTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_GetUserTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserTimelineRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).GetUserTimeline(ctx, in)
+		return srv.(TwitterServer).GetUserTimeline(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/GetUserTimeline",
+		FullMethod: "/twitter1.Twitter/GetUserTimeline",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).GetUserTimeline(ctx, req.(*UserTimelineRequest))
+		return srv.(TwitterServer).GetUserTimeline(ctx, req.(*UserTimelineRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_PublishTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_PublishTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PublishTweetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).PublishTweet(ctx, in)
+		return srv.(TwitterServer).PublishTweet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/PublishTweet",
+		FullMethod: "/twitter1.Twitter/PublishTweet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).PublishTweet(ctx, req.(*PublishTweetRequest))
+		return srv.(TwitterServer).PublishTweet(ctx, req.(*PublishTweetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).UpdateProfile(ctx, in)
+		return srv.(TwitterServer).UpdateProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/UpdateProfile",
+		FullMethod: "/twitter1.Twitter/UpdateProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).UpdateProfile(ctx, req.(*UpdateProfileRequest))
+		return srv.(TwitterServer).UpdateProfile(ctx, req.(*UpdateProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Twitter1_GetRaw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Twitter_GetRaw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RawAPIRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Twitter1Server).GetRaw(ctx, in)
+		return srv.(TwitterServer).GetRaw(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/twitter1.Twitter1/GetRaw",
+		FullMethod: "/twitter1.Twitter/GetRaw",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Twitter1Server).GetRaw(ctx, req.(*RawAPIRequest))
+		return srv.(TwitterServer).GetRaw(ctx, req.(*RawAPIRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Twitter1_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "twitter1.Twitter1",
-	HandlerType: (*Twitter1Server)(nil),
+var _Twitter_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "twitter1.Twitter",
+	HandlerType: (*TwitterServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetTweet",
-			Handler:    _Twitter1_GetTweet_Handler,
+			Handler:    _Twitter_GetTweet_Handler,
 		},
 		{
 			MethodName: "GetTweets",
-			Handler:    _Twitter1_GetTweets_Handler,
+			Handler:    _Twitter_GetTweets_Handler,
 		},
 		{
 			MethodName: "LikeTweet",
-			Handler:    _Twitter1_LikeTweet_Handler,
+			Handler:    _Twitter_LikeTweet_Handler,
 		},
 		{
 			MethodName: "UnlikeTweet",
-			Handler:    _Twitter1_UnlikeTweet_Handler,
+			Handler:    _Twitter_UnlikeTweet_Handler,
 		},
 		{
 			MethodName: "RetweetTweet",
-			Handler:    _Twitter1_RetweetTweet_Handler,
+			Handler:    _Twitter_RetweetTweet_Handler,
 		},
 		{
 			MethodName: "UnretweetTweet",
-			Handler:    _Twitter1_UnretweetTweet_Handler,
+			Handler:    _Twitter_UnretweetTweet_Handler,
 		},
 		{
 			MethodName: "DeleteTweet",
-			Handler:    _Twitter1_DeleteTweet_Handler,
+			Handler:    _Twitter_DeleteTweet_Handler,
 		},
 		{
 			MethodName: "GetHomeTimeline",
-			Handler:    _Twitter1_GetHomeTimeline_Handler,
+			Handler:    _Twitter_GetHomeTimeline_Handler,
 		},
 		{
 			MethodName: "GetMentionTimeline",
-			Handler:    _Twitter1_GetMentionTimeline_Handler,
+			Handler:    _Twitter_GetMentionTimeline_Handler,
 		},
 		{
 			MethodName: "GetUserTimeline",
-			Handler:    _Twitter1_GetUserTimeline_Handler,
+			Handler:    _Twitter_GetUserTimeline_Handler,
 		},
 		{
 			MethodName: "PublishTweet",
-			Handler:    _Twitter1_PublishTweet_Handler,
+			Handler:    _Twitter_PublishTweet_Handler,
 		},
 		{
 			MethodName: "UpdateProfile",
-			Handler:    _Twitter1_UpdateProfile_Handler,
+			Handler:    _Twitter_UpdateProfile_Handler,
 		},
 		{
 			MethodName: "GetRaw",
-			Handler:    _Twitter1_GetRaw_Handler,
+			Handler:    _Twitter_GetRaw_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

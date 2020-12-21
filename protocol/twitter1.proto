@@ -4,7 +4,7 @@ option go_package = "github.com/pantonshire/goldcrest/protocol";
 
 package twitter1;
 
-service Twitter1 {
+service Twitter {
   rpc GetTweet           (TweetRequest)           returns (TweetResponse);
   rpc GetTweets          (TweetsRequest)          returns (TweetsResponse);
   rpc LikeTweet          (TweetRequest)           returns (TweetResponse);

@@ -105,7 +105,7 @@ func main() {
     conf.Client.BaseURL,
     conf.Client.RateLimit.AssumeNext,
   )
-  pb.RegisterTwitter1Server(server, prox)
+  pb.RegisterTwitterServer(server, prox)
 
   fatal := make(chan error, 1)
 
