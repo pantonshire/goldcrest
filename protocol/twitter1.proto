@@ -186,13 +186,13 @@ message Tweet {
   bool truncated = 5;
   string source = 6;
   User user = 7;
-  message Reply {
+  message ReplyData {
     fixed64 reply_to_tweet_id = 1;
     fixed64 reply_to_user_id = 2;
     string reply_to_user_handle = 3;
   }
   oneof reply {
-    Reply replied_tweet = 8;
+    ReplyData replied_tweet = 8;
   }
   oneof quote {
     Tweet quoted_tweet = 9;

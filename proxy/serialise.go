@@ -44,7 +44,7 @@ func serTweet(mod model.Tweet) *pb.Tweet {
     WithheldScope:     mod.WithheldScope,
   }
   if mod.ReplyStatusID != nil && mod.ReplyUserID != nil {
-    msg.Reply = &pb.Tweet_RepliedTweet{RepliedTweet: &pb.Tweet_Reply{
+    msg.Reply = &pb.Tweet_RepliedTweet{RepliedTweet: &pb.Tweet_ReplyData{
       ReplyToTweetId:    *mod.ReplyStatusID,
       ReplyToUserId:     *mod.ReplyUserID,
       ReplyToUserHandle: strSafeDeref(mod.ReplyUserScreenName),
