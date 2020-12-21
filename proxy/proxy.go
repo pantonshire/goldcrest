@@ -7,6 +7,7 @@ import (
   "github.com/sirupsen/logrus"
   "google.golang.org/grpc"
   "google.golang.org/grpc/metadata"
+  "strconv"
 )
 
 var log = logrus.New()
@@ -170,9 +171,15 @@ func (p proxy) DeleteTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tweet
 }
 
 func (p proxy) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.TweetsResponse, error) {
+  auth := desAuth(req.GetAuth())
+  query := desTimelineOptions(req.GetTimelineOptions()).ser()
+  query.Set("exclude_replies", strconv.FormatBool(!req.GetIncludeReplies()))
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
-    //TODO
-    panic("implement me")
+    var tweets model.Timeline
+    if err := p.tc.standardRequest(homeTimelineEndpoint, auth, query, nil, &tweets); err != nil {
+      return nil, nil, err
+    }
+    return tweets, nil, nil
   })
   if err != nil {
     return nil, err
@@ -184,9 +191,14 @@ func (p proxy) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest)
 }
 
 func (p proxy) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.TweetsResponse, error) {
+  auth := desAuth(req.GetAuth())
+  query := desTimelineOptions(req.GetTimelineOptions()).ser()
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
-    //TODO
-    panic("implement me")
+    var tweets model.Timeline
+    if err := p.tc.standardRequest(mentionTimelineEndpoint, auth, query, nil, &tweets); err != nil {
+      return nil, nil, err
+    }
+    return tweets, nil, nil
   })
   if err != nil {
     return nil, err
@@ -198,9 +210,21 @@ func (p proxy) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRe
 }
 
 func (p proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.TweetsResponse, error) {
+  auth := desAuth(req.GetAuth())
+  query := desTimelineOptions(req.GetTimelineOptions()).ser()
+  if id, ok := req.GetUser().(*pb.UserTimelineRequest_UserId); ok {
+    query.Set("user_id", strconv.FormatUint(id.UserId, 10))
+  } else if handle, ok := req.GetUser().(*pb.UserTimelineRequest_UserHandle); ok {
+    query.Set("screen_name", handle.UserHandle)
+  }
+  query.Set("exclude_replies", strconv.FormatBool(!req.GetIncludeReplies()))
+  query.Set("include_rts", strconv.FormatBool(req.GetIncludeRetweets()))
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
-    //TODO
-    panic("implement me")
+    var tweets model.Timeline
+    if err := p.tc.standardRequest(userTimelineEndpoint, auth, query, nil, &tweets); err != nil {
+      return nil, nil, err
+    }
+    return tweets, nil, nil
   })
   if err != nil {
     return nil, err

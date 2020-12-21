@@ -61,9 +61,11 @@ message TweetOptions {
 message TimelineOptions {
   uint32 count = 1;
   oneof min {
+    /// The smallest id of Tweets that can be included in the timeline, inclusive
     fixed64 min_id = 2;
   }
   oneof max {
+    /// The largest id of Tweets that can be included in the timeline, inclusive
     fixed64 max_id = 3;
   }
   oneof content {
@@ -96,7 +98,7 @@ message HomeTimelineRequest {
 
 message MentionTimelineRequest {
   Authentication auth = 1;
-  TweetOptions tweet_options = 2;
+  TimelineOptions timeline_options = 2;
 }
 
 message UserTimelineRequest {

@@ -35,17 +35,6 @@ var (
   defaultTweetOptionsParams = defaultTweetOptions.ser()
 )
 
-func (opts tweetOptions) ser() oauth.Params {
-  return map[string]string{
-    "trim_user":            strconv.FormatBool(opts.trimUser),
-    "include_my_retweet":   strconv.FormatBool(opts.includeMyRetweet),
-    "include_entities":     strconv.FormatBool(opts.includeEntities),
-    "include_ext_alt_text": strconv.FormatBool(opts.includeExtAltText),
-    "include_card_uri":     strconv.FormatBool(opts.includeCardURI),
-    "tweet_mode":           opts.mode.String(),
-  }
-}
-
 func desAuth(msg *pb.Authentication) oauth.AuthPair {
   if msg == nil {
     return oauth.AuthPair{}
@@ -83,6 +72,17 @@ func desTweetOptions(options *pb.TweetOptions) tweetOptions {
   }
 }
 
+func (opts tweetOptions) ser() oauth.Params {
+  return map[string]string{
+    "trim_user":            strconv.FormatBool(opts.trimUser),
+    "include_my_retweet":   strconv.FormatBool(opts.includeMyRetweet),
+    "include_entities":     strconv.FormatBool(opts.includeEntities),
+    "include_ext_alt_text": strconv.FormatBool(opts.includeExtAltText),
+    "include_card_uri":     strconv.FormatBool(opts.includeCardURI),
+    "tweet_mode":           opts.mode.String(),
+  }
+}
+
 func desTimelineOptions(msg *pb.TimelineOptions) timelineOptions {
   if msg == nil {
     return timelineOptions{}
@@ -104,6 +104,19 @@ func desTimelineOptions(msg *pb.TimelineOptions) timelineOptions {
     opts.tweetOpts = defaultTweetOptions
   }
   return opts
+}
+
+func (opts timelineOptions) ser() oauth.Params {
+  params := oauth.NewParams()
+  params.Extend(opts.tweetOpts.ser())
+  params.Set("count", strconv.FormatUint(uint64(opts.count), 10))
+  if opts.minID != nil && *opts.minID > 0 {
+    params.Set("since_id", strconv.FormatUint(*opts.minID-1, 10))
+  }
+  if opts.maxID != nil {
+    params.Set("max_id", strconv.FormatUint(*opts.maxID, 10))
+  }
+  return params
 }
 
 func reserTweetRequest(msg *pb.TweetRequest) (oauth.AuthPair, oauth.Params) {
@@ -142,7 +155,7 @@ func reserTweetsRequest(msg *pb.TweetsRequest) (oauth.AuthPair, oauth.Params) {
   return auth, params
 }
 
-func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oauth.Params){
+func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oauth.Params) {
   if msg == nil {
     return oauth.AuthPair{}, nil
   }
