@@ -166,6 +166,26 @@ func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oaut
   params.Set("possibly_sensitive", strconv.FormatBool(msg.PossiblySensitive))
   params.Set("enable_dmcommands", strconv.FormatBool(msg.EnableDmCommands))
   params.Set("fail_dmcommands", strconv.FormatBool(msg.FailDmCommands))
+  if reply, ok := msg.Reply.(*pb.PublishTweetRequest_ReplyId); ok {
+    params.Set("in_reply_to_status_id", strconv.FormatUint(reply.ReplyId, 10))
+  }
+  if attachment, ok := msg.Attachment.(*pb.PublishTweetRequest_AttachmentUrl); ok {
+    params.Set("attachment_url", attachment.AttachmentUrl)
+  }
+  if len(msg.ExcludeReplyUserIds) > 0 {
+    exclude := make([]string, len(msg.ExcludeReplyUserIds))
+    for i, id := range msg.ExcludeReplyUserIds {
+      exclude[i] = strconv.FormatUint(id, 10)
+    }
+    params.Set("exclude_reply_user_ids", strings.Join(exclude, ","))
+  }
+  if len(msg.MediaIds) > 0 {
+    ids := make([]string, len(msg.MediaIds))
+    for i, id := range msg.MediaIds {
+      ids[i] = strconv.FormatUint(id, 10)
+    }
+    params.Set("media_ids", strings.Join(ids, ","))
+  }
   if custom, ok := msg.Content.(*pb.PublishTweetRequest_Custom); ok {
     params.Extend(desTweetOptions(custom.Custom).ser())
   } else {

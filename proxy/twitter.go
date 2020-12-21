@@ -68,6 +68,7 @@ var (
   unretweetEndpoint       = endpoint{path: "statuses/unretweet.json", method: methodPost}
   likeEndpoint            = endpoint{path: "favorites/create.json", method: methodPost}
   unlikeEndpoint          = endpoint{path: "favorites/destroy.json", method: methodPost}
+  updateProfileEndpoint   = endpoint{path: "account/update_profile.json", method: methodPost}
 )
 
 func (ep endpoint) limitKey() string {

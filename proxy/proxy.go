@@ -4,6 +4,7 @@ import (
   "context"
   pb "github.com/pantonshire/goldcrest/protocol"
   "github.com/pantonshire/goldcrest/proxy/model"
+  "github.com/pantonshire/goldcrest/proxy/oauth"
   "github.com/sirupsen/logrus"
   "google.golang.org/grpc"
   "google.golang.org/grpc/metadata"
@@ -236,9 +237,31 @@ func (p proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest)
 }
 
 func (p proxy) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserResponse, error) {
+  auth := desAuth(req.GetAuth())
+  query := oauth.NewParams()
+  query.Set("include_entities", strconv.FormatBool(req.GetIncludeEntities()))
+  query.Set("skip_status", strconv.FormatBool(!req.GetIncludeStatuses()))
+  if name, ok := req.GetUpdateName().(*pb.UpdateProfileRequest_Name); ok {
+    query.Set("name", name.Name)
+  }
+  if url, ok := req.GetUpdateUrl().(*pb.UpdateProfileRequest_Url); ok {
+    query.Set("url", url.Url)
+  }
+  if location, ok := req.GetUpdateLocation().(*pb.UpdateProfileRequest_Location); ok {
+    query.Set("location", location.Location)
+  }
+  if bio, ok := req.GetUpdateBio().(*pb.UpdateProfileRequest_Bio); ok {
+    query.Set("description", bio.Bio)
+  }
+  if col, ok := req.GetUpdateProfileLinkColor().(*pb.UpdateProfileRequest_ProfileLinkColor); ok {
+    query.Set("profile_link_color", col.ProfileLinkColor)
+  }
   resp, meta, err := generateUserResponse(func() (model.User, metadata.MD, error) {
-    //TODO
-    panic("implement me")
+    var user model.User
+    if err := p.tc.standardRequest(updateProfileEndpoint, auth, query, nil, &user); err != nil {
+      return model.User{}, nil, err
+    }
+    return user, nil, nil
   })
   if err != nil {
     return nil, err
