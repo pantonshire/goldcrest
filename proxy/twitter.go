@@ -4,6 +4,7 @@ import (
   "encoding/json"
   "fmt"
   "github.com/pantonshire/goldcrest/proxy/oauth"
+  "io/ioutil"
   "math/bits"
   "net/http"
   "path"
@@ -83,7 +84,7 @@ type twitterClient struct {
 
 func newTwitterClient() twitterClient {
   client := http.Client{
-    Timeout: time.Second * time.Duration(5 * time.Second), //TODO: put in config
+    Timeout: time.Second * time.Duration(5*time.Second), //TODO: put in config
   }
   return twitterClient{
     client: &client,
@@ -160,22 +161,21 @@ func (tc twitterClient) request(req *http.Request, ep endpoint, token string, ha
 
   if 200 <= resp.StatusCode && resp.StatusCode < 300 {
     return handler(resp)
-  } else if 400 <= resp.StatusCode && resp.StatusCode < 500 {
-    //var bs []byte
-    //bs, err := ioutil.ReadAll(resp.Body)
-    //if err != nil {
-    //  log.Error(err)
-    //}
-    //spew.Dump(string(bs))
-    return newBadRequestError(fmt.Sprintf("Twitter responded with %s", resp.Status))
   } else {
-    return newTwitterError(fmt.Sprintf("Twitter responded with %s", resp.Status))
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+      return err
+    }
+    msg := fmt.Sprintf("Twitter responded with %s: %s", resp.Status, string(body))
+    if 400 <= resp.StatusCode && resp.StatusCode < 500 {
+      return newBadRequestError(msg)
+    } else {
+      return newTwitterError(msg)
+    }
   }
 }
 
 func rateLimitHeaders(header http.Header) (current, next *uint, resets *time.Time, err error) {
-  log.Debug(header)
-
   if currentStr := header.Get(headerRateLimitRemaining); currentStr != "" {
     if currentVal, parseErr := strconv.ParseUint(currentStr, 10, bits.UintSize); parseErr != nil {
       err = newBadResponseHeaderError(headerRateLimitRemaining, currentStr)
