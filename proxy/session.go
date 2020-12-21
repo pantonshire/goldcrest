@@ -10,13 +10,15 @@ const (
 )
 
 type sessions struct {
-  mx    sync.Mutex
-  cache map[string]*session
+  mx              sync.Mutex
+  cache           map[string]*session
+  assumeNextLimit bool
 }
 
 type session struct {
-  mx     sync.Mutex
-  limits map[string]*rateLimit //Use endpoint.limitKey() as map key
+  mx              sync.Mutex
+  limits          map[string]*rateLimit
+  assumeNextLimit bool
 }
 
 type rateLimit struct {
@@ -28,22 +30,27 @@ type rateLimit struct {
   current     *uint
   next        *uint
   resets      time.Time
+  assumeNext  bool
 }
 
-func newSessions() *sessions {
+func newSessions(assumeNextLimit bool) *sessions {
   return &sessions{
-    cache: make(map[string]*session),
+    cache:           make(map[string]*session),
+    assumeNextLimit: assumeNextLimit,
   }
 }
 
-func newSession() *session {
+func newSession(assumeNextLimit bool) *session {
   return &session{
-    limits: make(map[string]*rateLimit),
+    limits:          make(map[string]*rateLimit),
+    assumeNextLimit: assumeNextLimit,
   }
 }
 
-func newRateLimit() *rateLimit {
-  return &rateLimit{}
+func newRateLimit(assumeNext bool) *rateLimit {
+  return &rateLimit{
+    assumeNext: assumeNext,
+  }
 }
 
 func (ses *sessions) get(token string) *session {
@@ -52,7 +59,7 @@ func (ses *sessions) get(token string) *session {
   if se, ok := ses.cache[token]; ok {
     return se
   }
-  se := newSession()
+  se := newSession(ses.assumeNextLimit)
   ses.cache[token] = se
   return se
 }
@@ -63,7 +70,7 @@ func (se *session) getLimit(key string) *rateLimit {
   if rl, ok := se.limits[key]; ok {
     return rl
   }
-  rl := newRateLimit()
+  rl := newRateLimit(se.assumeNextLimit)
   se.limits[key] = rl
   return rl
 }
@@ -96,8 +103,6 @@ func (rl *rateLimit) unlockHigh() {
   log.Debug("Release high lock")
 }
 
-//TODO: display rate limits for debugging
-//TODO: fix hang on second usage of an endpoint
 func (rl *rateLimit) use() error {
   rl.lockLow()
   defer rl.unlockLow()
@@ -128,8 +133,9 @@ func (rl *rateLimit) use() error {
         rl.current = new(uint)
       }
       *rl.current = *rl.next
-      //Uncomment if not assuming next rate limit
-      //rl.next = nil
+      if !rl.assumeNext {
+        rl.next = nil
+      }
     }
     rl.resets = time.Time{}
   }

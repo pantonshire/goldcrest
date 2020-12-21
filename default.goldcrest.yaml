@@ -1,0 +1,19 @@
+server:
+  port: 7400
+  connect_timeout: 120s
+
+  tls:
+    enabled: false
+    crt: path/to/crt
+    key: path/to/key
+
+client:
+  timeout: 5s
+  protocol: https
+  base_url: api.twitter.com/1.1
+
+  rate_limit:
+    # When set to true, the rate limit tracker will assume that the Twitter API maximum
+    # rate limits are constant. When set to false, information about the next rate limit
+    # will be discarded whenever the rate limit resets.
+    assume_next: true

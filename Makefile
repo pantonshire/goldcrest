@@ -4,7 +4,7 @@ GO_TEST := $(GO) test
 PROTOC := protoc
 
 PACKAGE := github.com/pantonshire/goldcrest/twitter1
-MAIN := cmd/main/main.go
+MAIN := cmd/server/server.go
 BUILD := build
 EXEC := goldcrest
 

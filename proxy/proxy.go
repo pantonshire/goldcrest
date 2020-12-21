@@ -9,25 +9,23 @@ import (
   "google.golang.org/grpc"
   "google.golang.org/grpc/metadata"
   "strconv"
+  "time"
 )
 
 var log = logrus.New()
 
-type proxy struct {
+type Proxy struct {
   tc twitterClient
+
 }
 
-func InitServer(server *grpc.Server) {
-  log.SetLevel(logrus.DebugLevel)
-
-  p := proxy{
-    tc: newTwitterClient(),
+func NewProxy(log *logrus.Logger, twitterTimeout time.Duration, twitterProtocol, twitterURL string, assumeNextLimit bool) *Proxy {
+  return &Proxy{
+    tc: newTwitterClient(twitterTimeout, twitterProtocol, twitterURL, assumeNextLimit),
   }
-
-  pb.RegisterTwitter1Server(server, &p)
 }
 
-func (p proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -45,7 +43,7 @@ func (p proxy) GetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetRes
   return resp, nil
 }
 
-func (p proxy) GetTweets(ctx context.Context, req *pb.TweetsRequest) (*pb.TweetsResponse, error) {
+func (p Proxy) GetTweets(ctx context.Context, req *pb.TweetsRequest) (*pb.TweetsResponse, error) {
   auth, query := reserTweetsRequest(req)
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
     var tweets model.Timeline
@@ -63,7 +61,7 @@ func (p proxy) GetTweets(ctx context.Context, req *pb.TweetsRequest) (*pb.Tweets
   return resp, nil
 }
 
-func (p proxy) LikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) LikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -81,7 +79,7 @@ func (p proxy) LikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetRe
   return resp, nil
 }
 
-func (p proxy) UnlikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) UnlikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -99,7 +97,7 @@ func (p proxy) UnlikeTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tweet
   return resp, nil
 }
 
-func (p proxy) RetweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) RetweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -117,7 +115,7 @@ func (p proxy) RetweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Twee
   return resp, nil
 }
 
-func (p proxy) UnretweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) UnretweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -135,7 +133,7 @@ func (p proxy) UnretweetTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tw
   return resp, nil
 }
 
-func (p proxy) PublishTweet(ctx context.Context, req *pb.PublishTweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) PublishTweet(ctx context.Context, req *pb.PublishTweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserPublishTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -153,7 +151,7 @@ func (p proxy) PublishTweet(ctx context.Context, req *pb.PublishTweetRequest) (*
   return resp, nil
 }
 
-func (p proxy) DeleteTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
+func (p Proxy) DeleteTweet(ctx context.Context, req *pb.TweetRequest) (*pb.TweetResponse, error) {
   auth, query := reserTweetRequest(req)
   resp, meta, err := generateTweetResponse(func() (model.Tweet, metadata.MD, error) {
     var tweet model.Tweet
@@ -171,7 +169,7 @@ func (p proxy) DeleteTweet(ctx context.Context, req *pb.TweetRequest) (*pb.Tweet
   return resp, nil
 }
 
-func (p proxy) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.TweetsResponse, error) {
+func (p Proxy) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest) (*pb.TweetsResponse, error) {
   auth := desAuth(req.GetAuth())
   query := desTimelineOptions(req.GetTimelineOptions()).ser()
   query.Set("exclude_replies", strconv.FormatBool(!req.GetIncludeReplies()))
@@ -191,7 +189,7 @@ func (p proxy) GetHomeTimeline(ctx context.Context, req *pb.HomeTimelineRequest)
   return resp, nil
 }
 
-func (p proxy) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.TweetsResponse, error) {
+func (p Proxy) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRequest) (*pb.TweetsResponse, error) {
   auth := desAuth(req.GetAuth())
   query := desTimelineOptions(req.GetTimelineOptions()).ser()
   resp, meta, err := generateTweetsResponse(func() (model.Timeline, metadata.MD, error) {
@@ -210,7 +208,7 @@ func (p proxy) GetMentionTimeline(ctx context.Context, req *pb.MentionTimelineRe
   return resp, nil
 }
 
-func (p proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.TweetsResponse, error) {
+func (p Proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest) (*pb.TweetsResponse, error) {
   auth := desAuth(req.GetAuth())
   query := desTimelineOptions(req.GetTimelineOptions()).ser()
   if id, ok := req.GetUser().(*pb.UserTimelineRequest_UserId); ok {
@@ -236,7 +234,7 @@ func (p proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest)
   return resp, nil
 }
 
-func (p proxy) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserResponse, error) {
+func (p Proxy) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserResponse, error) {
   auth := desAuth(req.GetAuth())
   query := oauth.NewParams()
   query.Set("include_entities", strconv.FormatBool(req.GetIncludeEntities()))
@@ -272,7 +270,7 @@ func (p proxy) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) 
   return resp, nil
 }
 
-func (p proxy) GetRaw(ctx context.Context, req *pb.RawAPIRequest) (*pb.RawAPIResult, error) {
+func (p Proxy) GetRaw(ctx context.Context, req *pb.RawAPIRequest) (*pb.RawAPIResult, error) {
   //TODO
   panic("implement me")
 }

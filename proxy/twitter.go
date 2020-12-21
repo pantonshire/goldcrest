@@ -7,16 +7,11 @@ import (
   "io/ioutil"
   "math/bits"
   "net/http"
-  "path"
   "strconv"
   "time"
 )
 
 const (
-  version  = "1.1"
-  protocol = "https"
-  domain   = "api.twitter.com"
-
   headerRateLimit          = "X-Rate-Limit-Limit"
   headerRateLimitRemaining = "X-Rate-Limit-Remaining"
   headerRateLimitReset     = "X-Rate-Limit-Reset"
@@ -79,17 +74,20 @@ func (ep endpoint) limitKey() string {
 }
 
 type twitterClient struct {
-  client *http.Client
-  ses    *sessions
+  client        *http.Client
+  ses           *sessions
+  protocol, url string
 }
 
-func newTwitterClient() twitterClient {
+func newTwitterClient(timeout time.Duration, protocol, url string, assumeNextLimit bool) twitterClient {
   client := http.Client{
-    Timeout: time.Second * time.Duration(5*time.Second), //TODO: put in config
+    Timeout: timeout,
   }
   return twitterClient{
-    client: &client,
-    ses:    newSessions(),
+    client:   &client,
+    ses:      newSessions(assumeNextLimit),
+    protocol: protocol,
+    url:      url,
   }
 }
 
@@ -100,7 +98,7 @@ func (tc twitterClient) standardRequest(ep endpoint, auth oauth.AuthPair, query,
 }
 
 func (tc twitterClient) oauthRequest(ep endpoint, auth oauth.AuthPair, query, body oauth.Params, handler func(resp *http.Response) error) error {
-  oauthReq := oauth.NewRequest(ep.method.String(), protocol, domain, path.Join(version, ep.path), query, body)
+  oauthReq := oauth.NewRequest(ep.method.String(), tc.protocol, tc.url, ep.path, query, body)
   req, err := oauthReq.MakeRequest(auth)
   if err != nil {
     return err
@@ -202,14 +200,4 @@ func rateLimitHeaders(header http.Header) (current, next *uint, resets *time.Tim
     }
   }
   return current, next, resets, err
-}
-
-func joinParamMaps(ms ...map[string]string) map[string]string {
-  master := make(map[string]string)
-  for _, m := range ms {
-    for key, val := range m {
-      master[key] = val
-    }
-  }
-  return master
 }
