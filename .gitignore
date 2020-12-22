@@ -7,11 +7,12 @@
 
 # Bianries
 /goldcrest
-build
+build/
 
 # Config
-/conf
+/conf/
 /goldcrest.yaml
 
 # Testing
 testdata/
+rstest/
