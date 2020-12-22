@@ -68,25 +68,19 @@ message TimelineOptions {
     /// The largest id of Tweets that can be included in the timeline, inclusive
     fixed64 max_id = 3;
   }
-  oneof content {
-    TweetOptions custom = 4;
-  }
+  TweetOptions twopts = 4;
 }
 
 message TweetRequest {
   Authentication auth = 1;
   fixed64 id = 2;
-  oneof content {
-    TweetOptions custom = 3;
-  }
+  TweetOptions twopts = 3;
 }
 
 message TweetsRequest {
   Authentication auth = 1;
   repeated fixed64 ids = 2;
-  oneof content {
-    TweetOptions custom = 3;
-  }
+  TweetOptions twopts = 3;
   bool map = 4;
 }
 
@@ -127,9 +121,7 @@ message PublishTweetRequest {
   bool possibly_sensitive = 8;
   bool enable_dm_commands = 9;
   bool fail_dm_commands = 10;
-  oneof content {
-    TweetOptions custom = 11;
-  }
+  TweetOptions twopts = 11;
 }
 
 message UpdateProfileRequest {

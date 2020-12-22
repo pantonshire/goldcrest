@@ -23,18 +23,6 @@ type timelineOptions struct {
   tweetOpts tweetOptions
 }
 
-var (
-  defaultTweetOptions = tweetOptions{
-    trimUser:          false,
-    includeMyRetweet:  true,
-    includeEntities:   true,
-    includeExtAltText: true,
-    includeCardURI:    true,
-    mode:              extendedMode,
-  }
-  defaultTweetOptionsParams = defaultTweetOptions.ser()
-)
-
 func desAuth(msg *pb.Authentication) oauth.AuthPair {
   if msg == nil {
     return oauth.AuthPair{}
@@ -88,7 +76,8 @@ func desTimelineOptions(msg *pb.TimelineOptions) timelineOptions {
     return timelineOptions{}
   }
   opts := timelineOptions{
-    count: uint(msg.Count),
+    count:     uint(msg.Count),
+    tweetOpts: desTweetOptions(msg.Twopts),
   }
   if minID, ok := msg.Min.(*pb.TimelineOptions_MinId); ok {
     opts.minID = new(uint64)
@@ -97,11 +86,6 @@ func desTimelineOptions(msg *pb.TimelineOptions) timelineOptions {
   if maxID, ok := msg.Max.(*pb.TimelineOptions_MaxId); ok {
     opts.maxID = new(uint64)
     *opts.maxID = maxID.MaxId
-  }
-  if tweetOpts, ok := msg.Content.(*pb.TimelineOptions_Custom); ok {
-    opts.tweetOpts = desTweetOptions(tweetOpts.Custom)
-  } else {
-    opts.tweetOpts = defaultTweetOptions
   }
   return opts
 }
@@ -126,11 +110,7 @@ func reserTweetRequest(msg *pb.TweetRequest) (oauth.AuthPair, oauth.Params) {
   auth := desAuth(msg.Auth)
   params := oauth.NewParams()
   params.Set("id", strconv.FormatUint(msg.Id, 10))
-  if custom, ok := msg.Content.(*pb.TweetRequest_Custom); ok {
-    params.Extend(desTweetOptions(custom.Custom).ser())
-  } else {
-    params.Extend(defaultTweetOptionsParams)
-  }
+  params.Extend(desTweetOptions(msg.Twopts).ser())
   return auth, params
 }
 
@@ -147,11 +127,7 @@ func reserTweetsRequest(msg *pb.TweetsRequest) (oauth.AuthPair, oauth.Params) {
     }
     params.Set("id", strings.Join(ids, ","))
   }
-  if custom, ok := msg.Content.(*pb.TweetsRequest_Custom); ok {
-    params.Extend(desTweetOptions(custom.Custom).ser())
-  } else {
-    params.Extend(defaultTweetOptionsParams)
-  }
+  params.Extend(desTweetOptions(msg.Twopts).ser())
   return auth, params
 }
 
@@ -186,10 +162,6 @@ func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oaut
     }
     params.Set("media_ids", strings.Join(ids, ","))
   }
-  if custom, ok := msg.Content.(*pb.PublishTweetRequest_Custom); ok {
-    params.Extend(desTweetOptions(custom.Custom).ser())
-  } else {
-    params.Extend(defaultTweetOptionsParams)
-  }
+  params.Extend(desTweetOptions(msg.Twopts).ser())
   return auth, params
 }
