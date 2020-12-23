@@ -155,3 +155,30 @@ func (client Client) request(reqFunc func(ctx context.Context) (metadata.MD, *pb
     return nil
   }
 }
+
+func (client Client) GetTweet(id uint64) (Tweet, error) {
+  var msg *pb.Tweet
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.GetTweet(ctx, &pb.TweetRequest{
+      Auth:   client.auth.ser(),
+      Id:     id,
+      Twopts: client.twopts.ser(),
+    }, grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetResponse_Tweet); ok {
+      msg = success.Tweet
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return Tweet{}, err
+  }
+  return desTweet(msg), nil
+}
