@@ -129,18 +129,48 @@ func (tc twitterClient) request(req *http.Request, ep endpoint, token string, ha
       return nil, err //TODO: replace with custom error for connection failed
     }
 
-    limitCurrent, limitNext, limitResets, err = rateLimitHeaders(resp.Header)
-    if err != nil {
-      return resp, err
+    tooManyRequests := resp.StatusCode == http.StatusTooManyRequests
+
+    var headerParseErr error
+
+    if val, ok, err := parseLimitHeader(resp.Header.Get(headerRateLimitRemaining)); ok && err == nil {
+      if !tooManyRequests {
+        limitCurrent = new(uint)
+        *limitCurrent = val
+      }
+    } else if err != nil {
+      headerParseErr = err
     }
 
-    if resp.StatusCode == http.StatusTooManyRequests {
+    if val, ok, err := parseLimitHeader(resp.Header.Get(headerRateLimit)); ok && err == nil {
+      limitNext = new(uint)
+      *limitNext = val
+    } else if err != nil {
+      headerParseErr = err
+    }
+
+    if val, ok, err := parseLimitResetsHeader(resp.Header.Get(headerRateLimitReset)); ok && err == nil {
+      limitResets = new(time.Time)
+      *limitResets = val
+    } else if err != nil {
+      headerParseErr = err
+    }
+
+    if tooManyRequests {
       rateLimitHit = true
+
+      limitCurrent = new(uint)
+      *limitCurrent = 0
+
       if limitResets != nil {
         return resp, newRateLimitError(*limitResets)
       } else {
         return resp, newRateLimitError(time.Time{})
       }
+    }
+
+    if headerParseErr != nil {
+      return resp, newBadResponseError("Twitter responded with a rate limit header that could not be parsed")
     }
 
     return resp, nil
@@ -174,30 +204,24 @@ func (tc twitterClient) request(req *http.Request, ep endpoint, token string, ha
   }
 }
 
-func rateLimitHeaders(header http.Header) (current, next *uint, resets *time.Time, err error) {
-  if currentStr := header.Get(headerRateLimitRemaining); currentStr != "" {
-    if currentVal, parseErr := strconv.ParseUint(currentStr, 10, bits.UintSize); parseErr != nil {
-      err = newBadResponseHeaderError(headerRateLimitRemaining, currentStr)
-    } else {
-      current = new(uint)
-      *current = uint(currentVal)
-    }
+func parseLimitHeader(s string) (uint, bool, error) {
+  if s == "" {
+    return 0, false, nil
   }
-  if nextStr := header.Get(headerRateLimit); nextStr != "" {
-    if nextVal, parseErr := strconv.ParseUint(nextStr, 10, bits.UintSize); parseErr != nil {
-      err = newBadResponseHeaderError(headerRateLimit, nextStr)
-    } else {
-      next = new(uint)
-      *next = uint(nextVal)
-    }
+  val, err := strconv.ParseUint(s, 10, bits.UintSize)
+  if err != nil {
+    return 0, false, err
   }
-  if resetsStr := header.Get(headerRateLimitReset); resetsStr != "" {
-    if resetsUnix, parseErr := strconv.ParseInt(resetsStr, 10, 64); parseErr != nil {
-      err = newBadResponseHeaderError(headerRateLimitReset, resetsStr)
-    } else {
-      resets = new(time.Time)
-      *resets = time.Unix(resetsUnix, 0)
-    }
+  return uint(val), true, nil
+}
+
+func parseLimitResetsHeader(s string) (time.Time, bool, error) {
+  if s == "" {
+    return time.Time{}, false, nil
   }
-  return current, next, resets, err
+  unix, err := strconv.ParseInt(s, 10, 64)
+  if err != nil {
+    return time.Time{}, false, err
+  }
+  return time.Unix(unix, 0), true, nil
 }

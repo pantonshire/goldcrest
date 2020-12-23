@@ -82,10 +82,6 @@ func newBadResponseError(message string) badResponseError {
   return badResponseError{message: message}
 }
 
-func newBadResponseHeaderError(header, value string) badResponseError {
-  return newBadResponseError(fmt.Sprintf("bad header value for %s: \"%s\"", header, value))
-}
-
 func (err badResponseError) Error() string {
   return fmt.Sprintf("twitter returned bad response: %s", err.message)
 }
