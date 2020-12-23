@@ -141,7 +141,7 @@ func (client Client) request(reqFunc func(ctx context.Context) (metadata.MD, *pb
             }
             retryTime := time.Unix(retryUnix, 0)
             if rp == nil || rp.shouldRetry(retryTime) {
-              time.Sleep(time.Now().Sub(retryTime)) //TODO: use a context timeout here
+              time.Sleep(retryTime.Sub(time.Now())) //TODO: use a context timeout here
               continue
             }
             return RateLimitError{resets: retryTime}
