@@ -156,11 +156,11 @@ func (client Client) request(reqFunc func(ctx context.Context) (metadata.MD, *pb
   }
 }
 
-func (client Client) GetTweet(id uint64) (Tweet, error) {
+func (client Client) tweetRequest(id uint64, grpcFunc func(context.Context, *pb.TweetRequest, ...grpc.CallOption) (*pb.TweetResponse, error)) (Tweet, error) {
   var msg *pb.Tweet
   err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
     var header metadata.MD
-    resp, err := client.twitter.GetTweet(ctx, &pb.TweetRequest{
+    resp, err := grpcFunc(ctx, &pb.TweetRequest{
       Auth:   client.auth.ser(),
       Id:     id,
       Twopts: client.twopts.ser(),
@@ -181,4 +181,187 @@ func (client Client) GetTweet(id uint64) (Tweet, error) {
     return Tweet{}, err
   }
   return desTweet(msg), nil
+}
+
+func (client Client) GetTweet(id uint64) (Tweet, error) {
+  return client.tweetRequest(id, client.twitter.GetTweet)
+}
+
+func (client Client) GetTweets(ids ...uint64) ([]Tweet, error) {
+  if len(ids) == 0 {
+    return nil, nil
+  }
+  var msg *pb.Tweets
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.GetTweets(ctx, &pb.TweetsRequest{
+      Auth:   client.auth.ser(),
+      Ids:    ids,
+      Twopts: client.twopts.ser(),
+    }, grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetsResponse_Tweets); ok {
+      msg = success.Tweets
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetsResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return nil, err
+  }
+  return desTimeline(msg), nil
+}
+
+func (client Client) LikeTweet(id uint64) (Tweet, error) {
+  return client.tweetRequest(id, client.twitter.LikeTweet)
+}
+
+func (client Client) UnlikeTweet(id uint64) (Tweet, error) {
+  return client.tweetRequest(id, client.twitter.UnlikeTweet)
+}
+
+func (client Client) RetweetTweet(id uint64) (Tweet, error) {
+  return client.tweetRequest(id, client.twitter.RetweetTweet)
+}
+
+func (client Client) UnretweetTweet(id uint64) (Tweet, error) {
+  return client.tweetRequest(id, client.twitter.UnretweetTweet)
+}
+
+func (client Client) DeleteTweet(id uint64) (Tweet, error) {
+  return client.tweetRequest(id, client.twitter.DeleteTweet)
+}
+
+func (client Client) HomeTimeline(tlopts TimelineOptions, replies bool) ([]Tweet, error) {
+  var msg *pb.Tweets
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.GetHomeTimeline(ctx, &pb.HomeTimelineRequest{
+      Auth:            client.auth.ser(),
+      TimelineOptions: tlopts.ser(client.twopts),
+      IncludeReplies:  replies,
+    }, grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetsResponse_Tweets); ok {
+      msg = success.Tweets
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetsResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return nil, err
+  }
+  return desTimeline(msg), nil
+}
+
+func (client Client) MentionTimeline(tlopts TimelineOptions) ([]Tweet, error) {
+  var msg *pb.Tweets
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.GetMentionTimeline(ctx, &pb.MentionTimelineRequest{
+      Auth:            client.auth.ser(),
+      TimelineOptions: tlopts.ser(client.twopts),
+    }, grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetsResponse_Tweets); ok {
+      msg = success.Tweets
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetsResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return nil, err
+  }
+  return desTimeline(msg), nil
+}
+
+func (client Client) UserTimeline(user UserIdentifier, tlopts TimelineOptions, replies, retweets bool) ([]Tweet, error) {
+  var msg *pb.Tweets
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    req := &pb.UserTimelineRequest{
+      Auth:            client.auth.ser(),
+      TimelineOptions: tlopts.ser(client.twopts),
+      IncludeReplies:  replies,
+      IncludeRetweets: retweets,
+    }
+    user.serIntoUserTimelineRequest(req)
+    resp, err := client.twitter.GetUserTimeline(ctx, req, grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetsResponse_Tweets); ok {
+      msg = success.Tweets
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetsResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return nil, err
+  }
+  return desTimeline(msg), nil
+}
+
+func (client Client) PublishTweet(com TweetComposer) (Tweet, error) {
+  var msg *pb.Tweet
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.PublishTweet(ctx, com.ser(client.auth, client.twopts), grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetResponse_Tweet); ok {
+      msg = success.Tweet
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return Tweet{}, err
+  }
+  return desTweet(msg), nil
+}
+
+func (client Client) UpdateProfile(pu ProfileUpdater, includeEntities, includeStatuses bool) (User, error) {
+  var msg *pb.User
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.UpdateProfile(ctx, pu.ser(client.auth, includeEntities, includeStatuses), grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.UserResponse_User); ok {
+      msg = success.User
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.UserResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return User{}, err
+  }
+  return desUser(msg), nil
 }

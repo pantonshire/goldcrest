@@ -90,6 +90,41 @@ func (opts TweetOptions) ser() *pb.TweetOptions {
   }
 }
 
+type TimelineOptions struct {
+  count    uint
+  min, max *uint64
+}
+
+func NewTimelineOptions(count uint) TimelineOptions {
+  return TimelineOptions{count: count}
+}
+
+func (tlopts TimelineOptions) WithMin(min uint64) TimelineOptions {
+  tlopts.min = new(uint64)
+  *tlopts.min = min
+  return tlopts
+}
+
+func (tlopts TimelineOptions) WithMax(max uint64) TimelineOptions {
+  tlopts.max = new(uint64)
+  *tlopts.max = max
+  return tlopts
+}
+
+func (tlopts TimelineOptions) ser(twopts TweetOptions) *pb.TimelineOptions {
+  msg := pb.TimelineOptions{
+    Count:  uint32(tlopts.count),
+    Twopts: twopts.ser(),
+  }
+  if tlopts.min != nil {
+    msg.Min = &pb.TimelineOptions_MinId{MinId: *tlopts.min}
+  }
+  if tlopts.max != nil {
+    msg.Max = &pb.TimelineOptions_MaxId{MaxId: *tlopts.max}
+  }
+  return &msg
+}
+
 type UserIdentifier interface {
   serIntoUserTimelineRequest(req *pb.UserTimelineRequest)
 }
