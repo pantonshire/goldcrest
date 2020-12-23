@@ -81,7 +81,6 @@ message TweetsRequest {
   Authentication auth = 1;
   repeated fixed64 ids = 2;
   TweetOptions twopts = 3;
-  bool map = 4;
 }
 
 message HomeTimelineRequest {
