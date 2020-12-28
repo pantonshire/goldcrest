@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::future::Future;
 use tonic::transport::{Endpoint, Channel};
 use chrono::prelude::*;
+use tokio::time;
 
 pub struct Client {
     au_client: Arc<Mutex<TwitterClient<Channel>>>,
@@ -31,8 +32,6 @@ impl Client {
         S: response::Response<T>,
         F: Fn(Arc<Mutex<TwitterClient<Channel>>>, tonic::Request<R>) -> Fut,
     {
-        //TODO: retries, deadline
-
         let deadline = Utc::now() + self.wait_timeout;
 
         loop {
@@ -42,23 +41,43 @@ impl Client {
 
             match resp.into_inner().response_result() {
                 None => return Err(Box::new(ClientError::InvalidResponse)),
+
                 Some(Ok(msg)) => return Ok(msg),
+
                 Some(Err(err)) => {
                     if err.code == twitter1::error::Code::RateLimit as i32 {
-
-                    } else {
+                        let retry = meta.get("retry")
+                            .ok_or(ClientError::RetryUnknown)?;
+                        let retry = std::str::from_utf8(retry.as_bytes())
+                            .map_err(|_| ClientError::RetryUnknown)?
+                            .parse::<i64>()
+                            .map_err(|_| ClientError::RetryUnknown)?;
+                        let retry = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(retry, 0), Utc);
                         
+                        if deadline < retry {
+                            return Err(Box::new(ClientError::RetryTimeout));
+                        }
+
+                        match (retry - Utc::now()).to_std() {
+                            Ok(wait_time) => time::delay_for(wait_time).await,
+                            Err(_)        => (), //no need to wait if duration was negative
+                        }
+
+                        continue
                     }
+
+                    return Err(Box::new(if err.code == twitter1::error::Code::TwitterError as i32 {
+                        ClientError::TwitterError(err.message)
+                    } else if err.code == twitter1::error::Code::BadRequest as i32 {
+                        ClientError::BadRequest(err.message)
+                    } else if err.code == twitter1::error::Code::BadResponse as i32 {
+                        ClientError::BadResponse(err.message)
+                    } else {
+                        ClientError::UnknownError(err.code)
+                    }))
                 },
             }
         }
-
-        // let meta = resp.metadata();
-        // let msg = resp.into_inner();
-        // let msg = resp.get_ref();
-        // meta.get("");
-
-        panic!("Not implemented")
     }
 
     pub async fn get_tweet(&mut self, req: twitter1::TweetRequest) -> Result<data::Tweet, Box<dyn std::error::Error>> {
@@ -70,14 +89,25 @@ impl Client {
 
 #[derive(Debug)]
 pub enum ClientError {
-    UnknownError(u32),
+    UnknownError(i32),
     InvalidResponse,
+    RetryTimeout,
+    RetryUnknown,
+    TwitterError(String),
+    BadRequest(String),
+    BadResponse(String),
 }
 
 impl std::fmt::Display for ClientError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(fmt, "Client error: {}", match self {
-            ClientError::InvalidResponse => "invalid response",
+        write!(fmt, "[Goldcrest client] {}", match self {
+            ClientError::UnknownError(code) => format!("unknown error code {}", code),
+            ClientError::InvalidResponse    => "invalid response".to_string(),
+            ClientError::RetryTimeout       => "timed out waiting for rate limit to reset".to_string(),
+            ClientError::RetryUnknown       => "rate limit reached, but reset time unknown".to_string(),
+            ClientError::TwitterError(s)    => format!("Twitter server-side error: {}", s),
+            ClientError::BadRequest(s)      => format!("bad request to Twitter: {}", s),
+            ClientError::BadResponse(s)     => format!("bad response from Twitter: {}", s),
         })
     }
 }

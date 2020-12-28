@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 tonic = "0.3"
 prost = "0.6"
-tokio = { version = "0.2", features = ["macros"] }
+tokio = { version = "0.2", features = ["macros", "time"] }
 chrono = "0.4"
 
 [build-dependencies]
