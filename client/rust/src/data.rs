@@ -36,28 +36,19 @@ pub(super) trait Deserialize<T: Sized> {
     fn des(self) -> DesResult<T>;
 }
 
-impl<T,S> Deserialize<Option<S>> for Option<T>
-where
-    T: Deserialize<S>
-{
+impl<T,S> Deserialize<Option<S>> for Option<T> where T: Deserialize<S> {
     fn des(self) -> DesResult<Option<S>> {
         self.map(T::des).map_or(Ok(None), |x| x.map(Some))
     }
 }
 
-impl<T,S> Deserialize<Box<S>> for Box<T>
-where
-    T: Deserialize<S>
-{
+impl<T,S> Deserialize<Box<S>> for Box<T> where T: Deserialize<S> {
     fn des(self) -> DesResult<Box<S>> {
         Ok(Box::new((*self).des()?))
     }
 }
 
-impl<T,S> Deserialize<Vec<S>> for Vec<T>
-where
-    T: Deserialize<S>
-{
+impl<T,S> Deserialize<Vec<S>> for Vec<T> where T: Deserialize<S> {
     fn des(self) -> DesResult<Vec<S>> {
         self.into_iter().map(T::des).collect()
     }

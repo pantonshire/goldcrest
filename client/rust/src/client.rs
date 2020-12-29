@@ -2,15 +2,22 @@ use crate::twitter1::{self, twitter_client::TwitterClient};
 use crate::response;
 use crate::data::{self, Deserialize};
 
-use std::sync::{Arc, Mutex};
+// use std::sync::{Arc, Mutex};
 use std::future::Future;
 use tonic::transport::{Endpoint, Channel};
 use chrono::prelude::*;
 use tokio::time;
 
+#[derive(Clone)]
 pub struct Client {
-    au_client: Arc<Mutex<TwitterClient<Channel>>>,
+    // au_client: Arc<Mutex<TwitterClient<Channel>>>,
+    au_client: TwitterClient<Channel>,
     wait_timeout: chrono::Duration,
+}
+
+macro_rules! request {
+    // ($f:ident) => { |t,r| async move { t.lock().unwrap().$f(r).await } }
+    ($f:ident) => { |mut t, r| async move { t.$f(r).await } }
 }
 
 impl Client {
@@ -20,22 +27,25 @@ impl Client {
             .connect()
             .await?;
         Ok(Client{
-            au_client: Arc::new(Mutex::new(TwitterClient::new(channel))),
+            // au_client: Arc::new(Mutex::new(TwitterClient::new(channel))),
+            au_client: TwitterClient::new(channel),
             wait_timeout: wait_timeout,
         })
     }
 
-    async fn request<R, S, T, F, Fut>(&mut self, req: R, rf: F) -> Result<T, Box<dyn std::error::Error>>
+    async fn request<R, S, T, F, Fut>(&self, req: R, rf: F) -> Result<T, Box<dyn std::error::Error>>
     where
         Fut: Future<Output=Result<tonic::Response<S>, tonic::Status>>,
         R: Clone,
         S: response::Response<T>,
-        F: Fn(Arc<Mutex<TwitterClient<Channel>>>, tonic::Request<R>) -> Fut,
+        // F: Fn(Arc<Mutex<TwitterClient<Channel>>>, tonic::Request<R>) -> Fut,
+        F: Fn(TwitterClient<Channel>, tonic::Request<R>) -> Fut,
     {
         let deadline = Utc::now() + self.wait_timeout;
 
         loop {
-            let resp = rf(Arc::clone(&self.au_client), tonic::Request::new(req.clone())).await?;
+            // let resp = rf(Arc::clone(&self.au_client), tonic::Request::new(req.clone())).await?;
+            let resp = rf(self.au_client.clone(), tonic::Request::new(req.clone())).await?;
 
             let meta = resp.metadata().clone();
 
@@ -80,10 +90,16 @@ impl Client {
         }
     }
 
-    pub async fn get_tweet(&mut self, req: twitter1::TweetRequest) -> Result<data::Tweet, Box<dyn std::error::Error>> {
-        self.request(req, |t, r| async move { t.lock().unwrap().get_tweet(r).await })
+    pub async fn get_tweet(&self, req: twitter1::TweetRequest) -> Result<data::Tweet, Box<dyn std::error::Error>> {
+        // self.request(req, |t, r| async move { t.lock().unwrap().get_tweet(r).await })
+        //     .await
+        //     .and_then(|t| Ok(t.des()?))
+        self.request(req, request!(get_tweet))
             .await
             .and_then(|t| Ok(t.des()?))
+        // self.request(req, |mut t, r| async move { t.get_tweet(r).await })
+        //     .await
+        //     .and_then(|t| Ok(t.des()?))
     }
 }
 
