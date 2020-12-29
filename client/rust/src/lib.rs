@@ -4,7 +4,8 @@ pub mod request;
 
 mod response;
 
-pub use client::Client;
+pub use client::{Client, ClientBuilder};
+pub use request::Authentication;
 
 pub mod twitter1 {
     tonic::include_proto!("twitter1");

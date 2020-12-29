@@ -154,6 +154,14 @@ impl Deserialize<Tweet> for twitter1::Tweet {
     }
 }
 
+impl Deserialize<Vec<Tweet>> for twitter1::Tweets {
+    fn des(self) -> DesResult<Vec<Tweet>> {
+        self.tweets.into_iter()
+            .map(twitter1::Tweet::des)
+            .collect()
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ReplyData {
     pub tweet_id: u64,
