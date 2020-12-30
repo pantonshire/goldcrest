@@ -120,24 +120,16 @@ impl Deserialize<Tweet> for twitter1::Tweet {
             truncated: self.truncated,
             source: self.source,
             user: Box::new(self.user.exists()?.des()?),
-            replied_to: self.reply.map(|reply| match reply {
-                twitter1::tweet::Reply::RepliedTweet(reply) => reply
-            }).des()?,
-            quoted: self.quote.map(|quote| match quote {
-                twitter1::tweet::Quote::QuotedTweet(quote) => quote
-            }).des()?,
-            retweeted: self.retweet.map(|retweet| match retweet {
-                twitter1::tweet::Retweet::RetweetedTweet(retweet) => retweet
-            }).des()?,
+            replied_to: self.replied_tweet.des()?,
+            quoted: self.quoted_tweet.des()?,
+            retweeted: self.retweeted_tweet.des()?,
             quotes: self.quote_count,
             replies: self.reply_count,
             retweets: self.retweet_count,
             likes: self.favorite_count,
             you_liked: self.favorited,
             you_retweeted: self.retweeted,
-            your_retweet_id: self.current_user_retweet.map(|id| match id {
-                twitter1::tweet::CurrentUserRetweet::CurrentUserRetweetId(id) => id
-            }),
+            your_retweet_id: self.current_user_retweet_id.map(u64::from),
             hashtags: self.hashtags.des()?,
             urls: self.urls.des()?,
             mentions: self.mentions.des()?,
@@ -309,9 +301,7 @@ impl Deserialize<Media> for twitter1::Media {
             media_type: self.r#type,
             media_url: self.media_url,
             alt: self.alt,
-            source_tweet_id: self.source.map(|source| match source {
-                twitter1::media::Source::SourceTweetId(id) => id,
-            }),
+            source_tweet_id: self.source_tweet_id.map(u64::from),
             thumb: self.thumb.exists()?.des()?,
             small: self.small.exists()?.des()?,
             medium: self.medium.exists()?.des()?,

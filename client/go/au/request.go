@@ -117,10 +117,10 @@ func (tlopts TimelineOptions) ser(twopts TweetOptions) *pb.TimelineOptions {
     Twopts: twopts.ser(),
   }
   if tlopts.min != nil {
-    msg.Min = &pb.TimelineOptions_MinId{MinId: *tlopts.min}
+    msg.MinId = &pb.OptFixed64{Val: *tlopts.min}
   }
   if tlopts.max != nil {
-    msg.Max = &pb.TimelineOptions_MaxId{MaxId: *tlopts.max}
+    msg.MaxId = &pb.OptFixed64{Val: *tlopts.max}
   }
   return &msg
 }
@@ -212,14 +212,14 @@ func (com TweetComposer) ser(auth authentication, twopts TweetOptions) *pb.Publi
     Twopts:            twopts.ser(),
   }
   if com.replyID != nil {
-    req.Reply = &pb.PublishTweetRequest_ReplyId{ReplyId: *com.replyID}
+    req.ReplyId = &pb.OptFixed64{Val: *com.replyID}
     req.AutoPopulateReplyMetadata = true
     if com.excludeUserIDs != nil {
       req.ExcludeReplyUserIds = com.excludeUserIDs
     }
   }
   if com.attachmentURL != nil {
-    req.Attachment = &pb.PublishTweetRequest_AttachmentUrl{AttachmentUrl: *com.attachmentURL}
+    req.AttachmentUrl = &pb.OptString{Val: *com.attachmentURL}
   }
   return &req
 }
@@ -273,19 +273,19 @@ func (pu ProfileUpdater) ser(auth authentication, includeEntities, includeStatus
     IncludeStatuses: includeStatuses,
   }
   if pu.name != nil {
-    req.UpdateName = &pb.UpdateProfileRequest_Name{Name: *pu.name}
+    req.Name = &pb.OptString{Val: *pu.name}
   }
   if pu.url != nil {
-    req.UpdateUrl = &pb.UpdateProfileRequest_Url{Url: *pu.url}
+    req.Url = &pb.OptString{Val: *pu.url}
   }
   if pu.location != nil {
-    req.UpdateLocation = &pb.UpdateProfileRequest_Location{Location: *pu.location}
+    req.Location = &pb.OptString{Val: *pu.location}
   }
   if pu.bio != nil {
-    req.UpdateBio = &pb.UpdateProfileRequest_Bio{Bio: *pu.bio}
+    req.Bio = &pb.OptString{Val: *pu.bio}
   }
   if pu.profileLinkColor != nil {
-    req.UpdateProfileLinkColor = &pb.UpdateProfileRequest_ProfileLinkColor{ProfileLinkColor: *pu.profileLinkColor}
+    req.LinkColor = &pb.OptString{Val: *pu.profileLinkColor}
   }
   return &req
 }

@@ -34,6 +34,7 @@ func desTweet(msg *pb.Tweet) Tweet {
     Likes:                uint(msg.FavoriteCount),
     CurrentUserLiked:     msg.Favorited,
     CurrentUserRetweeted: msg.Retweeted,
+    CurrentUserRetweetID: desOptFixed64(msg.CurrentUserRetweetId),
     Hashtags:             desSymbols(msg.Hashtags),
     URLs:                 desURLs(msg.Urls),
     Mentions:             desMentions(msg.Mentions),
@@ -47,24 +48,20 @@ func desTweet(msg *pb.Tweet) Tweet {
     WithheldCounties:     msg.WithheldCountries,
     WithheldScope:        msg.WithheldScope,
   }
-  if reply, ok := msg.Reply.(*pb.Tweet_RepliedTweet); ok && reply.RepliedTweet != nil {
+  if msg.RepliedTweet != nil {
     tweet.RepliedTo = &ReplyData{
-      TweetID:    reply.RepliedTweet.ReplyToTweetId,
-      UserID:     reply.RepliedTweet.ReplyToUserId,
-      UserHandle: reply.RepliedTweet.ReplyToUserHandle,
+      TweetID:    msg.RepliedTweet.ReplyToTweetId,
+      UserID:     msg.RepliedTweet.ReplyToUserId,
+      UserHandle: msg.RepliedTweet.ReplyToUserHandle,
     }
   }
-  if quote, ok := msg.Quote.(*pb.Tweet_QuotedTweet); ok {
+  if msg.QuotedTweet != nil {
     tweet.Quoted = new(Tweet)
-    *tweet.Quoted = desTweet(quote.QuotedTweet)
+    *tweet.Quoted = desTweet(msg.QuotedTweet)
   }
-  if retweet, ok := msg.Retweet.(*pb.Tweet_RetweetedTweet); ok {
+  if msg.RepliedTweet != nil {
     tweet.Retweeted = new(Tweet)
-    *tweet.Retweeted = desTweet(retweet.RetweetedTweet)
-  }
-  if currentUserRetweet, ok := msg.CurrentUserRetweet.(*pb.Tweet_CurrentUserRetweetId); ok {
-    tweet.CurrentUserRetweetID = new(uint64)
-    *tweet.CurrentUserRetweetID = currentUserRetweet.CurrentUserRetweetId
+    *tweet.Retweeted = desTweet(msg.RetweetedTweet)
   }
   return tweet
 }
@@ -167,7 +164,7 @@ func desMediaItems(msgs []*pb.Media) []Media {
         Type:          msg.Type,
         MediaURL:      msg.MediaUrl,
         Alt:           msg.Alt,
-        SourceTweetID: desMediaSource(msg),
+        SourceTweetID: desOptFixed64(msg.SourceTweetId),
         Thumb:         desMediaSize(msg.Thumb),
         Small:         desMediaSize(msg.Small),
         Medium:        desMediaSize(msg.Medium),
@@ -176,15 +173,6 @@ func desMediaItems(msgs []*pb.Media) []Media {
     }
   }
   return media
-}
-
-func desMediaSource(msg *pb.Media) *uint64 {
-  if source, ok := msg.Source.(*pb.Media_SourceTweetId); ok {
-    id := new(uint64)
-    *id = source.SourceTweetId
-    return id
-  }
-  return nil
 }
 
 func desMediaSize(msg *pb.Media_Size) MediaSize {
@@ -218,4 +206,22 @@ func desPolls(msgs []*pb.Poll) []Poll {
     }
   }
   return polls
+}
+
+func desOptFixed64(msg *pb.OptFixed64) *uint64 {
+  if msg != nil {
+    val := new(uint64)
+    *val = msg.Val
+    return val
+  }
+  return nil
+}
+
+func desOptString(msg *pb.OptString) *string {
+  if msg != nil {
+    val := new(string)
+    *val = msg.Val
+    return val
+  }
+  return nil
 }

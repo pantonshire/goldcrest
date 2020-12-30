@@ -3,6 +3,7 @@ pub mod data;
 pub mod request;
 
 mod response;
+mod optional;
 
 pub use client::{Client, ClientBuilder};
 pub use request::Authentication;

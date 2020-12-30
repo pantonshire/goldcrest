@@ -79,13 +79,13 @@ func desTimelineOptions(msg *pb.TimelineOptions) timelineOptions {
     count:     uint(msg.Count),
     tweetOpts: desTweetOptions(msg.Twopts),
   }
-  if minID, ok := msg.Min.(*pb.TimelineOptions_MinId); ok {
+  if msg.MinId != nil {
     opts.minID = new(uint64)
-    *opts.minID = minID.MinId
+    *opts.minID = msg.MinId.Val
   }
-  if maxID, ok := msg.Max.(*pb.TimelineOptions_MaxId); ok {
+  if msg.MaxId != nil {
     opts.maxID = new(uint64)
-    *opts.maxID = maxID.MaxId
+    *opts.maxID = msg.MaxId.Val
   }
   return opts
 }
@@ -142,11 +142,11 @@ func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oaut
   params.Set("possibly_sensitive", strconv.FormatBool(msg.PossiblySensitive))
   params.Set("enable_dmcommands", strconv.FormatBool(msg.EnableDmCommands))
   params.Set("fail_dmcommands", strconv.FormatBool(msg.FailDmCommands))
-  if reply, ok := msg.Reply.(*pb.PublishTweetRequest_ReplyId); ok {
-    params.Set("in_reply_to_status_id", strconv.FormatUint(reply.ReplyId, 10))
+  if msg.ReplyId != nil {
+    params.Set("in_reply_to_status_id", strconv.FormatUint(msg.ReplyId.Val, 10))
   }
-  if attachment, ok := msg.Attachment.(*pb.PublishTweetRequest_AttachmentUrl); ok {
-    params.Set("attachment_url", attachment.AttachmentUrl)
+  if msg.AttachmentUrl != nil {
+    params.Set("attachment_url", msg.AttachmentUrl.Val)
   }
   if len(msg.ExcludeReplyUserIds) > 0 {
     exclude := make([]string, len(msg.ExcludeReplyUserIds))

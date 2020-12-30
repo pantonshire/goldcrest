@@ -239,20 +239,20 @@ func (p Proxy) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) 
   query := oauth.NewParams()
   query.Set("include_entities", strconv.FormatBool(req.GetIncludeEntities()))
   query.Set("skip_status", strconv.FormatBool(!req.GetIncludeStatuses()))
-  if name, ok := req.GetUpdateName().(*pb.UpdateProfileRequest_Name); ok {
-    query.Set("name", name.Name)
+  if req.Name != nil {
+    query.Set("name", req.Name.Val)
   }
-  if url, ok := req.GetUpdateUrl().(*pb.UpdateProfileRequest_Url); ok {
-    query.Set("url", url.Url)
+  if req.Url != nil {
+    query.Set("url", req.Url.Val)
   }
-  if location, ok := req.GetUpdateLocation().(*pb.UpdateProfileRequest_Location); ok {
-    query.Set("location", location.Location)
+  if req.Location != nil {
+    query.Set("location", req.Location.Val)
   }
-  if bio, ok := req.GetUpdateBio().(*pb.UpdateProfileRequest_Bio); ok {
-    query.Set("description", bio.Bio)
+  if req.Bio != nil {
+    query.Set("description", req.Bio.Val)
   }
-  if col, ok := req.GetUpdateProfileLinkColor().(*pb.UpdateProfileRequest_ProfileLinkColor); ok {
-    query.Set("profile_link_color", col.ProfileLinkColor)
+  if req.LinkColor != nil {
+    query.Set("profile_link_color", req.LinkColor.Val)
   }
   resp, meta, err := generateUserResponse(func() (model.User, metadata.MD, error) {
     var user model.User

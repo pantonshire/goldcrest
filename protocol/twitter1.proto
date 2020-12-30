@@ -22,6 +22,14 @@ service Twitter {
   // rpc StreamTweets(???) returns (stream Tweet);
 }
 
+message OptFixed64 {
+  fixed64 val = 1;
+}
+
+message OptString {
+  string val = 1;
+}
+
 message Error {
   enum Code {
     RATE_LIMIT = 0;
@@ -60,14 +68,10 @@ message TweetOptions {
 
 message TimelineOptions {
   uint32 count = 1;
-  oneof min {
-    /// The smallest id of Tweets that can be included in the timeline, inclusive
-    fixed64 min_id = 2;
-  }
-  oneof max {
-    /// The largest id of Tweets that can be included in the timeline, inclusive
-    fixed64 max_id = 3;
-  }
+  /// The smallest id of Tweets that can be included in the timeline, inclusive
+  OptFixed64 min_id = 2;
+  /// The largest id of Tweets that can be included in the timeline, inclusive
+  OptFixed64 max_id = 3;
   TweetOptions twopts = 4;
 }
 
@@ -108,14 +112,10 @@ message UserTimelineRequest {
 message PublishTweetRequest {
   Authentication auth = 1;
   string text = 2;
-  oneof reply {
-    fixed64 reply_id = 3;
-  }
+  OptFixed64 reply_id = 3;
   bool auto_populate_reply_metadata = 4;
   repeated fixed64 exclude_reply_user_ids = 5;
-  oneof attachment {
-    string attachment_url = 6;
-  }
+  OptString attachment_url = 6;
   repeated fixed64 media_ids = 7;
   bool possibly_sensitive = 8;
   bool enable_dm_commands = 9;
@@ -125,21 +125,11 @@ message PublishTweetRequest {
 
 message UpdateProfileRequest {
   Authentication auth = 1;
-  oneof update_name {
-    string name = 2;
-  }
-  oneof update_url {
-    string url = 3;
-  }
-  oneof update_location {
-    string location = 4;
-  }
-  oneof update_bio {
-    string bio = 5;
-  }
-  oneof update_profile_link_color {
-    string profile_link_color = 6;
-  }
+  OptString name = 2;
+  OptString url = 3;
+  OptString location = 4;
+  OptString bio = 5;
+  OptString link_color = 6;
   bool include_entities = 7;
   bool include_statuses = 8;
 }
@@ -182,24 +172,16 @@ message Tweet {
     fixed64 reply_to_user_id = 2;
     string reply_to_user_handle = 3;
   }
-  oneof reply {
-    ReplyData replied_tweet = 8;
-  }
-  oneof quote {
-    Tweet quoted_tweet = 9;
-  }
-  oneof retweet {
-    Tweet retweeted_tweet = 10;
-  }
+  ReplyData replied_tweet = 8;
+  Tweet quoted_tweet = 9;
+  Tweet retweeted_tweet = 10;
   uint32 quote_count = 11;
   uint32 reply_count = 12;
   uint32 retweet_count = 13;
   uint32 favorite_count = 14;
   bool favorited = 15;
   bool retweeted = 16;
-  oneof current_user_retweet {
-    fixed64 current_user_retweet_id = 17;
-  }
+  OptFixed64 current_user_retweet_id = 17;
   repeated Symbol hashtags = 18;
   repeated URL urls = 19;
   repeated Mention mentions = 20;
@@ -264,9 +246,7 @@ message Media {
   string type = 3;
   string media_url = 4;
   string alt = 5;
-  oneof source {
-    fixed64 source_tweet_id = 6;
-  }
+  OptFixed64 source_tweet_id = 6;
   message Size {
     uint32 width = 1;
     uint32 height = 2;
