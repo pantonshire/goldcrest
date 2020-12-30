@@ -1,0 +1,305 @@
+syntax = "proto3";
+
+option go_package = "github.com/pantonshire/goldcrest/protocol";
+
+package twitter1;
+
+service Twitter {
+  rpc GetTweet           (TweetRequest)           returns (TweetResponse);
+  rpc GetTweets          (TweetsRequest)          returns (TweetsResponse);
+  rpc LikeTweet          (TweetRequest)           returns (TweetResponse);
+  rpc UnlikeTweet        (TweetRequest)           returns (TweetResponse);
+  rpc RetweetTweet       (TweetRequest)           returns (TweetResponse);
+  rpc UnretweetTweet     (TweetRequest)           returns (TweetResponse);
+  rpc DeleteTweet        (TweetRequest)           returns (TweetResponse);
+  rpc GetHomeTimeline    (HomeTimelineRequest)    returns (TweetsResponse);
+  rpc GetMentionTimeline (MentionTimelineRequest) returns (TweetsResponse);
+  rpc GetUserTimeline    (UserTimelineRequest)    returns (TweetsResponse);
+  rpc PublishTweet       (PublishTweetRequest)    returns (TweetResponse);
+  rpc UpdateProfile      (UpdateProfileRequest)   returns (UserResponse);
+  rpc GetRaw             (RawAPIRequest)          returns (RawAPIResult);
+
+  // rpc StreamTweets(???) returns (stream Tweet);
+}
+
+message Error {
+  enum Code {
+    RATE_LIMIT = 0;
+    TWITTER_ERROR = 1;
+    BAD_REQUEST = 2;
+    BAD_RESPONSE = 3;
+  }
+  Code code = 1;
+  string message = 2;
+}
+
+message Authentication {
+  string consumer_key = 1;
+  string access_token = 2;
+  string secret_key = 3;
+  string secret_token = 4;
+}
+
+message Indices {
+  uint32 start = 1;
+  uint32 end = 2;
+}
+
+message TweetOptions {
+  bool trim_user = 1;
+  bool include_my_retweet = 2;
+  bool include_entities = 3;
+  bool include_ext_alt_text = 4;
+  bool include_card_uri = 5;
+  enum Mode {
+    COMPAT = 0;
+    EXTENDED = 1;
+  }
+  Mode mode = 6;
+}
+
+message TimelineOptions {
+  uint32 count = 1;
+  oneof min {
+    /// The smallest id of Tweets that can be included in the timeline, inclusive
+    fixed64 min_id = 2;
+  }
+  oneof max {
+    /// The largest id of Tweets that can be included in the timeline, inclusive
+    fixed64 max_id = 3;
+  }
+  TweetOptions twopts = 4;
+}
+
+message TweetRequest {
+  Authentication auth = 1;
+  fixed64 id = 2;
+  TweetOptions twopts = 3;
+}
+
+message TweetsRequest {
+  Authentication auth = 1;
+  repeated fixed64 ids = 2;
+  TweetOptions twopts = 3;
+}
+
+message HomeTimelineRequest {
+  Authentication auth = 1;
+  TimelineOptions timeline_options = 2;
+  bool include_replies = 3;
+}
+
+message MentionTimelineRequest {
+  Authentication auth = 1;
+  TimelineOptions timeline_options = 2;
+}
+
+message UserTimelineRequest {
+  Authentication auth = 1;
+  oneof user {
+    fixed64 user_id = 2;
+    string user_handle = 3;
+  }
+  TimelineOptions timeline_options = 4;
+  bool include_replies = 5;
+  bool include_retweets = 6;
+}
+
+message PublishTweetRequest {
+  Authentication auth = 1;
+  string text = 2;
+  oneof reply {
+    fixed64 reply_id = 3;
+  }
+  bool auto_populate_reply_metadata = 4;
+  repeated fixed64 exclude_reply_user_ids = 5;
+  oneof attachment {
+    string attachment_url = 6;
+  }
+  repeated fixed64 media_ids = 7;
+  bool possibly_sensitive = 8;
+  bool enable_dm_commands = 9;
+  bool fail_dm_commands = 10;
+  TweetOptions twopts = 11;
+}
+
+message UpdateProfileRequest {
+  Authentication auth = 1;
+  oneof update_name {
+    string name = 2;
+  }
+  oneof update_url {
+    string url = 3;
+  }
+  oneof update_location {
+    string location = 4;
+  }
+  oneof update_bio {
+    string bio = 5;
+  }
+  oneof update_profile_link_color {
+    string profile_link_color = 6;
+  }
+  bool include_entities = 7;
+  bool include_statuses = 8;
+}
+
+message TweetResponse {
+  oneof response {
+    Tweet tweet = 1;
+    Error error = 2;
+  }
+}
+
+message TweetsResponse {
+  oneof response {
+    Tweets tweets = 1;
+    Error error = 2;
+  }
+}
+
+message UserResponse {
+  oneof response {
+    User user = 1;
+    Error error = 2;
+  }
+}
+
+message Tweets {
+  repeated Tweet tweets = 1;
+}
+
+message Tweet {
+  fixed64 id = 1;
+  uint64 created_at = 2;
+  string text = 3;
+  Indices text_display_range = 4;
+  bool truncated = 5;
+  string source = 6;
+  User user = 7;
+  message ReplyData {
+    fixed64 reply_to_tweet_id = 1;
+    fixed64 reply_to_user_id = 2;
+    string reply_to_user_handle = 3;
+  }
+  oneof reply {
+    ReplyData replied_tweet = 8;
+  }
+  oneof quote {
+    Tweet quoted_tweet = 9;
+  }
+  oneof retweet {
+    Tweet retweeted_tweet = 10;
+  }
+  uint32 quote_count = 11;
+  uint32 reply_count = 12;
+  uint32 retweet_count = 13;
+  uint32 favorite_count = 14;
+  bool favorited = 15;
+  bool retweeted = 16;
+  oneof current_user_retweet {
+    fixed64 current_user_retweet_id = 17;
+  }
+  repeated Symbol hashtags = 18;
+  repeated URL urls = 19;
+  repeated Mention mentions = 20;
+  repeated Symbol symbols = 21;
+  repeated Media media = 22;
+  repeated Poll polls = 23;
+  bool possibly_sensitive = 24;
+  string filter_level = 25;
+  string lang = 26;
+  bool withheld_copyright = 27;
+  repeated string withheld_countries = 28;
+  string withheld_scope = 29;
+}
+
+message User {
+  fixed64 id = 1;
+  string handle = 2;
+  string display_name = 3;
+  uint64 created_at = 4;
+  string bio = 5;
+  string url = 6;
+  string location = 7;
+  bool protected = 8;
+  bool verified = 9;
+  uint32 follower_count = 10;
+  uint32 following_count = 11;
+  uint32 listed_count = 12;
+  uint32 favorites_count = 13;
+  uint32 statuses_count = 14;
+  string profile_banner = 15;
+  string profile_image = 16;
+  bool default_profile = 17;
+  bool default_profile_image = 18;
+  repeated string withheld_countries = 19;
+  string withheld_scope = 20;
+  repeated URL url_urls = 21;
+  repeated URL bio_urls = 22;
+}
+
+message URL {
+  Indices indices = 1;
+  string twitter_url = 2;
+  string display_url = 3;
+  string expanded_url = 4;
+}
+
+message Symbol {
+  Indices indices = 1;
+  string text = 2;
+}
+
+message Mention {
+  Indices indices = 1;
+  fixed64 user_id = 2;
+  string handle = 3;
+  string display_name = 4;
+}
+
+message Media {
+  URL url = 1;
+  fixed64 id = 2;
+  string type = 3;
+  string media_url = 4;
+  string alt = 5;
+  oneof source {
+    fixed64 source_tweet_id = 6;
+  }
+  message Size {
+    uint32 width = 1;
+    uint32 height = 2;
+    string resize = 3;
+  }
+  Size thumb = 7;
+  Size small = 8;
+  Size medium = 9;
+  Size large = 10;
+}
+
+message Poll {
+  uint64 end_time = 1;
+  uint32 duration_minutes = 2;
+  message Option {
+    uint32 position = 1;
+    string text = 2;
+  }
+  repeated Option options = 3;
+}
+
+message RawAPIRequest {
+  Authentication auth = 1;
+  string method = 2;
+  string protocol = 3;
+  string version = 4;
+  string path = 5;
+  map<string, string> query_params = 6;
+  map<string, string> body_params = 7;
+}
+
+message RawAPIResult {
+  map<string, string> headers = 1;
+  uint32 status = 2;
+  bytes body = 3;
+}

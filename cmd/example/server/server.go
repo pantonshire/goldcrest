@@ -3,26 +3,17 @@ package main
 import (
   "fmt"
   "github.com/pantonshire/goldcrest/proxy"
-  "github.com/pantonshire/goldcrest/twitter1"
+  "google.golang.org/grpc"
+  "net"
   "os"
   "os/signal"
   "syscall"
 )
 
 func main() {
-  ok, err, fatal, stop := proxy.ServeTwitter1(proxy.Twitter1Config{
-    ProxyConfig: proxy.ProxyConfig{
-      Enabled: true,
-      Port:    7400,
-    },
-    TwitterConfig: twitter1.TwitterConfig{
-      ClientTimeoutSeconds: 5,
-    },
-  })
+  err, fatal, stop := serve(7400)
   if err != nil {
     panic(err)
-  } else if !ok {
-    panic("Twitter1 server not started")
   }
   interrupt := make(chan os.Signal, 1)
   signal.Notify(interrupt, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -34,5 +25,24 @@ func main() {
     fmt.Println("goodbye!")
   case err := <-fatal:
     panic(err)
+  }
+}
+
+func serve(port uint) (startupErr error, fatal <-chan error, shutdown func()) {
+  var opts []grpc.ServerOption
+  listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+  if err != nil {
+    return err, nil, nil
+  }
+  grpcServer := grpc.NewServer(opts...)
+  proxy.InitServer(grpcServer)
+  fatalErrors := make(chan error, 1)
+  go func() {
+    if err := grpcServer.Serve(listener); err != nil {
+      fatalErrors <- err
+    }
+  }()
+  return nil, fatalErrors, func() {
+    grpcServer.GracefulStop()
   }
 }
