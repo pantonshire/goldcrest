@@ -156,7 +156,10 @@ func (tc twitterClient) request(req *http.Request, ep endpoint, token string, ha
       headerParseErr = err
     }
 
+    //TODO: need to test this (with one of the POST endpoints, probably)
     if tooManyRequests {
+      log.Info("429 too many requests")
+
       rateLimitHit = true
 
       limitCurrent = new(uint)

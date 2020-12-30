@@ -122,6 +122,7 @@ func (rl *rateLimit) use() error {
   resetsKnown := !rl.resets.IsZero()
 
   if !resetsKnown && rl.current != nil && *rl.current == 0 {
+    log.Info("Escape from rate limit stuck condition")
     rl.resets = now.Add(stuckResetTime) //Could be stuck forever otherwise!
   } else if resetsKnown && now.After(rl.resets) {
     if rl.next == nil {
