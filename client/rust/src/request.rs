@@ -166,12 +166,11 @@ impl TimelineOptions {
     }
 
     fn ser(self, twopts: TweetOptions) -> twitter1::TimelineOptions {
-        use twitter1::timeline_options::{Min, Max};
         twitter1::TimelineOptions{
             count: self._count,
             twopts: Some(twopts.ser()),
-            min: self._min.map(Min::MinId),
-            max: self._max.map(Max::MaxId),
+            min_id: self._min.map(u64::into),
+            max_id: self._max.map(u64::into),
         }
     }
 }
@@ -342,7 +341,6 @@ pub(super) fn new_user_timeline_request(auth: Authentication, user: UserIdentifi
 }
 
 pub(super) fn new_publish_tweet_request(auth: Authentication, builder: TweetBuilder, twopts: TweetOptions) -> twitter1::PublishTweetRequest {
-    use twitter1::publish_tweet_request::{Reply, Attachment};
     twitter1::PublishTweetRequest{
         auth: Some(auth.ser()),
         text: builder._text,
@@ -353,21 +351,20 @@ pub(super) fn new_publish_tweet_request(auth: Authentication, builder: TweetBuil
         enable_dm_commands: builder._enable_dm_commands,
         fail_dm_commands: builder._fail_dm_commands,
         twopts: Some(twopts.ser()),
-        reply: builder._reply_id.map(Reply::ReplyId),
-        attachment: builder._attachment_url.map(Attachment::AttachmentUrl)
+        reply_id: builder._reply_id.map(u64::into),
+        attachment_url: builder._attachment_url.map(String::into),
     }
 }
 
 pub(super) fn new_update_profile_request(auth: Authentication, builder: ProfileBuilder, entities: bool, statuses: bool) -> twitter1::UpdateProfileRequest {
-    use twitter1::update_profile_request::*;
     twitter1::UpdateProfileRequest{
         auth: Some(auth.ser()),
         include_entities: entities,
         include_statuses: statuses,
-        update_name: builder._name.map(UpdateName::Name),
-        update_url: builder._url.map(UpdateUrl::Url),
-        update_location: builder._location.map(UpdateLocation::Location),
-        update_bio: builder._bio.map(UpdateBio::Bio),
-        update_profile_link_color: builder._link_color.map(UpdateProfileLinkColor::ProfileLinkColor),
+        name: builder._name.map(String::into),
+        url: builder._url.map(String::into),
+        location: builder._location.map(String::into),
+        bio: builder._bio.map(String::into),
+        link_color: builder._link_color.map(String::into),
     }
 }

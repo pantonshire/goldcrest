@@ -44,20 +44,20 @@ func serTweet(mod model.Tweet) *pb.Tweet {
     WithheldScope:     mod.WithheldScope,
   }
   if mod.ReplyStatusID != nil && mod.ReplyUserID != nil {
-    msg.Reply = &pb.Tweet_RepliedTweet{RepliedTweet: &pb.Tweet_ReplyData{
+    msg.RepliedTweet = &pb.Tweet_ReplyData{
       ReplyToTweetId:    *mod.ReplyStatusID,
       ReplyToUserId:     *mod.ReplyUserID,
       ReplyToUserHandle: strSafeDeref(mod.ReplyUserScreenName),
-    }}
+    }
   }
   if mod.QuotedStatus != nil {
-    msg.Quote = &pb.Tweet_QuotedTweet{QuotedTweet: serTweet(*mod.QuotedStatus)}
+    msg.QuotedTweet = serTweet(*mod.QuotedStatus)
   }
   if mod.RetweetedStatus != nil {
-    msg.Retweet = &pb.Tweet_RetweetedTweet{RetweetedTweet: serTweet(*mod.RetweetedStatus)}
+    msg.RetweetedTweet = serTweet(*mod.RetweetedStatus)
   }
   if mod.CurrentUserRetweet != nil {
-    msg.CurrentUserRetweet = &pb.Tweet_CurrentUserRetweetId{CurrentUserRetweetId: mod.CurrentUserRetweet.ID}
+    msg.CurrentUserRetweetId = &pb.OptFixed64{Val: mod.CurrentUserRetweet.ID}
   }
   return &msg
 }
@@ -173,7 +173,7 @@ func serMediaItem(mod model.Media) *pb.Media {
     Large:    serMediaSize(mod.Sizes.Large),
   }
   if mod.SourceStatusID != nil {
-    msg.Source = &pb.Media_SourceTweetId{SourceTweetId: *mod.SourceStatusID}
+    msg.SourceTweetId = &pb.OptFixed64{Val: *mod.SourceStatusID}
   }
   return &msg
 }
