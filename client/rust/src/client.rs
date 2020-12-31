@@ -1,5 +1,5 @@
-use crate::{response, request};
-use crate::data::{self, Deserialize};
+use crate::{response, request, deserialize::Deserialize};
+use crate::data::{self};
 use crate::twitter1::{self, twitter_client::TwitterClient};
 
 use std::future::Future;
