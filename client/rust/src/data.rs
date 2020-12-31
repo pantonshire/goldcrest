@@ -12,6 +12,7 @@ fn indices_to_bits(ind: &Indices, len: usize) -> BitVec<Lsb0, u8> {
     bits
 }
 
+/// Represents a single Tweet, otherwise known as a status in the Twitter API.
 #[derive(Clone, Debug)]
 pub struct Tweet {
     pub id: u64,
@@ -46,6 +47,8 @@ pub struct Tweet {
 }
 
 impl Tweet {
+    /// If this Tweet is a retweet, returns the original Tweet. Otherwise, returns this Tweet.
+    /// Moves the Tweet struct.
     pub fn original(self) -> Self {
         match self.retweeted {
             Some(tweet) => *tweet,
@@ -53,23 +56,36 @@ impl Tweet {
         }
     }
 
-    pub fn text(&self) -> String {
+    /// Returns the Tweet text trimmed according to its display range. Inline entities such as
+    /// URLs, mentions and hashtags can optionally be removed, depending on the provided
+    /// TweetTextOptions.
+    pub fn text(&self, options: tweet::TweetTextOptions) -> String {
         let l = self.raw_text.chars().count();
         let mut mask = indices_to_bits(&self.text_display_range, l);
-        for hashtag in self.hashtags.iter() {
-            mask &= !indices_to_bits(&hashtag.indices, l);
+        if !options.hashtags_included {
+            for hashtag in self.hashtags.iter() {
+                mask &= !indices_to_bits(&hashtag.indices, l);
+            }
         }
-        for url in self.urls.iter() {
-            mask &= !indices_to_bits(&url.indices, l);
+        if !options.urls_included {
+            for url in self.urls.iter() {
+                mask &= !indices_to_bits(&url.indices, l);
+            }
         }
-        for mention in self.mentions.iter() {
-            mask &= !indices_to_bits(&mention.indices, l);
+        if !options.mentions_included {
+            for mention in self.mentions.iter() {
+                mask &= !indices_to_bits(&mention.indices, l);
+            }
         }
-        for symbol in self.symbols.iter() {
-            mask &= !indices_to_bits(&symbol.indices, l);
+        if !options.symbols_included {
+            for symbol in self.symbols.iter() {
+                mask &= !indices_to_bits(&symbol.indices, l);
+            }
         }
-        for media in self.media.iter() {
-            mask &= !indices_to_bits(&media.url.indices, l);
+        if !options.media_included {
+            for media in self.media.iter() {
+                mask &= !indices_to_bits(&media.url.indices, l);
+            }
         }
         let mut text = String::new();
         for (i, c) in self.raw_text.chars().enumerate() {
@@ -81,12 +97,85 @@ impl Tweet {
     }
 }
 
+pub mod tweet {
+    pub struct TweetTextOptions {
+        pub(super) hashtags_included: bool,
+        pub(super) urls_included: bool,
+        pub(super) mentions_included: bool,
+        pub(super) symbols_included: bool,
+        pub(super) media_included: bool,
+    }
+
+    impl TweetTextOptions {
+        pub fn all() -> TweetTextOptions {
+            TweetTextOptions{
+                hashtags_included: true,
+                urls_included: true,
+                mentions_included: true,
+                symbols_included: true,
+                media_included: true,
+            }
+        }
+
+        pub fn none() -> TweetTextOptions {
+            TweetTextOptions{
+                hashtags_included: false,
+                urls_included: false,
+                mentions_included: false,
+                symbols_included: false,
+                media_included: false,
+            }
+        }
+
+        pub fn hashtags(self, included: bool) -> Self {
+            TweetTextOptions{
+                hashtags_included: included,
+                ..self
+            }
+        }
+
+        pub fn urls(self, included: bool) -> Self {
+            TweetTextOptions{
+                urls_included: included,
+                ..self
+            }
+        }
+
+        pub fn mentions(self, included: bool) -> Self {
+            TweetTextOptions{
+                mentions_included: included,
+                ..self
+            }
+        }
+
+        pub fn symbols(self, included: bool) -> Self {
+            TweetTextOptions{
+                symbols_included: included,
+                ..self
+            }
+        }
+
+        pub fn media(self, included: bool) -> Self {
+            TweetTextOptions{
+                media_included: included,
+                ..self
+            }
+        }
+    }
+}
+
+/// Represents a handle that uniquely identifies a user.
+/// Referred to as "screen name" in the Twitter API.
+/// Note that a user may change their handle, so user IDs should be preferred as a way of
+/// identifying users rather than handles.
 #[derive(Clone, Debug)]
 pub struct Handle {
+    /// The user's handle without the leading at symbol (@).
     pub name_only: String,
 }
 
 impl Handle {
+    /// Returns the user's handle with an at symbol (@) prepended.
     pub fn at_name(&self) -> String {
         let mut at_name = "@".to_owned();
         at_name.push_str(&self.name_only);
