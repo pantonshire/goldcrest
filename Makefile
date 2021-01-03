@@ -18,9 +18,9 @@ PROTO_PATH := protocol
 PROTO_SOURCE := $(wildcard $(PROTO_PATH)/*.proto)
 PROTO_BUILD := $(PROTO_SOURCE:.proto=.pb.go)
 
-build: exec $(EXEC)
+build: $(BUILD)/$(EXEC) $(EXEC)
 
-exec: buildpath
+$(BUILD)/$(EXEC): buildpath
 	$(GO_BUILD) -v -o $(BUILD)/$(EXEC) $(MAIN)
 
 $(EXEC):
@@ -55,4 +55,4 @@ $(PROTO_PATH)/%.pb.go: $(PROTO_PATH)/%.proto
 clean-proto:
 	rm $(wildcard $(PROTO_PATH)/*.pb.go)
 
-.PHONY: buildpath distpath build exec test dist dist-% clean proto clean-proto
+.PHONY: buildpath distpath build test dist dist-% clean proto clean-proto
