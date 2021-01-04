@@ -15,6 +15,7 @@ pub struct ClientBuilder {
     _port: u32,
     _request_timeout: chrono::Duration,
     _wait_timeout: chrono::Duration,
+    _concurrency_limit: Option<usize>,
     _authentication: Option<request::Authentication>,
 }
 
@@ -26,6 +27,7 @@ impl ClientBuilder {
             _port: 8000,
             _request_timeout: chrono::Duration::zero(),
             _wait_timeout: chrono::Duration::zero(),
+            _concurrency_limit: None,
             _authentication: None,
         }
     }
@@ -38,6 +40,9 @@ impl ClientBuilder {
         let mut ep = Endpoint::from_shared(uri)?;
         if !self._request_timeout.is_zero() {
             ep = ep.timeout(self._request_timeout.to_std()?);
+        }
+        if self._concurrency_limit.is_some() {
+            ep = ep.concurrency_limit(self._concurrency_limit.unwrap());
         }
         let channel = ep.connect().await?;
         Ok(Client{
@@ -83,6 +88,11 @@ impl ClientBuilder {
 
     pub fn wait_timeout(&mut self, timeout: chrono::Duration) -> &mut Self {
         self._wait_timeout = timeout;
+        self
+    }
+
+    pub fn concurrency_limit(&mut self, limit: usize) -> &mut Self {
+        self._concurrency_limit = Some(limit);
         self
     }
 }
