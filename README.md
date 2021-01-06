@@ -1,3 +1,5 @@
+![latest](https://img.shields.io/github/v/release/pantonshire/goldcrest?include_prereleases&label=latest)
+
 # Goldcrest Twitter API Proxy
 Goldcrest is a proxy server using gRPC for interacting with the Twitter API v1.1. Its main focus is on providing centralised
 rate-limit tracking so that several processes can concurrently use the Twitter API without having to worry about rate-limits.
