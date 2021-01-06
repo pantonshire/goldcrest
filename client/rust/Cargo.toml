@@ -1,6 +1,6 @@
 [package]
 name = "goldcrest"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Thomas Panton <tom@tomandtally.co.uk>"]
 edition = "2018"
 
