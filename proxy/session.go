@@ -22,15 +22,16 @@ type session struct {
 }
 
 type rateLimit struct {
-  mxData      sync.Mutex
-  mxNext      sync.Mutex
-  mxLow       sync.Mutex
-  resolving   bool
-  mxResolving sync.Mutex
-  current     *uint
-  next        *uint
-  resets      time.Time
-  assumeNext  bool
+  mxData     sync.Mutex
+  mxNext     sync.Mutex
+  mxLow      sync.Mutex
+  //boolean flag is safe from instruction reordering because it is always protected by mxData
+  resolving  bool
+  resolved   chan struct{}
+  current    *uint
+  next       *uint
+  resets     time.Time
+  assumeNext bool
 }
 
 func newSessions(assumeNextLimit bool) *sessions {
@@ -48,7 +49,10 @@ func newSession(assumeNextLimit bool) *session {
 }
 
 func newRateLimit(assumeNext bool) *rateLimit {
+  resolved := make(chan struct{}, 1)
+  resolved <- struct{}{}
   return &rateLimit{
+    resolved:   resolved,
     assumeNext: assumeNext,
   }
 }
@@ -110,11 +114,11 @@ func (rl *rateLimit) use() error {
   for rl.resolving {
     log.Debug("Resolving! Must wait")
     rl.unlockLow()
-    log.Debug("Wait for resolving lock")
-    rl.mxResolving.Lock()
-    log.Debug("Acquire resolving lock")
-    rl.mxResolving.Unlock()
-    log.Debug("Release resolving lock")
+    log.Debug("Wait for resolved message")
+    <-rl.resolved
+    log.Debug("Received resolved message")
+    rl.resolved <- struct{}{}
+    log.Debug("Return resolved message")
     rl.lockLow()
   }
 
@@ -142,9 +146,9 @@ func (rl *rateLimit) use() error {
   }
 
   if rl.current == nil {
-    log.Debug("Start resolving, wait for resolving lock")
-    rl.mxResolving.Lock()
-    log.Debug("Acquire resolving lock")
+    log.Debug("Start resolving, take from resolved message channel")
+    <-rl.resolved
+    log.Debug("Received resolved message")
     rl.resolving = true
     return nil
   } else if *rl.current > 0 {
@@ -162,9 +166,9 @@ func (rl *rateLimit) finish(current, next *uint, resets *time.Time, forceSync bo
   defer rl.unlockHigh()
 
   if rl.resolving {
-    log.Debug("Finished resolving, release resolving lock")
+    log.Debug("Finished resolving, send resolved message")
     rl.resolving = false
-    rl.mxResolving.Unlock()
+    rl.resolved <- struct{}{}
   }
 
   if current != nil && (forceSync || rl.current == nil) {
