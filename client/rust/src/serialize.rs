@@ -25,7 +25,7 @@ pub(crate) fn ser_search_request(auth: Authentication, search_opts: SearchOption
         lang: search_opts.par_lang.map(String::into),
         locale: search_opts.par_locale.map(String::into),
         result_type: ser_search_result_type(search_opts.par_result_type),
-        until_timestamp: search_opts.par_until.map(|x| (x as u64).into()),
+        until_timestamp: search_opts.par_until.map(i64::into),
         timeline_options: Some(ser_timeline_options(timeline_opts, tweet_opts)),
     }
 }

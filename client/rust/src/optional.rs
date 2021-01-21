@@ -1,5 +1,17 @@
 use crate::twitter1;
 
+impl From<i64> for twitter1::OptInt64 {
+    fn from(x: i64) -> Self {
+        twitter1::OptInt64{val: x}
+    }
+}
+
+impl From<twitter1::OptInt64> for i64 {
+    fn from(x: twitter1::OptInt64) -> Self {
+        x.val
+    }
+}
+
 impl From<u64> for twitter1::OptFixed64 {
     fn from(x: u64) -> Self {
         twitter1::OptFixed64{val: x}

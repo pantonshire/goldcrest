@@ -209,7 +209,7 @@ func serSearchRequest(auth authentication, searchOpts SearchOptions, twOpts Twee
     req.Locale = &pb.OptString{Val: *searchOpts.locale}
   }
   if searchOpts.until != nil {
-    req.UntilTimestamp = &pb.OptUint64{Val: uint64(searchOpts.until.Unix())}
+    req.UntilTimestamp = &pb.OptInt64{Val: searchOpts.until.Unix()}
   }
   return &req
 }

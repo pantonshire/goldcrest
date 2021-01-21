@@ -250,7 +250,7 @@ func (p Proxy) SearchTweets(ctx context.Context, req *pb.SearchRequest) (*pb.Twe
   }
   query.Set("result_type", reserSearchResultType(req.GetResultType()))
   if untilUnix := req.GetUntilTimestamp(); untilUnix != nil {
-    until := time.Unix(int64(untilUnix.Val), 0)
+    until := time.Unix(untilUnix.Val, 0)
     untilStr := until.Format("2006-01-02")
     query.Set("until", untilStr)
   }
