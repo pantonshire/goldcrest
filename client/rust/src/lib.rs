@@ -1,6 +1,7 @@
 pub mod client;
 pub mod data;
 pub mod request;
+pub mod error;
 
 mod optional;
 mod deserialize;

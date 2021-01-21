@@ -1,67 +1,40 @@
-use crate::{twitter1, data::*};
+use crate::error::{DeserializationError, DeserializationResult, Exists};
+use crate::data::*;
+use crate::twitter1;
 
 use std::convert::TryFrom;
 use chrono::{DateTime, NaiveDateTime, Duration, Utc};
 
-type DesResult<T> = Result<T, DeserializationError>;
-
-#[derive(Debug)]
-pub enum DeserializationError {
-    FieldMissing,
-    FieldOutOfRange,
-}
-
-impl std::fmt::Display for DeserializationError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(fmt, "Deserialization error: {}", match self {
-            DeserializationError::FieldMissing    => "missing field",
-            DeserializationError::FieldOutOfRange => "field out of range",
-        })
-    }
-}
-
-impl std::error::Error for DeserializationError {}
-
-trait Exists<T> {
-    fn exists(self) -> Result<T, DeserializationError>;
-}
-
-impl<T> Exists<T> for Option<T> {
-    fn exists(self) -> Result<T, DeserializationError> {
-        self.ok_or(DeserializationError::FieldMissing)
-    }
-}
-
-pub(super) trait Deserialize<T: Sized> {
-    fn des(self) -> DesResult<T>;
+pub(super) trait Deserialize<T> where T: Sized {
+    fn des(self) -> DeserializationResult<T>;
 }
 
 impl<T,S> Deserialize<Option<S>> for Option<T> where T: Deserialize<S> {
-    fn des(self) -> DesResult<Option<S>> {
+    fn des(self) -> DeserializationResult<Option<S>> {
         self.map(T::des).map_or(Ok(None), |x| x.map(Some))
     }
 }
 
 impl<T,S> Deserialize<Box<S>> for Box<T> where T: Deserialize<S> {
-    fn des(self) -> DesResult<Box<S>> {
+    fn des(self) -> DeserializationResult<Box<S>> {
         Ok(Box::new((*self).des()?))
     }
 }
 
 impl<T,S> Deserialize<Vec<S>> for Vec<T> where T: Deserialize<S> {
-    fn des(self) -> DesResult<Vec<S>> {
+    fn des(self) -> DeserializationResult<Vec<S>> {
         self.into_iter().map(T::des).collect()
     }
 }
 
 impl Deserialize<DateTime<Utc>> for i64 {
-    fn des(self) -> DesResult<DateTime<Utc>> {
+    fn des(self) -> DeserializationResult<DateTime<Utc>> {
         Ok(DateTime::from_utc(NaiveDateTime::from_timestamp(self, 0), Utc))
     }
 }
 
 impl Deserialize<DateTime<Utc>> for u64 {
-    fn des(self) -> DesResult<DateTime<Utc>> {
+    fn des(self) -> DeserializationResult<DateTime<Utc>> {
         match i64::try_from(self) {
             Ok(x)  => x.des(),
             Err(_) => Err(DeserializationError::FieldOutOfRange)
@@ -70,7 +43,7 @@ impl Deserialize<DateTime<Utc>> for u64 {
 }
 
 impl Deserialize<Handle> for String {
-    fn des(self) -> DesResult<Handle> {
+    fn des(self) -> DeserializationResult<Handle> {
         Ok(Handle{
             name_only: self,
         })
@@ -78,13 +51,13 @@ impl Deserialize<Handle> for String {
 }
 
 impl Deserialize<Indices> for twitter1::Indices {
-    fn des(self) -> DesResult<Indices> {
+    fn des(self) -> DeserializationResult<Indices> {
         Ok(self.start as usize .. self.end as usize)
     }
 }
 
 impl Deserialize<Tweet> for twitter1::Tweet {
-    fn des(self) -> DesResult<Tweet> {
+    fn des(self) -> DeserializationResult<Tweet> {
         Ok(Tweet{
             id: self.id,
             created_at: self.created_at.des()?,
@@ -120,7 +93,7 @@ impl Deserialize<Tweet> for twitter1::Tweet {
 }
 
 impl Deserialize<Vec<Tweet>> for twitter1::Tweets {
-    fn des(self) -> DesResult<Vec<Tweet>> {
+    fn des(self) -> DeserializationResult<Vec<Tweet>> {
         self.tweets.into_iter()
             .map(twitter1::Tweet::des)
             .collect()
@@ -128,7 +101,7 @@ impl Deserialize<Vec<Tweet>> for twitter1::Tweets {
 }
 
 impl Deserialize<ReplyData> for twitter1::tweet::ReplyData {
-    fn des(self) -> DesResult<ReplyData> {
+    fn des(self) -> DeserializationResult<ReplyData> {
         Ok(ReplyData{
             tweet_id: self.reply_to_tweet_id,
             user_id: self.reply_to_user_id,
@@ -138,7 +111,7 @@ impl Deserialize<ReplyData> for twitter1::tweet::ReplyData {
 }
 
 impl Deserialize<User> for twitter1::User {
-    fn des(self) -> DesResult<User> {
+    fn des(self) -> DeserializationResult<User> {
         Ok(User{
             id: self.id,
             handle: self.handle.des()?,
@@ -167,7 +140,7 @@ impl Deserialize<User> for twitter1::User {
 }
 
 impl Deserialize<URL> for twitter1::Url {
-    fn des(self) -> DesResult<URL> {
+    fn des(self) -> DeserializationResult<URL> {
         Ok(URL{
             indices: self.indices.exists()?.des()?,
             twitter_url: self.twitter_url,
@@ -178,7 +151,7 @@ impl Deserialize<URL> for twitter1::Url {
 }
 
 impl Deserialize<Symbol> for twitter1::Symbol {
-    fn des(self) -> DesResult<Symbol> {
+    fn des(self) -> DeserializationResult<Symbol> {
         Ok(Symbol{
             indices: self.indices.exists()?.des()?,
             text: self.text,
@@ -187,7 +160,7 @@ impl Deserialize<Symbol> for twitter1::Symbol {
 }
 
 impl Deserialize<Mention> for twitter1::Mention {
-    fn des(self) -> DesResult<Mention> {
+    fn des(self) -> DeserializationResult<Mention> {
         Ok(Mention{
             indices: self.indices.exists()?.des()?,
             user_id: self.user_id,
@@ -198,7 +171,7 @@ impl Deserialize<Mention> for twitter1::Mention {
 }
 
 impl Deserialize<Media> for twitter1::Media {
-    fn des(self) -> DesResult<Media> {
+    fn des(self) -> DeserializationResult<Media> {
         Ok(Media{
             url: self.url.exists()?.des()?,
             id: self.id,
@@ -215,7 +188,7 @@ impl Deserialize<Media> for twitter1::Media {
 }
 
 impl Deserialize<MediaSize> for twitter1::media::Size {
-    fn des(self) -> DesResult<MediaSize> {
+    fn des(self) -> DeserializationResult<MediaSize> {
         Ok(MediaSize{
             width: self.width,
             height: self.height,
@@ -225,7 +198,7 @@ impl Deserialize<MediaSize> for twitter1::media::Size {
 }
 
 impl Deserialize<Poll> for twitter1::Poll {
-    fn des(self) -> DesResult<Poll> {
+    fn des(self) -> DeserializationResult<Poll> {
         Ok(Poll{
             end_time: self.end_time.des()?,
             duration: Duration::minutes(self.duration_minutes as i64),
@@ -235,7 +208,7 @@ impl Deserialize<Poll> for twitter1::Poll {
 }
 
 impl Deserialize<PollOption> for twitter1::poll::Option {
-    fn des(self) -> DesResult<PollOption> {
+    fn des(self) -> DeserializationResult<PollOption> {
         Ok(PollOption{
             position: self.position as usize,
             text: self.text,
