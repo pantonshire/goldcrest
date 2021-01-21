@@ -11,6 +11,7 @@ Goldcrest currently supports the following Twitter API endpoints:
 |------------------------------|----------------------|
 | `statuses/update`            | `PublishTweet`       |
 | `statuses/retweet`           | `RetweetTweet`       |
+| `search/tweets`              | `SearchTweets`       |
 | `statuses/unretweet`         | `UnretweetTweet`     |
 | `statuses/show`              | `GetTweet`           |
 | `statuses/lookup`            | `GetTweets`          |
