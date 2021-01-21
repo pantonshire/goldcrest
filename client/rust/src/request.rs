@@ -1,29 +1,20 @@
-use crate::twitter1;
+use chrono::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct Authentication {
-    consumer_key: String,
-    consumer_secret: String,
-    token: String,
-    token_secret: String,
+    pub(crate) consumer_key: String,
+    pub(crate) consumer_secret: String,
+    pub(crate) access_token: String,
+    pub(crate) token_secret: String,
 }
 
 impl Authentication {
-    pub fn new(consumer_key: &str, consumer_secret: &str, token: &str, token_secret: &str) -> Self {
+    pub fn new(consumer_key: String, consumer_secret: String, access_token: String, token_secret: String) -> Self {
         Authentication{
-            consumer_key: consumer_key.to_owned(),
-            consumer_secret: consumer_secret.to_owned(),
-            token: token.to_owned(),
-            token_secret: token_secret.to_owned(),
-        }
-    }
-
-    fn ser(self) -> twitter1::Authentication {
-        twitter1::Authentication{
-            consumer_key: self.consumer_key,
-            secret_key: self.consumer_secret,
-            access_token: self.token,
-            secret_token: self.token_secret,
+            consumer_key,
+            consumer_secret,
+            access_token,
+            token_secret,
         }
     }
 }
@@ -34,143 +25,182 @@ pub enum TweetMode {
     Extended,
 }
 
-impl TweetMode {
-    fn ser(self) -> i32 {
-        use twitter1::tweet_options::Mode;
-        (match self {
-            TweetMode::Compatibility => Mode::Compat,
-            TweetMode::Extended      => Mode::Extended,
-        }) as i32
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct TweetOptions {
-    _trim_user: bool,
-    _include_your_retweet: bool,
-    _include_entities: bool,
-    _include_ext_alt_text: bool,
-    _include_card_uri: bool,
-    _mode: TweetMode,
+    pub(crate) par_trim_user: bool,
+    pub(crate) par_include_your_retweet: bool,
+    pub(crate) par_include_entities: bool,
+    pub(crate) par_include_ext_alt_text: bool,
+    pub(crate) par_include_card_uri: bool,
+    pub(crate) par_mode: TweetMode,
 }
 
 impl TweetOptions {
     pub fn default() -> Self {
         TweetOptions{
-            _trim_user: false,
-            _include_your_retweet: true,
-            _include_entities: true,
-            _include_ext_alt_text: true,
-            _include_card_uri: true,
-            _mode: TweetMode::Extended,
+            par_trim_user: false,
+            par_include_your_retweet: true,
+            par_include_entities: true,
+            par_include_ext_alt_text: true,
+            par_include_card_uri: true,
+            par_mode: TweetMode::Extended,
         }
     }
 
     pub fn trim_user(self, trim: bool) -> Self {
         TweetOptions{
-            _trim_user: trim,
+            par_trim_user: trim,
             ..self
         }
     }
 
     pub fn include_your_retweet(self, include: bool) -> Self {
         TweetOptions{
-            _include_your_retweet: include,
+            par_include_your_retweet: include,
             ..self
         }
     }
 
     pub fn include_entities(self, include: bool) -> Self {
         TweetOptions{
-            _include_entities: include,
+            par_include_entities: include,
             ..self
         }
     }
 
     pub fn include_alt(self, include: bool) -> Self {
         TweetOptions{
-            _include_ext_alt_text: include,
+            par_include_ext_alt_text: include,
             ..self
         }
     }
 
     pub fn include_card_uri(self, include: bool) -> Self {
         TweetOptions{
-            _include_card_uri: include,
+            par_include_card_uri: include,
             ..self
         }
     }
 
     pub fn mode(self, mode: TweetMode) -> Self {
         TweetOptions{
-            _mode: mode,
+            par_mode: mode,
             ..self
-        }
-    }
-
-    fn ser(self) -> twitter1::TweetOptions {
-        twitter1::TweetOptions{
-            trim_user: self._trim_user,
-            include_my_retweet: self._include_your_retweet,
-            include_entities: self._include_entities,
-            include_ext_alt_text: self._include_ext_alt_text,
-            include_card_uri: self._include_card_uri,
-            mode: self._mode.ser(),
         }
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct TimelineOptions {
-    _count: u32,
-    _min: Option<u64>,
-    _max: Option<u64>,
+    pub(crate) par_count: u32,
+    pub(crate) par_min: Option<u64>,
+    pub(crate) par_max: Option<u64>,
 }
 
 impl TimelineOptions {
     pub fn default() -> TimelineOptions {
         TimelineOptions{
-            _count: 20,
-            _min: None,
-            _max: None,
+            par_count: 20,
+            par_min: None,
+            par_max: None,
         }
     }
 
     pub fn count(self, num: u32) -> Self {
         TimelineOptions{
-            _count: num,
+            par_count: num,
             ..self
         }
     }
 
     pub fn min_id(self, id: u64) -> Self {
         TimelineOptions{
-            _min: Some(id),
+            par_min: Some(id),
             ..self
         }
     }
 
     pub fn max_id(self, id: u64) -> Self {
         TimelineOptions{
-            _max: Some(id),
+            par_max: Some(id),
             ..self
         }
     }
 
     pub fn id_range(self, min: u64, max: u64) -> Self {
         TimelineOptions{
-            _min: Some(min),
-            _max: Some(max),
+            par_min: Some(min),
+            par_max: Some(max),
+            ..self
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum SearchResultType {
+    Mixed,
+    Recent,
+    Popular,
+}
+
+#[derive(Clone, Debug)]
+pub struct SearchOptions {
+    pub(crate) par_query: String,
+    pub(crate) par_geocode: Option<String>,
+    pub(crate) par_lang: Option<String>,
+    pub(crate) par_locale: Option<String>,
+    pub(crate) par_result_type: SearchResultType,
+    pub(crate) par_until: Option<i64>,
+}
+
+impl SearchOptions {
+    pub fn new(query: String) -> Self {
+        SearchOptions{
+            par_query: query,
+            par_geocode: None,
+            par_lang: None,
+            par_locale: None,
+            par_result_type: SearchResultType::Mixed,
+            par_until: None,
+        }
+    }
+
+    pub fn geocode(self, geocode: String) -> Self {
+        SearchOptions{
+            par_geocode: Some(geocode),
             ..self
         }
     }
 
-    fn ser(self, twopts: TweetOptions) -> twitter1::TimelineOptions {
-        twitter1::TimelineOptions{
-            count: self._count,
-            twopts: Some(twopts.ser()),
-            min_id: self._min.map(u64::into),
-            max_id: self._max.map(u64::into),
+    pub fn lang(self, lang: String) -> Self {
+        SearchOptions{
+            par_lang: Some(lang),
+            ..self
+        }
+    }
+
+    pub fn locale(self, locale: String) -> Self {
+        SearchOptions{
+            par_locale: Some(locale),
+            ..self
+        }
+    }
+
+    pub fn result_type(self, result_type: SearchResultType) -> Self {
+        SearchOptions{
+            par_result_type: result_type,
+            ..self
+        }
+    }
+
+    pub fn until<Tz: TimeZone>(self, time: DateTime<Tz>) -> Self {
+        self.until_unix(time.timestamp())
+    }
+
+    pub fn until_unix(self, timestamp: i64) -> Self {
+        SearchOptions{
+            par_until: Some(timestamp),
+            ..self
         }
     }
 }
@@ -181,190 +211,110 @@ pub enum UserIdentifier {
     Handle(String),
 }
 
-impl UserIdentifier {
-    fn ser(self) -> twitter1::user_timeline_request::User {
-        use twitter1::user_timeline_request::User;
-        match self {
-            UserIdentifier::Id(id)         => User::UserId(id),
-            UserIdentifier::Handle(handle) => User::UserHandle(handle),
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct TweetBuilder {
-    _text: String,
-    _reply_id: Option<u64>,
-    _exclude_ids: Vec<u64>,
-    _media_ids: Vec<u64>,
-    _sensitive: bool,
-    _enable_dm_commands: bool,
-    _fail_dm_commands: bool,
-    _attachment_url: Option<String>,
+    pub(crate) par_text: String,
+    pub(crate) par_reply_id: Option<u64>,
+    pub(crate) par_exclude_ids: Vec<u64>,
+    pub(crate) par_media_ids: Vec<u64>,
+    pub(crate) par_sensitive: bool,
+    pub(crate) par_enable_dm_commands: bool,
+    pub(crate) par_fail_dm_commands: bool,
+    pub(crate) par_attachment_url: Option<String>,
 }
 
 impl TweetBuilder {
     pub fn new(text: String) -> TweetBuilder {
         TweetBuilder{
-            _text: text,
-            _reply_id: None,
-            _exclude_ids: Vec::new(),
-            _media_ids: Vec::new(),
-            _sensitive: false,
-            _enable_dm_commands: false,
-            _fail_dm_commands: false,
-            _attachment_url: None,
+            par_text: text,
+            par_reply_id: None,
+            par_exclude_ids: Vec::new(),
+            par_media_ids: Vec::new(),
+            par_sensitive: false,
+            par_enable_dm_commands: false,
+            par_fail_dm_commands: false,
+            par_attachment_url: None,
         }
     }
 
     pub fn reply_to(&mut self, id: u64) -> &mut Self {
-        self._reply_id = Some(id);
+        self.par_reply_id = Some(id);
         self
     }
 
     pub fn exclude_id(&mut self, id: u64) -> &mut Self {
-        self._exclude_ids.push(id);
+        self.par_exclude_ids.push(id);
         self
     }
 
     pub fn exclude_ids<I: Iterator<Item = u64>>(&mut self, ids: I) -> &mut Self {
-        self._exclude_ids.extend(ids);
+        self.par_exclude_ids.extend(ids);
         self
     }
 
     pub fn mark_sensitive(&mut self) -> &mut Self {
-        self._sensitive = true;
+        self.par_sensitive = true;
         self
     }
 
     pub fn enable_dm_commands(&mut self) -> &mut Self {
-        self._enable_dm_commands = true;
+        self.par_enable_dm_commands = true;
         self
     }
 
     pub fn fail_dm_commands(&mut self) -> &mut Self {
-        self._fail_dm_commands = true;
+        self.par_fail_dm_commands = true;
         self
     }
 
     pub fn attach(&mut self, url: String) -> &mut Self {
-        self._attachment_url = Some(url);
+        self.par_attachment_url = Some(url);
         self
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct ProfileBuilder {
-    _name: Option<String>,
-    _url: Option<String>,
-    _location: Option<String>,
-    _bio: Option<String>,
-    _link_color: Option<String>,
+    pub(crate) par_name: Option<String>,
+    pub(crate) par_url: Option<String>,
+    pub(crate) par_location: Option<String>,
+    pub(crate) par_bio: Option<String>,
+    pub(crate) par_link_color: Option<String>,
 }
 
 impl ProfileBuilder {
     pub fn new() -> ProfileBuilder {
         ProfileBuilder{
-            _name: None,
-            _url: None,
-            _location: None,
-            _bio: None,
-            _link_color: None,
+            par_name: None,
+            par_url: None,
+            par_location: None,
+            par_bio: None,
+            par_link_color: None,
         }
     }
 
     pub fn name(&mut self, name: String) -> &mut Self {
-        self._name = Some(name);
+        self.par_name = Some(name);
         self
     }
 
     pub fn url(&mut self, url: String) -> &mut Self {
-        self._url = Some(url);
+        self.par_url = Some(url);
         self
     }
 
     pub fn location(&mut self, location: String) -> &mut Self {
-        self._location = Some(location);
+        self.par_location = Some(location);
         self
     }
 
     pub fn bio(&mut self, bio: String) -> &mut Self {
-        self._bio = Some(bio);
+        self.par_bio = Some(bio);
         self
     }
 
     pub fn link_color(&mut self, color: String) -> &mut Self {
-        self._link_color = Some(color);
+        self.par_link_color = Some(color);
         self
-    }
-}
-
-pub(super) fn new_tweet_request(auth: Authentication, id: u64, twopts: TweetOptions) -> twitter1::TweetRequest {
-    twitter1::TweetRequest{
-        auth: Some(auth.ser()),
-        id: id,
-        twopts: Some(twopts.ser()),
-    }
-}
-
-pub(super) fn new_tweets_request(auth: Authentication, ids: Vec<u64>, twopts: TweetOptions) -> twitter1::TweetsRequest {
-    twitter1::TweetsRequest{
-        auth: Some(auth.ser()),
-        ids: ids,
-        twopts: Some(twopts.ser()),
-    }
-}
-
-pub(super) fn new_home_timeline_request(auth: Authentication, tlopts: TimelineOptions, twopts: TweetOptions, replies: bool) -> twitter1::HomeTimelineRequest {
-    twitter1::HomeTimelineRequest{
-        auth: Some(auth.ser()),
-        timeline_options: Some(tlopts.ser(twopts)),
-        include_replies: replies,
-    }
-}
-
-pub(super) fn new_mention_timeline_request(auth: Authentication, tlopts: TimelineOptions, twopts: TweetOptions) -> twitter1::MentionTimelineRequest {
-    twitter1::MentionTimelineRequest{
-        auth: Some(auth.ser()),
-        timeline_options: Some(tlopts.ser(twopts)),
-    }
-}
-
-pub(super) fn new_user_timeline_request(auth: Authentication, user: UserIdentifier, tlopts: TimelineOptions, twopts: TweetOptions, replies: bool, retweets: bool) -> twitter1::UserTimelineRequest {
-    twitter1::UserTimelineRequest{
-        auth: Some(auth.ser()),
-        timeline_options: Some(tlopts.ser(twopts)),
-        include_replies: replies,
-        include_retweets: retweets,
-        user: Some(user.ser()),
-    }
-}
-
-pub(super) fn new_publish_tweet_request(auth: Authentication, builder: TweetBuilder, twopts: TweetOptions) -> twitter1::PublishTweetRequest {
-    twitter1::PublishTweetRequest{
-        auth: Some(auth.ser()),
-        text: builder._text,
-        auto_populate_reply_metadata: builder._reply_id.is_some(),
-        exclude_reply_user_ids: builder._exclude_ids,
-        media_ids: builder._media_ids,
-        possibly_sensitive: builder._sensitive,
-        enable_dm_commands: builder._enable_dm_commands,
-        fail_dm_commands: builder._fail_dm_commands,
-        twopts: Some(twopts.ser()),
-        reply_id: builder._reply_id.map(u64::into),
-        attachment_url: builder._attachment_url.map(String::into),
-    }
-}
-
-pub(super) fn new_update_profile_request(auth: Authentication, builder: ProfileBuilder, entities: bool, statuses: bool) -> twitter1::UpdateProfileRequest {
-    twitter1::UpdateProfileRequest{
-        auth: Some(auth.ser()),
-        include_entities: entities,
-        include_statuses: statuses,
-        name: builder._name.map(String::into),
-        url: builder._url.map(String::into),
-        location: builder._location.map(String::into),
-        bio: builder._bio.map(String::into),
-        link_color: builder._link_color.map(String::into),
     }
 }

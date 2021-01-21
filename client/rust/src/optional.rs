@@ -12,6 +12,18 @@ impl From<twitter1::OptFixed64> for u64 {
     }
 }
 
+impl From<u64> for twitter1::OptUint64 {
+    fn from(x: u64) -> Self {
+        twitter1::OptUint64{val: x}
+    }
+}
+
+impl From<twitter1::OptUint64> for u64 {
+    fn from(x: twitter1::OptUint64) -> Self {
+        x.val
+    }
+}
+
 impl From<String> for twitter1::OptString {
     fn from(x: String) -> Self {
         twitter1::OptString{val: x}

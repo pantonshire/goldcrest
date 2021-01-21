@@ -1,5 +1,8 @@
-use crate::{response, request, deserialize::Deserialize};
-use crate::data::{self};
+use crate::response;
+use crate::request;
+use crate::serialize;
+use crate::deserialize::Deserialize;
+use crate::data;
 use crate::twitter1::{self, twitter_client::TwitterClient};
 
 use std::future::Future;
@@ -120,7 +123,7 @@ macro_rules! request {
 
 macro_rules! tweet_request {
     ($client:expr, $id:expr, $twopts: expr, $f:ident) => {
-        request!($client, request::new_tweet_request($client.authentication.clone(), $id, $twopts), $f)
+        request!($client, crate::serialize::ser_tweet_request($client.authentication.clone(), $id, $twopts), $f)
     }
 }
 
@@ -130,8 +133,13 @@ impl Client {
     }
 
     pub async fn get_tweets(&self, ids: Vec<u64>, twopts: request::TweetOptions) -> ReqResult<Vec<data::Tweet>> {
-        let req = request::new_tweets_request(self.authentication.clone(), ids, twopts);
+        let req = serialize::ser_tweets_request(self.authentication.clone(), ids, twopts);
         request!(self, req, get_tweets)
+    }
+
+    pub async fn search_tweets(&self, search_opts: request::SearchOptions, tweet_opts: request::TweetOptions, timeline_opts: request::TimelineOptions) -> ReqResult<Vec<data::Tweet>> {
+        let req = serialize::ser_search_request(self.authentication.clone(), search_opts, tweet_opts, timeline_opts);
+        request!(self, req, search_tweets)
     }
 
     pub async fn like(&self, id: u64, twopts: request::TweetOptions) -> ReqResult<data::Tweet> {
@@ -155,27 +163,27 @@ impl Client {
     }
 
     pub async fn home_timeline(&self, tlopts: request::TimelineOptions, twopts: request::TweetOptions, replies: bool) -> ReqResult<Vec<data::Tweet>> {
-        let req = request::new_home_timeline_request(self.authentication.clone(), tlopts, twopts, replies);
+        let req = serialize::ser_home_timeline_request(self.authentication.clone(), tlopts, twopts, replies);
         request!(self, req, get_home_timeline)
     }
 
     pub async fn mention_timeline(&self, tlopts: request::TimelineOptions, twopts: request::TweetOptions) -> ReqResult<Vec<data::Tweet>> {
-        let req = request::new_mention_timeline_request(self.authentication.clone(), tlopts, twopts);
+        let req = serialize::ser_mention_timeline_request(self.authentication.clone(), tlopts, twopts);
         request!(self, req, get_mention_timeline)
     }
 
     pub async fn user_timeline(&self, user: request::UserIdentifier, tlopts: request::TimelineOptions, twopts: request::TweetOptions, replies: bool, retweets: bool) -> ReqResult<Vec<data::Tweet>> {
-        let req = request::new_user_timeline_request(self.authentication.clone(), user, tlopts, twopts, replies, retweets);
+        let req = serialize::ser_user_timeline_request(self.authentication.clone(), user, tlopts, twopts, replies, retweets);
         request!(self, req, get_user_timeline)
     }
 
     pub async fn publish(&self, tweet: request::TweetBuilder, twopts: request::TweetOptions) -> ReqResult<data::Tweet> {
-        let req = request::new_publish_tweet_request(self.authentication.clone(), tweet, twopts);
+        let req = serialize::ser_publish_tweet_request(self.authentication.clone(), tweet, twopts);
         request!(self, req, publish_tweet)
     }
 
     pub async fn update_profile(&self, profile: request::ProfileBuilder, entities: bool, statuses: bool) -> ReqResult<data::User> {
-        let req = request::new_update_profile_request(self.authentication.clone(), profile, entities, statuses);
+        let req = serialize::ser_update_profile_request(self.authentication.clone(), profile, entities, statuses);
         request!(self, req, update_profile)
     }
 
@@ -212,7 +220,7 @@ impl Client {
                         }
 
                         match (retry - Utc::now()).to_std() {
-                            Ok(wait_time) => time::delay_for(wait_time).await,
+                            Ok(wait_time) => time::sleep(wait_time).await,
                             Err(_)        => (), //no need to wait if duration was negative
                         }
 
