@@ -7,6 +7,7 @@ package twitter1;
 service Twitter {
   rpc GetTweet           (TweetRequest)           returns (TweetResponse);
   rpc GetTweets          (TweetsRequest)          returns (TweetsResponse);
+  rpc SearchTweets       (SearchRequest)          returns (TweetsResponse);
   rpc LikeTweet          (TweetRequest)           returns (TweetResponse);
   rpc UnlikeTweet        (TweetRequest)           returns (TweetResponse);
   rpc RetweetTweet       (TweetRequest)           returns (TweetResponse);
@@ -20,6 +21,10 @@ service Twitter {
   rpc GetRaw             (RawAPIRequest)          returns (RawAPIResult);
 
   // rpc StreamTweets(???) returns (stream Tweet);
+}
+
+message OptUint64 {
+  uint64 val = 1;
 }
 
 message OptFixed64 {
@@ -85,6 +90,22 @@ message TweetsRequest {
   Authentication auth = 1;
   repeated fixed64 ids = 2;
   TweetOptions twopts = 3;
+}
+
+message SearchRequest {
+  Authentication auth = 1;
+  string query = 2;
+  OptString geocode = 3;
+  OptString lang = 4;
+  OptString locale = 5;
+  enum ResultType {
+    MIXED = 0;
+    RECENT = 1;
+    POPULAR = 2;
+  }
+  ResultType result_type = 6;
+  OptUint64 until_timestamp = 7;
+  TimelineOptions timeline_options = 8;
 }
 
 message HomeTimelineRequest {

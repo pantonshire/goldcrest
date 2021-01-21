@@ -234,6 +234,43 @@ func (p Proxy) GetUserTimeline(ctx context.Context, req *pb.UserTimelineRequest)
   return resp, nil
 }
 
+func (p Proxy) SearchTweets(ctx context.Context, req *pb.SearchRequest) (*pb.TweetsResponse, error) {
+  auth := desAuth(req.GetAuth())
+
+  query := desTimelineOptions(req.GetTimelineOptions()).ser()
+  query.Set("q", req.GetQuery())
+  if geo := req.GetGeocode(); geo != nil {
+    query.Set("geocode", geo.Val)
+  }
+  if lang := req.GetLang(); lang != nil {
+    query.Set("lang", lang.Val)
+  }
+  if locale := req.GetLocale(); locale != nil {
+    query.Set("locale", locale.Val)
+  }
+  query.Set("result_type", reserSearchResultType(req.GetResultType()))
+  if untilUnix := req.GetUntilTimestamp(); untilUnix != nil {
+    until := time.Unix(int64(untilUnix.Val), 0)
+    untilStr := until.Format("2006-01-02")
+    query.Set("until", untilStr)
+  }
+
+  resp, meta, err := generateSearchResultResponse(func() (model.SearchResult, metadata.MD, error) {
+    var tweets model.SearchResult
+    if err := p.tc.standardRequest(searchEndpoint, auth, query, nil, &tweets); err != nil {
+      return model.SearchResult{}, nil, err
+    }
+    return tweets, nil, nil
+  })
+  if err != nil {
+    return nil, err
+  }
+  if err := sendHeader(ctx, meta); err != nil {
+    return nil, err
+  }
+  return resp, nil
+}
+
 func (p Proxy) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserResponse, error) {
   auth := desAuth(req.GetAuth())
   query := oauth.NewParams()
