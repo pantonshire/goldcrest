@@ -1,4 +1,4 @@
-package au
+package goldcrest
 
 import (
   pb "github.com/pantonshire/goldcrest/protocol"

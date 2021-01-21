@@ -34,11 +34,14 @@ func main() {
     WithTimeout(time.Second * 5).
     WithRetryLimit(5)
 
-  tweet, err := client.GetTweet(1224097454477512704)
+  searchOpts := goldcrest.NewSearchOptions("aaaahhh (from:infinite_scream)")
+  tlOpts := goldcrest.NewTimelineOptions(15)
+
+  tweets, err := client.SearchTweets(searchOpts, tlOpts)
 
   if err != nil {
     panic(err)
   }
 
-  spew.Dump(tweet)
+  spew.Dump(tweets)
 }
