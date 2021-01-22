@@ -1,4 +1,32 @@
 use std::error::Error;
+use std::fmt::{self, Display, Formatter};
+
+pub type ConnectionResult<T> = Result<T, ConnectionError>;
+
+#[derive(Debug)]
+pub enum ConnectionError {
+    Unauthenticated,
+    InvalidUri,
+    Channel(Box<tonic::transport::Error>),
+}
+
+impl Display for ConnectionError {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+        match self {
+            ConnectionError::Unauthenticated => write!(fmt, "not authenticated"),
+            ConnectionError::InvalidUri      => write!(fmt, "invalid URI"),
+            ConnectionError::Channel(err)    => err.fmt(fmt),
+        }
+    }
+}
+
+impl Error for ConnectionError {}
+
+impl From<tonic::transport::Error> for ConnectionError {
+    fn from(err: tonic::transport::Error) -> Self {
+        ConnectionError::Channel(Box::new(err))
+    }
+}
 
 pub type RequestResult<T> = Result<T, RequestError>;
 
@@ -6,15 +34,19 @@ pub type RequestResult<T> = Result<T, RequestError>;
 pub enum RequestError {
     Tonic(Box<tonic::Status>),
     Deserialization(Box<DeserializationError>),
-    Client(Box<ClientError>),
+    Client(Box<TwitterError>),
+    RetryTimeout,
+    RetryUnknown,
 }
 
-impl std::fmt::Display for RequestError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for RequestError {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
         match self {
             RequestError::Tonic(err)           => err.fmt(fmt),
             RequestError::Deserialization(err) => err.fmt(fmt),
             RequestError::Client(err)          => err.fmt(fmt),
+            RequestError::RetryTimeout         => write!(fmt, "deadline exceeded waiting for rate limit to reset"),
+            RequestError::RetryUnknown         => write!(fmt, "rate limit reached, but retry time unknown"),
         }
     }
 }
@@ -33,8 +65,8 @@ impl From<DeserializationError> for RequestError {
     }
 }
 
-impl From<ClientError> for RequestError {
-    fn from(err: ClientError) -> Self {
+impl From<TwitterError> for RequestError {
+    fn from(err: TwitterError) -> Self {
         RequestError::Client(Box::new(err))
     }
 }
@@ -47,8 +79,8 @@ pub enum DeserializationError {
     FieldOutOfRange,
 }
 
-impl std::fmt::Display for DeserializationError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for DeserializationError {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
         write!(fmt, "[Goldcrest deserialization] {}", match self {
             DeserializationError::FieldMissing    => "missing field",
             DeserializationError::FieldOutOfRange => "field out of range",
@@ -69,30 +101,24 @@ impl<T> Exists<T> for Option<T> {
 }
 
 #[derive(Debug)]
-pub enum ClientError {
+pub enum TwitterError {
     UnknownError(i32),
     InvalidResponse,
-    RetryTimeout,
-    RetryUnknown,
     TwitterError(String),
     BadRequest(String),
     BadResponse(String),
-    Unauthenticated,
 }
 
-impl std::fmt::Display for ClientError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(fmt, "[Goldcrest client] {}", match self {
-            ClientError::UnknownError(code) => format!("unknown error code {}", code),
-            ClientError::InvalidResponse    => "invalid response".to_owned(),
-            ClientError::RetryTimeout       => "timed out waiting for rate limit to reset".to_owned(),
-            ClientError::RetryUnknown       => "rate limit reached, but reset time unknown".to_owned(),
-            ClientError::TwitterError(s)    => format!("Twitter server-side error: {}", s),
-            ClientError::BadRequest(s)      => format!("bad request to Twitter: {}", s),
-            ClientError::BadResponse(s)     => format!("bad response from Twitter: {}", s),
-            ClientError::Unauthenticated    => "not authenticated".to_owned(),
+impl Display for TwitterError {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+        write!(fmt, "Goldcrest Twitter error: {}", match self {
+            TwitterError::UnknownError(code) => format!("unknown error code {}", code),
+            TwitterError::InvalidResponse    => "invalid response".to_owned(),
+            TwitterError::TwitterError(s)    => format!("Twitter server-side error: {}", s),
+            TwitterError::BadRequest(s)      => format!("bad request to Twitter: {}", s),
+            TwitterError::BadResponse(s)     => format!("bad response from Twitter: {}", s),
         })
     }
 }
 
-impl std::error::Error for ClientError {}
+impl Error for TwitterError {}

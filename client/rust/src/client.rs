@@ -3,11 +3,12 @@ use crate::request;
 use crate::serialize;
 use crate::deserialize::Deserialize;
 use crate::data;
-use crate::error::{RequestResult, ClientError};
+use crate::error::{ConnectionError, ConnectionResult, RequestError, RequestResult, TwitterError};
 use crate::twitter1::{self, twitter_client::TwitterClient};
 
 use std::future::Future;
 use chrono::prelude::*;
+use chrono::Duration;
 use tonic::transport::{Endpoint, Channel};
 use tokio::time;
 
@@ -15,8 +16,8 @@ pub struct ClientBuilder {
     par_scheme: String,
     par_host: String,
     par_port: u32,
-    par_request_timeout: chrono::Duration,
-    par_wait_timeout: chrono::Duration,
+    par_request_timeout: Duration,
+    par_wait_timeout: Duration,
     par_concurrency_limit: Option<usize>,
     par_authentication: Option<request::Authentication>,
 }
@@ -27,26 +28,33 @@ impl ClientBuilder {
             par_scheme: "http".to_owned(),
             par_host: "localhost".to_owned(),
             par_port: 8000,
-            par_request_timeout: chrono::Duration::zero(),
-            par_wait_timeout: chrono::Duration::zero(),
+            par_request_timeout: Duration::zero(),
+            par_wait_timeout: Duration::zero(),
             par_concurrency_limit: None,
             par_authentication: None,
         }
     }
 
-    pub async fn connect(self) -> Result<Client, Box<dyn std::error::Error>> {
+    pub async fn connect(self) -> ConnectionResult<Client> {
         if self.par_authentication.is_none() {
-            return Err(Box::new(ClientError::Unauthenticated));
+            return Err(ConnectionError::Unauthenticated);
         }
+
         let uri = format!("{}://{}:{}", self.par_scheme, self.par_host, self.par_port);
-        let mut ep = Endpoint::from_shared(uri)?;
-        if !self.par_request_timeout.is_zero() {
-            ep = ep.timeout(self.par_request_timeout.to_std()?);
+        let mut ep = Endpoint::from_shared(uri)
+            .map_err(|_| ConnectionError::InvalidUri)?;
+
+        if self.par_request_timeout > Duration::zero() {
+            // If the duration is positive, to_std should never return an error, so it is safe
+            // to unwrap the result
+            ep = ep.timeout(self.par_request_timeout.to_std().unwrap());
         }
         if self.par_concurrency_limit.is_some() {
             ep = ep.concurrency_limit(self.par_concurrency_limit.unwrap());
         }
+
         let channel = ep.connect().await?;
+
         Ok(Client{
             au_client: TwitterClient::new(channel),
             wait_timeout: if self.par_wait_timeout.is_zero() {
@@ -83,12 +91,12 @@ impl ClientBuilder {
         self
     }
 
-    pub fn request_timeout(&mut self, timeout: chrono::Duration) -> &mut Self {
+    pub fn request_timeout(&mut self, timeout: Duration) -> &mut Self {
         self.par_request_timeout = timeout;
         self
     }
 
-    pub fn wait_timeout(&mut self, timeout: chrono::Duration) -> &mut Self {
+    pub fn wait_timeout(&mut self, timeout: Duration) -> &mut Self {
         self.par_wait_timeout = timeout;
         self
     }
@@ -102,7 +110,7 @@ impl ClientBuilder {
 #[derive(Clone)]
 pub struct Client {
     au_client: TwitterClient<Channel>,
-    wait_timeout: Option<chrono::Duration>,
+    wait_timeout: Option<Duration>,
     authentication: request::Authentication,
 }
 
@@ -200,22 +208,22 @@ impl Client {
             let meta = resp.metadata().clone();
 
             match resp.into_inner().response_result() {
-                None => return Err(ClientError::InvalidResponse.into()),
+                None => return Err(TwitterError::InvalidResponse.into()),
 
                 Some(Ok(msg)) => return Ok(msg),
 
                 Some(Err(err)) => {
                     if err.code == twitter1::error::Code::RateLimit as i32 {
                         let retry = meta.get("retry")
-                            .ok_or(ClientError::RetryUnknown)?;
+                            .ok_or(RequestError::RetryUnknown)?;
                         let retry = std::str::from_utf8(retry.as_bytes())
-                            .map_err(|_| ClientError::RetryUnknown)?
+                            .map_err(|_| RequestError::RetryUnknown)?
                             .parse::<i64>()
-                            .map_err(|_| ClientError::RetryUnknown)?;
+                            .map_err(|_| RequestError::RetryUnknown)?;
                         let retry = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(retry, 0), Utc);
                         
                         if deadline.is_some() && deadline.unwrap() < retry {
-                            return Err(ClientError::RetryTimeout.into());
+                            return Err(RequestError::RetryTimeout.into());
                         }
 
                         match (retry - Utc::now()).to_std() {
@@ -227,13 +235,13 @@ impl Client {
                     }
 
                     return Err(if err.code == twitter1::error::Code::TwitterError as i32 {
-                        ClientError::TwitterError(err.message).into()
+                        TwitterError::TwitterError(err.message).into()
                     } else if err.code == twitter1::error::Code::BadRequest as i32 {
-                        ClientError::BadRequest(err.message).into()
+                        TwitterError::BadRequest(err.message).into()
                     } else if err.code == twitter1::error::Code::BadResponse as i32 {
-                        ClientError::BadResponse(err.message).into()
+                        TwitterError::BadResponse(err.message).into()
                     } else {
-                        ClientError::UnknownError(err.code).into()
+                        TwitterError::UnknownError(err.code).into()
                     })
                 },
             }
