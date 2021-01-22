@@ -63,6 +63,7 @@ var (
   unretweetEndpoint       = endpoint{path: "statuses/unretweet.json", method: methodPost}
   likeEndpoint            = endpoint{path: "favorites/create.json", method: methodPost}
   unlikeEndpoint          = endpoint{path: "favorites/destroy.json", method: methodPost}
+  searchEndpoint          = endpoint{path: "search/tweets.json", method: methodGet}
   updateProfileEndpoint   = endpoint{path: "account/update_profile.json", method: methodPost}
 )
 

@@ -1,6 +1,9 @@
-package au
+package goldcrest
 
-import pb "github.com/pantonshire/goldcrest/protocol"
+import (
+  pb "github.com/pantonshire/goldcrest/protocol"
+  "time"
+)
 
 type authentication struct {
   consumerKey, accessToken, secretKey, secretToken string
@@ -15,18 +18,20 @@ func (auth authentication) ser() *pb.Authentication {
   }
 }
 
-type TweetMode string
+type TweetMode uint8
 
 const (
-  CompatibilityMode = "Compatibility"
-  ExtendedMode      = "Extended"
+  CompatibilityMode TweetMode = iota
+  ExtendedMode
 )
 
 func (m TweetMode) ser() pb.TweetOptions_Mode {
-  if m == ExtendedMode {
+  switch m {
+  case ExtendedMode:
     return pb.TweetOptions_EXTENDED
+  default:
+    return pb.TweetOptions_COMPAT
   }
-  return pb.TweetOptions_COMPAT
 }
 
 type TweetOptions struct {
@@ -123,6 +128,90 @@ func (tlopts TimelineOptions) ser(twopts TweetOptions) *pb.TimelineOptions {
     msg.MaxId = &pb.OptFixed64{Val: *tlopts.max}
   }
   return &msg
+}
+
+type SearchResultType uint8
+
+const (
+  SearchMixed SearchResultType = iota
+  SearchRecent
+  SearchPopular
+)
+
+func (t SearchResultType) ser() pb.SearchRequest_ResultType {
+  switch t {
+  case SearchRecent:
+    return pb.SearchRequest_RECENT
+  case SearchPopular:
+    return pb.SearchRequest_POPULAR
+  default:
+    return pb.SearchRequest_MIXED
+  }
+}
+
+type SearchOptions struct {
+  query             string
+  geo, lang, locale *string
+  resType           SearchResultType
+  until             *time.Time
+}
+
+func NewSearchOptions(query string) SearchOptions {
+  return SearchOptions{
+    query:   query,
+    resType: SearchMixed,
+  }
+}
+
+func (opts SearchOptions) WithGeocode(geocode string) SearchOptions {
+  opts.geo = new(string)
+  *opts.geo = geocode
+  return opts
+}
+
+func (opts SearchOptions) WithLang(lang string) SearchOptions {
+  opts.lang = new(string)
+  *opts.lang = lang
+  return opts
+}
+
+func (opts SearchOptions) WithLocale(locale string) SearchOptions {
+  opts.locale = new(string)
+  *opts.locale = locale
+  return opts
+}
+
+func (opts SearchOptions) WithResultType(resType SearchResultType) SearchOptions {
+  opts.resType = resType
+  return opts
+}
+
+func (opts SearchOptions) WithUntilTime(until time.Time) SearchOptions {
+  opts.until = new(time.Time)
+  *opts.until = until
+  return opts
+}
+
+func serSearchRequest(auth authentication, searchOpts SearchOptions, twOpts TweetOptions, tlOpts TimelineOptions) *pb.SearchRequest {
+  req := pb.SearchRequest{
+    Auth:            auth.ser(),
+    Query:           searchOpts.query,
+    ResultType:      searchOpts.resType.ser(),
+    TimelineOptions: tlOpts.ser(twOpts),
+  }
+  if searchOpts.geo != nil {
+    req.Geocode = &pb.OptString{Val: *searchOpts.geo}
+  }
+  if searchOpts.lang != nil {
+    req.Lang = &pb.OptString{Val: *searchOpts.lang}
+  }
+  if searchOpts.locale != nil {
+    req.Locale = &pb.OptString{Val: *searchOpts.locale}
+  }
+  if searchOpts.until != nil {
+    req.UntilTimestamp = &pb.OptInt64{Val: searchOpts.until.Unix()}
+  }
+  return &req
 }
 
 type UserIdentifier interface {

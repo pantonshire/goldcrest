@@ -1,4 +1,4 @@
-package au
+package goldcrest
 
 import (
   "context"
@@ -302,6 +302,32 @@ func (client Client) UserTimeline(user UserIdentifier, tlopts TimelineOptions, r
     }
     user.serIntoUserTimelineRequest(req)
     resp, err := client.twitter.GetUserTimeline(ctx, req, grpc.Header(&header))
+    if err != nil {
+      return nil, nil, err
+    }
+    if success, ok := resp.Response.(*pb.TweetsResponse_Tweets); ok {
+      msg = success.Tweets
+      return header, nil, nil
+    } else if failure, ok := resp.Response.(*pb.TweetsResponse_Error); ok {
+      return header, failure.Error, nil
+    } else {
+      return header, nil, errors.New("invalid response")
+    }
+  })
+  if err != nil {
+    return nil, err
+  }
+  return desTimeline(msg), nil
+}
+
+func (client Client) SearchTweets(searchOpts SearchOptions, tlOpts TimelineOptions) ([]Tweet, error) {
+  var msg *pb.Tweets
+  err := client.request(func(ctx context.Context) (metadata.MD, *pb.Error, error) {
+    var header metadata.MD
+    resp, err := client.twitter.SearchTweets(
+      ctx,
+      serSearchRequest(client.auth, searchOpts, client.twopts, tlOpts),
+      grpc.Header(&header))
     if err != nil {
       return nil, nil, err
     }

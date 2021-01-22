@@ -46,3 +46,15 @@ func generateUserResponse(generator func() (model.User, metadata.MD, error)) (*p
   return &pb.UserResponse{Response: &pb.UserResponse_User{User: serUser(user)}}, meta, nil
 }
 
+// Search metadata is dropped for now
+func generateSearchResultResponse(generator func() (model.SearchResult, metadata.MD, error)) (*pb.TweetsResponse, metadata.MD, error) {
+  result, meta, err := generator()
+  if err != nil {
+    if errMsg, errMeta := serError(err); errMsg != nil {
+      return &pb.TweetsResponse{Response: &pb.TweetsResponse_Error{Error: errMsg}}, metadata.Join(meta, errMeta), nil
+    }
+    return nil, nil, err
+  }
+  return &pb.TweetsResponse{Response: &pb.TweetsResponse_Tweets{Tweets: serTimeline(result.Statuses)}}, meta, nil
+}
+

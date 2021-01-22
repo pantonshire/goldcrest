@@ -1,4 +1,4 @@
-package au
+package goldcrest
 
 import (
   pb "github.com/pantonshire/goldcrest/protocol"
@@ -22,7 +22,7 @@ func desTweet(msg *pb.Tweet) Tweet {
   }
   tweet := Tweet{
     ID:                   msg.Id,
-    CreatedAt:            time.Unix(int64(msg.CreatedAt), 0),
+    CreatedAt:            time.Unix(msg.CreatedAt, 0),
     Text:                 msg.Text,
     TextDisplayRange:     desIndices(msg.TextDisplayRange),
     Truncated:            msg.Truncated,
@@ -74,7 +74,7 @@ func desUser(msg *pb.User) User {
     ID:                  msg.Id,
     Handle:              msg.Handle,
     DisplayName:         msg.DisplayName,
-    CreatedAt:           time.Unix(int64(msg.CreatedAt), 0),
+    CreatedAt:           time.Unix(msg.CreatedAt, 0),
     Bio:                 msg.Bio,
     URL:                 msg.Url,
     Location:            msg.Location,
@@ -191,7 +191,7 @@ func desPolls(msgs []*pb.Poll) []Poll {
   for i, msg := range msgs {
     if msg != nil {
       polls[i] = Poll{
-        EndTime:  time.Unix(int64(msg.EndTime), 0),
+        EndTime:  time.Unix(msg.EndTime, 0),
         Duration: time.Minute * time.Duration(msg.DurationMinutes),
         Options:  make([]PollOption, len(msg.Options)),
       }

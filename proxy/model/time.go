@@ -33,9 +33,8 @@ func (tt TwitterTime) Unwrap() time.Time {
   return time.Time(tt)
 }
 
-// Returns the unix timestamp represented by this time as a 64-bit unsigned integer. The sign is discarded for
-// improved compatibility with gRPC. As such, times before 1970 will not be correctly translated by this function;
-// this is not a problem because the primitive human civilisation of the 1960s had not yet invented Twitter!
-func (tt TwitterTime) Unix() uint64 {
-  return uint64(tt.Unwrap().Unix())
+// Returns the unix timestamp represented by this time as a 64-bit signed integer.
+// This used to be unsigned in alpha-0.1, but is now signed to reflect the change in the protocol.
+func (tt TwitterTime) Unix() int64 {
+  return tt.Unwrap().Unix()
 }

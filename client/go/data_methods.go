@@ -1,4 +1,4 @@
-package au
+package goldcrest
 
 func (tweet Tweet) Unfold() Tweet {
   if tweet.Retweeted != nil {

@@ -40,10 +40,12 @@ func desAuth(msg *pb.Authentication) oauth.AuthPair {
 }
 
 func desTweetMode(msg pb.TweetOptions_Mode) tweetMode {
-  if msg == pb.TweetOptions_EXTENDED {
+  switch msg {
+  case pb.TweetOptions_EXTENDED:
     return extendedMode
+  default:
+    return compatibilityMode
   }
-  return compatibilityMode
 }
 
 func desTweetOptions(options *pb.TweetOptions) tweetOptions {
@@ -164,4 +166,15 @@ func reserPublishTweetRequest(msg *pb.PublishTweetRequest) (oauth.AuthPair, oaut
   }
   params.Extend(desTweetOptions(msg.Twopts).ser())
   return auth, params
+}
+
+func reserSearchResultType(resType pb.SearchRequest_ResultType) string {
+  switch resType {
+  case pb.SearchRequest_RECENT:
+    return "recent"
+  case pb.SearchRequest_POPULAR:
+    return "popular"
+  default:
+    return "mixed"
+  }
 }

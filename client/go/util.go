@@ -1,4 +1,4 @@
-package au
+package goldcrest
 
 import "strings"
 
