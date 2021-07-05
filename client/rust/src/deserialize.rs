@@ -52,7 +52,10 @@ impl Deserialize<Handle> for String {
 
 impl Deserialize<Indices> for twitter1::Indices {
     fn des(self) -> DeserializationResult<Indices> {
-        Ok(self.start as usize .. self.end as usize)
+        Ok(Indices {
+            start_inclusive: self.start as usize,
+            end_exlcusive: self.end as usize,
+        })
     }
 }
 

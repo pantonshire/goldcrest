@@ -1,15 +1,27 @@
-use bitvec::prelude::*;
+use std::ops::Range;
 
-pub type Indices = std::ops::Range<usize>;
+#[derive(Copy, Clone, Debug)]
+pub struct Indices {
+    pub start_inclusive: usize,
+    pub end_exlcusive: usize,
+}
 
-fn indices_to_bits(ind: &Indices, len: usize) -> BitVec<Lsb0, u8> {
-    let mut bits = bitvec![Lsb0, u8; 0; len];
-    let mut i = ind.start;
-    while i < ind.end && i < len {
-        bits.set(i, true);
-        i += 1
+impl Indices {
+    #[inline]
+    pub fn contains(&self, i: usize) -> bool {
+        self.start_inclusive <= i && i < self.end_exlcusive
     }
-    bits
+
+    pub fn limit(&self, max: usize) -> Self {
+        Self {
+            start_inclusive: self.start_inclusive,
+            end_exlcusive: self.end_exlcusive.min(max)
+        }
+    }
+
+    pub fn range(&self) -> Range<usize> {
+        self.start_inclusive..self.end_exlcusive
+    }
 }
 
 /// Represents a single Tweet, otherwise known as a status in the Twitter API.
@@ -52,7 +64,7 @@ impl Tweet {
     pub fn original(self) -> Self {
         match self.retweeted {
             Some(tweet) => *tweet,
-            None        => self,
+            None => self,
         }
     }
 
@@ -60,40 +72,63 @@ impl Tweet {
     /// URLs, mentions and hashtags can optionally be removed, depending on the provided
     /// TweetTextOptions.
     pub fn text(&self, options: tweet::TweetTextOptions) -> String {
-        let l = self.raw_text.chars().count();
-        let mut mask = indices_to_bits(&self.text_display_range, l);
-        if !options.hashtags_included {
-            for hashtag in self.hashtags.iter() {
-                mask &= !indices_to_bits(&hashtag.indices, l);
+        let full_len = self.raw_text.chars().count();
+
+        let exclude_indices = {
+            let mut exclude_indices = vec![false; full_len];
+
+            if !options.hashtags_included {
+                for hashtag in self.hashtags.iter() {
+                    for i in hashtag.indices.limit(full_len).range() {
+                        exclude_indices[i] = true;
+                    }
+                }
             }
-        }
-        if !options.urls_included {
-            for url in self.urls.iter() {
-                mask &= !indices_to_bits(&url.indices, l);
+
+            if !options.urls_included {
+                for url in self.urls.iter() {
+                    for i in url.indices.limit(full_len).range() {
+                        exclude_indices[i] = true;
+                    }
+                }
             }
-        }
-        if !options.mentions_included {
-            for mention in self.mentions.iter() {
-                mask &= !indices_to_bits(&mention.indices, l);
+
+            if !options.mentions_included {
+                for mention in self.mentions.iter() {
+                    for i in mention.indices.limit(full_len).range() {
+                        exclude_indices[i] = true;
+                    }
+                }
             }
-        }
-        if !options.symbols_included {
-            for symbol in self.symbols.iter() {
-                mask &= !indices_to_bits(&symbol.indices, l);
+
+            if !options.symbols_included {
+                for symbol in self.symbols.iter() {
+                    for i in symbol.indices.limit(full_len).range() {
+                        exclude_indices[i] = true;
+                    }
+                }
             }
-        }
-        if !options.media_included {
-            for media in self.media.iter() {
-                mask &= !indices_to_bits(&media.url.indices, l);
+
+            if !options.media_included {
+                for media in self.media.iter() {
+                    for i in media.url.indices.limit(full_len).range() {
+                        exclude_indices[i] = true;
+                    }
+                }
             }
-        }
-        let mut text = String::new();
-        for (i, c) in self.raw_text.chars().enumerate() {
-            if mask[i] {
-                text.push(c);
-            }
-        }
-        text
+
+            exclude_indices
+        };
+
+        self.raw_text
+            .chars()
+            .enumerate()
+            .filter_map(|(i, c)| if exclude_indices[i] {
+                None
+            } else {
+                Some(c)
+            })
+            .collect()
     }
 }
 
@@ -107,7 +142,7 @@ pub mod tweet {
     }
 
     impl TweetTextOptions {
-        pub fn all() -> TweetTextOptions {
+        pub const fn all() -> TweetTextOptions {
             TweetTextOptions{
                 hashtags_included: true,
                 urls_included: true,
@@ -117,7 +152,7 @@ pub mod tweet {
             }
         }
 
-        pub fn none() -> TweetTextOptions {
+        pub const fn none() -> TweetTextOptions {
             TweetTextOptions{
                 hashtags_included: false,
                 urls_included: false,
