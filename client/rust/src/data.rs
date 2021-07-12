@@ -71,7 +71,7 @@ impl Tweet {
     /// Returns the Tweet text trimmed according to its display range. Inline entities such as
     /// URLs, mentions and hashtags can optionally be removed, depending on the provided
     /// TweetTextOptions.
-    pub fn text(&self, options: tweet::TweetTextOptions) -> String {
+    pub fn text(&self, options: &tweet::TweetTextOptions) -> String {
         let full_len = self.raw_text.chars().count();
 
         let exclude_indices = {
@@ -133,6 +133,7 @@ impl Tweet {
 }
 
 pub mod tweet {
+    #[derive(Eq, PartialEq, Clone, Debug)]
     pub struct TweetTextOptions {
         pub(super) hashtags_included: bool,
         pub(super) urls_included: bool,
@@ -162,35 +163,35 @@ pub mod tweet {
             }
         }
 
-        pub fn hashtags(self, included: bool) -> Self {
+        pub const fn hashtags(self, included: bool) -> Self {
             TweetTextOptions{
                 hashtags_included: included,
                 ..self
             }
         }
 
-        pub fn urls(self, included: bool) -> Self {
+        pub const fn urls(self, included: bool) -> Self {
             TweetTextOptions{
                 urls_included: included,
                 ..self
             }
         }
 
-        pub fn mentions(self, included: bool) -> Self {
+        pub const fn mentions(self, included: bool) -> Self {
             TweetTextOptions{
                 mentions_included: included,
                 ..self
             }
         }
 
-        pub fn symbols(self, included: bool) -> Self {
+        pub const fn symbols(self, included: bool) -> Self {
             TweetTextOptions{
                 symbols_included: included,
                 ..self
             }
         }
 
-        pub fn media(self, included: bool) -> Self {
+        pub const fn media(self, included: bool) -> Self {
             TweetTextOptions{
                 media_included: included,
                 ..self
