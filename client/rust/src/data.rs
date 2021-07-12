@@ -71,7 +71,7 @@ impl Tweet {
     /// Returns the Tweet text trimmed according to its display range. Inline entities such as
     /// URLs, mentions and hashtags can optionally be removed, depending on the provided
     /// TweetTextOptions.
-    pub fn text(&self, options: &tweet::TweetTextOptions) -> String {
+    pub fn text(&self, options: tweet::TweetTextOptions) -> String {
         let full_len = self.raw_text.chars().count();
 
         let exclude_indices = {
