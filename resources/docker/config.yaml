@@ -1,0 +1,11 @@
+server:
+  port: 80
+  connect_timeout: 120s
+
+client:
+  timeout: 10s
+  protocol: https
+  base_url: api.twitter.com/1.1
+
+  rate_limit:
+    assume_next: true
