@@ -18,7 +18,6 @@ FROM alpine:latest as run
 COPY --from=build /goldcrest/bin/goldcrest /usr/local/bin/goldcrest
 
 COPY resources/docker/config.yaml /etc/goldcrest/config.yaml
-VOLUME /etc/goldcrest
 
 EXPOSE 80
 EXPOSE 443
