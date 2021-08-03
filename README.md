@@ -26,6 +26,17 @@ Goldcrest currently supports the following Twitter API endpoints:
 | `account/update_profile`     | `UpdateProfile`      |
 
 ## Setup
+### Docker
+```sh
+# Build the image
+docker build -t goldcrest https://github.com/Pantonshire/goldcrest.git#main
+
+# Run the container using port 8000
+docker run -d -p 127.0.0.1:8000:80 goldcrest
+```
+
+The configuration file is located at `/etc/goldcrest/config.yaml` in the container.
+
 ### Building from source
 1. To compile Goldcrest from source, you will first need the following:
     - [Go](https://golang.org/dl/) ≥ 1.15
