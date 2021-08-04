@@ -27,11 +27,16 @@ Goldcrest currently supports the following Twitter API endpoints:
 
 ## Setup
 ### Docker
-```sh
-# Build the image
-docker build -t goldcrest https://github.com/Pantonshire/goldcrest.git#main
+Pre-built images are available on [Docker Hub](https://hub.docker.com/r/pantonshire/goldcrest).
 
-# Run the container using port 8000
+```sh
+docker run -d -p 127.0.0.1:8000:80 pantonshire/goldcrest
+```
+
+Currently, images are available for amd64 and arm64. If you're using a different architecture, you'll probably need to build the image yourself:
+
+```sh
+docker build -t goldcrest https://github.com/Pantonshire/goldcrest.git#main
 docker run -d -p 127.0.0.1:8000:80 goldcrest
 ```
 
