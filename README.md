@@ -7,6 +7,8 @@ rate-limit tracking so that several processes can concurrently use the Twitter A
 
 Currently, there are clients in [Go](client/go/au) and [Rust](client/rust).
 
+Please note that this project is still in alpha stage; use at your own risk!
+
 ## Supported endpoints
 Goldcrest currently supports the following Twitter API endpoints:  
 
@@ -40,8 +42,6 @@ Currently, images are available for amd64 and arm64. If you're using a different
 docker build -t goldcrest https://github.com/Pantonshire/goldcrest.git#main
 docker run -d -p 127.0.0.1:8000:80 goldcrest
 ```
-
-The configuration file is located at `/etc/goldcrest/config.yaml` in the container.
 
 ### Building from source
 1. To compile Goldcrest from source, you will first need the following:
