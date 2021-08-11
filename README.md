@@ -1,10 +1,13 @@
-![latest](https://img.shields.io/github/v/release/pantonshire/goldcrest?include_prereleases&label=latest)
-
 # Goldcrest Twitter API Proxy
+[![Latest Release](https://img.shields.io/github/v/release/Pantonshire/goldcrest?include_prereleases&label=latest&logo=github)](https://github.com/pantonshire/goldcrest/releases/latest)
+[![Docker Hub](https://img.shields.io/docker/v/pantonshire/goldcrest?label=docker%20hub&logo=docker)](https://hub.docker.com/r/pantonshire/goldcrest)
+
 Goldcrest is a proxy server using gRPC for interacting with the Twitter API v1.1. Its main focus is on providing centralised
 rate-limit tracking so that several processes can concurrently use the Twitter API without having to worry about rate-limits.
 
 Currently, there are clients in [Go](client/go/au) and [Rust](client/rust).
+
+Please note that this project is still in alpha stage; use at your own risk!
 
 ## Supported endpoints
 Goldcrest currently supports the following Twitter API endpoints:  
@@ -27,15 +30,18 @@ Goldcrest currently supports the following Twitter API endpoints:
 
 ## Setup
 ### Docker
-```sh
-# Build the image
-docker build -t goldcrest https://github.com/Pantonshire/goldcrest.git#main
+Pre-built images are available on [Docker Hub](https://hub.docker.com/r/pantonshire/goldcrest).
 
-# Run the container using port 8000
-docker run -d -p 127.0.0.1:8000:80 goldcrest
+```sh
+docker run -d -p 127.0.0.1:8000:80 pantonshire/goldcrest
 ```
 
-The configuration file is located at `/etc/goldcrest/config.yaml` in the container.
+Currently, images are available for amd64 and arm64. If you're using a different architecture, you'll probably need to build the image yourself:
+
+```sh
+docker build -t goldcrest https://github.com/Pantonshire/goldcrest.git#main
+docker run -d -p 127.0.0.1:8000:80 goldcrest
+```
 
 ### Building from source
 1. To compile Goldcrest from source, you will first need the following:
