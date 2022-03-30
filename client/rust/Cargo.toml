@@ -5,6 +5,7 @@ authors = ["Tom Panton <pantonshire@gmail.com>"]
 edition = "2021"
 
 [features]
+default = ["tonic-rustfmt"]
 tonic-rustfmt = ["tonic-build/rustfmt"]
 
 [dependencies]
