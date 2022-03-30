@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine as build
+FROM golang:1.18-alpine as build
 WORKDIR /goldcrest
 COPY go.mod go.sum ./
 COPY cmd/ ./cmd/
